@@ -1,0 +1,715 @@
+// Nervus IPC v1 —— 控制面 Envelope
+//
+// 传输组合固定为（§10.1、§10.3）：
+//
+//	AF_UNIX / SOCK_STREAM
+//	    + uint32 big-endian length prefix（N 不含前缀自身，0 与 >128KiB 均为协议错误）
+//	    + Protobuf Envelope
+//	    + Nervus RPC / Event / Subscription 语义
+//
+// Envelope 的职责边界（§10.4）：建立连接、发现 endpoint、发起调用、返回结果、
+// 取消、订阅、推送事件、维持连接。它【不】承载任意 shell 命令，【不】允许上传
+// 代码，也【不】试图复刻 HTTP/gRPC 的全部功能。想加一个新 body 之前先问：
+// 它是否属于上面这八件事之一；不是就应该做成某个 Interface 的 method。
+//
+// 不进入本文件的东西：
+//   - Transfer 数据面（BeginTransfer/CommitTransfer，§10.9）——那是系统
+//     Interface 上的 method，走 Request/Response，不占 Envelope body 号；
+//   - Operation 查询（GetOperation/CancelOperation，§10.9）——同上，且 [v2+]；
+//   - internal_connection_id（§10.2）——它不离开 nervud，永远不上 wire。
+//
+// 字段号纪律（§10.12）：本文件的 body 号一经发布【永不复用】。§10.4 给出的
+// 号（10/11、20-25、30-32、40-43、50/51、60/61）为起始分配，本文件在其分组
+// 空隙内扩展了 26/27、44/45、52，未改动任何已分配号。
+
+syntax = "proto3";
+
+package nervus.ipc.v1;
+
+import "nervus/ipc/v1/status.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+
+// 连字符在 Java 包名里非法，理由见 status.proto。
+option java_package = "io.github.nervusos.ipc.v1";
+option java_multiple_files = true;
+
+// 本文件【必须】显式指定：默认外层类名会由 envelope.proto 推导成 Envelope，
+// 而本文件里正好有一个叫 Envelope 的 message——不改名就是编译期冲突。
+option java_outer_classname = "EnvelopeProto";
+
+// =============================================================================
+// Envelope
+// =============================================================================
+
+// Envelope 是控制面上唯一的顶层消息，一个 Frame 恰好一个 Envelope。
+//
+// 接收纪律（§10.7）：nervud 先解析这层小型外层结构，完成身份、endpoint、方法、
+// 长度与权限检查，【之后】才用生成代码解析方法 payload。顺序反过来就等于让
+// 未授权输入直接驱动业务解析器，是 CPU/内存放大攻击的入口。
+message Envelope {
+  // 发送方正在使用的协议版本。
+  //
+  // 【只在 Hello / HelloAck 中有意义】。握手完成后版本由连接状态决定，
+  // 接收方忽略后续 Envelope 的这两个字段——协议版本是连接属性，不接受逐帧
+  // 重新协商。proto3 不发送零值，因此非握手帧留空时这两个字段不占字节。
+  uint32 protocol_major = 1;
+  uint32 protocol_minor = 2;
+
+  // body 未设置（包括来自未知新版本的未知 body）一律视为协议违规：
+  // 关闭连接，不生成响应。空 Envelope 没有任何合法用途，容忍它只会给
+  // 「发一堆空帧刷预算」留口子。
+  oneof body {
+    // --- 连接状态机（不占用业务 request_id，§10.4）---
+    Hello hello = 10;
+    HelloAck hello_ack = 11;
+
+    // --- Endpoint 发现与注册 ---
+    ResolveEndpoint resolve_endpoint = 20;
+    ResolveEndpointResult resolve_endpoint_result = 21;
+    RegisterEndpoint register_endpoint = 22;
+    RegisterEndpointResult register_endpoint_result = 23;
+    EndpointDied endpoint_died = 24;
+    EndpointRevoked endpoint_revoked = 25;
+    // 26/27 是本文件的扩展：Service 优雅下线（NRCP §16.2 的 SHUTTING_DOWN）。
+    // 没有它，Provider 想停止服务某个 endpoint 只能断开整条连接。
+    UnregisterEndpoint unregister_endpoint = 26;
+    UnregisterEndpointResult unregister_endpoint_result = 27;
+
+    // --- 调用 ---
+    Request request = 30;
+    Response response = 31;
+    Cancel cancel = 32;
+
+    // --- 订阅与事件 ---
+    Subscribe subscribe = 40;
+    SubscribeResult subscribe_result = 41;
+    Unsubscribe unsubscribe = 42;
+    Event event = 43;
+    // 44/45 是本文件的扩展，理由见各自的消息注释。
+    UnsubscribeResult unsubscribe_result = 44;
+    SubscriptionClosed subscription_closed = 45;
+
+    // --- 转发给外部 Service（仅 nervud ↔ Service 连接上有效）---
+    Dispatch dispatch = 50;
+    DispatchResult dispatch_result = 51;
+    // 52 是本文件的扩展：没有它，被取消的调用会让 Service 一直算到自己超时。
+    CancelDispatch cancel_dispatch = 52;
+
+    // --- 保活 ---
+    Ping ping = 60;
+    Pong pong = 61;
+  }
+}
+
+// =============================================================================
+// 连接建立（§10.2）
+// =============================================================================
+
+// Hello 是客户端在连接上发出的第一个 Envelope。此前 nervud 已经通过
+// SO_PEERCRED 拿到 PID/UID/GID 并映射出 Package——所以 Hello 里【没有】
+// 任何身份字段可以被相信。
+//
+// 握手前不接受任何其他 body；握手有独立的短 deadline，超时即关闭
+// （否则连上不说话就能白占一个连接槽）。
+message Hello {
+  // 客户端支持的协议 major 版本闭区间。nervud 在交集中选最高者；
+  // 无交集则回 Failure HelloAck 后关闭，不做「降级到某个我也不确定的版本」。
+  uint32 min_protocol_major = 1;
+  uint32 max_protocol_major = 2;
+
+  // 对应 max_protocol_major 的最高 minor。minor 只增不减语义，
+  // 服务端选定的 minor 不会超过本值。
+  uint32 max_protocol_minor = 3;
+
+  // SDK 标识，仅用于诊断与兼容性统计，【不参与任何裁决】。
+  // 权限来自 Package 签名/安装来源/manifest，不来自「装了哪个 SDK」（§10.10）。
+  string sdk_name = 4;
+  string sdk_version = 5;
+
+  // 客户端【自称】的 Component ID，是待验证的线索而非身份声明（§10.2）。
+  //
+  // nervud 用 PID、systemd unit/cgroup 与启动记录核对它；不一致即握手失败。
+  // 之所以还要客户端提供：同一 Package 的多个 Component 共享 UID，先拿到
+  // 自称值可以把核对从「遍历该 Package 的全部 Component」收敛成一次比对。
+  string declared_component_id = 6;
+}
+
+// HelloAck 是握手的唯一结果。失败时 nervud 先发出带 Failure 的 HelloAck，
+// 【再】关闭连接——裸关连接会让客户端无法区分「版本谈不拢」和「socket 坏了」，
+// 这两种情况的正确反应完全不同（前者不该重连，后者该）。
+message HelloAck {
+  oneof outcome {
+    HelloAckSuccess success = 1;
+    Failure failure = 2;
+  }
+}
+
+message HelloAckSuccess {
+  // 服务端选定并即刻生效的协议版本。
+  uint32 protocol_major = 1;
+  uint32 protocol_minor = 2;
+
+  // nervud 核对后确认的身份，回显给客户端。
+  //
+  // 这【不是】授予身份——身份早在 SO_PEERCRED 时就定了，这里只是让 SDK 能
+  // 尽早发现配置错位（「我以为我是 com.foo.a，内核说我是 com.foo.b」），
+  // 否则这类错误要等到第一次权限拒绝才暴露。
+  string package_id = 3;
+  string component_id = 4;
+
+  // 本连接生效的预算。让 SDK 能自我约束，而不是靠「被杀掉」来发现上限。
+  ConnectionLimits limits = 5;
+}
+
+// ConnectionLimits 是 §10.11 准入限制在 wire 上的投影。
+//
+// 服务端【不】因为告知过就放松执法：这些值是 SDK 的自律依据，不是承诺。
+// 实际取值可能因调用者 profile 而不同，但都不超过 128 KiB Frame 硬上限与
+// 进程级全局预算，不存在「无限」档位。
+message ConnectionLimits {
+  // 绝对 Frame 上限，恒为 131072（128 KiB）。作为字段下发是为了让 SDK
+  // 有单一真相源，而不是把 128 KiB 硬编码在两种语言的三个地方。
+  uint32 max_frame_bytes = 1;
+
+  // 普通方法默认 request/response 额度（§10.3：16 KiB）。
+  // 逐方法额度在 Registry 中声明，最终取「方法额度、profile 额度、硬上限」最小值。
+  uint32 default_method_payload_bytes = 2;
+
+  // 每连接最大 in-flight Request 数（默认 64）。
+  uint32 max_inflight_requests = 3;
+
+  // 每连接 in-flight payload 总字节（默认 1 MiB）。
+  // 【按字节计量而不是条数】：只数条数的队列会被 64 个 128 KiB 请求撑爆。
+  uint64 max_inflight_payload_bytes = 4;
+
+  // 每连接 outbound queue 总字节（默认 512 KiB）。超出且无法安全排入响应时
+  // 关闭慢消费者。
+  uint64 max_outbound_queue_bytes = 5;
+
+  // 每连接最大并发订阅数。
+  uint32 max_subscriptions = 6;
+
+  // Request.timeout_ms 为 0 时采用的默认值，以及服务端允许的上限。
+  // nervud 按方法最大值收紧调用者请求的 timeout，两者取小。
+  uint32 default_timeout_ms = 7;
+  uint32 max_timeout_ms = 8;
+
+  // 服务端在多久没有任何 Frame 后判定连接空闲。SDK 据此决定 Ping 周期，
+  // 不必猜测。
+  uint32 idle_timeout_ms = 9;
+}
+
+// =============================================================================
+// Endpoint 发现与注册（§10.5）
+// =============================================================================
+
+// ResolveEndpoint 请求把一个逻辑 Interface 解析成本连接上的路由句柄。
+//
+// endpoint_id 是不透明、【连接作用域】的句柄，不是 fd，也不靠「别人猜不到
+// 数字」获得安全性：查找键实际是 (connection, endpoint_id)，另一条连接上的
+// 相同数字不是同一个 binding。
+message ResolveEndpoint {
+  uint64 request_id = 1;
+
+  // 逻辑接口 ID，如 "nervus.interface.motion.base"。
+  string interface_id = 2;
+
+  // 可接受的接口 major 版本闭区间。无交集 → FAILED_PRECONDITION +
+  // ResolveEndpointErrorDetail{VERSION_MISMATCH}。
+  uint32 min_interface_major = 3;
+  uint32 max_interface_major = 4;
+
+  // Resource 选择器。
+  //
+  // [REWRITE-v1] 固定 BaseMotion 可以留空，由 nervud 隐式取
+  // {type=nervus.resource.motion.base, role=main}。
+  // [v2+] 通用机器人 App 必须显式给出，且【不能】提交 OEM 的
+  // Package/Component/Provider 名称——那会让 App 绕过标准 Resource 选择。
+  ResourceSelector selector = 5;
+
+  // 仅用于 manifest 已明确绑定的非通用 Service 或 OEM 私有依赖。
+  // 它不是「指定实现」的后门：标准接口走 selector，本字段非空且未在
+  // manifest 中声明即 PERMISSION_DENIED。
+  string explicit_component = 6;
+}
+
+// ResourceSelector 使用结构化形状而非点分字符串（NRCP §8.3）。
+//
+// [v2+] 最终字符语法、公开/私有 label 目录、REQUIRE_UNIQUE/SYSTEM_PREFERRED
+// 枚举与多候选选择 Policy 尚待冻结（NRCP §25.2）——本消息目前只固定
+// type/role 两个必然存在的维度，其余维度留待冻结后新增字段，不预先猜测。
+message ResourceSelector {
+  // 资源类型，如 "nervus.resource.motion.base"。
+  string type = 1;
+  // 稳定角色，如 "main" / "front"。
+  string role = 2;
+}
+
+message ResolveEndpointResult {
+  uint64 request_id = 1;
+  oneof outcome {
+    ResolveEndpointSuccess success = 2;
+    // error_detail 的类型固定为 ResolveEndpointErrorDetail（见 status.proto）。
+    Failure failure = 3;
+  }
+}
+
+message ResolveEndpointSuccess {
+  // 本连接上的路由句柄。断线后全部失效，重连必须重新 Resolve。
+  uint64 endpoint_id = 1;
+
+  // 原子选定的接口版本。
+  uint32 interface_major = 2;
+  uint32 interface_minor = 3;
+
+  // 选中接口 schema 的确定性标识。SDK 用它校验本地生成代码与服务端一致，
+  // 不一致说明两侧 schema 漂移——这类错误必须在第一次调用前就暴露，
+  // 而不是等到某个字段被静默丢弃。
+  bytes interface_schema_hash = 4;
+
+  // 接口需要时返回的、已解析的公开 Resource 句柄。
+  // 【不含】Provider PID、driver 名、设备节点、序列号或内部路径（§7 v2 目录投影）。
+  string resource_handle = 5;
+
+  // [v2+] 解析时的 caller-projection 目录 revision。
+  //
+  // 它只记录快照，【不】构成 binding 的生命周期：无关的目录变化不会自动
+  // 撤销现有 binding，binding 的存亡由自身 generation、Service/Resource 状态、
+  // EndpointDied/EndpointRevoked 与每次调用的复核决定（§10.5）。
+  uint64 catalog_revision = 6;
+}
+
+// RegisterEndpoint 是 Service 向 nervud【报到】，不是自行创造权限（§10.5）。
+// 只能注册 manifest 已声明、且与签名/权限 profile 相符的 endpoint。
+message RegisterEndpoint {
+  uint64 request_id = 1;
+
+  string interface_id = 2;
+  uint32 interface_major = 3;
+  uint32 interface_minor = 4;
+
+  // 本 Service 实现的 schema hash。与 Registry 中登记值不符即拒绝——
+  // 避免一个用旧 schema 编译的 Provider 悄悄服务新接口。
+  bytes interface_schema_hash = 5;
+
+  // 该 endpoint 服务的 Resource。[REWRITE-v1] 固定为 base.main。
+  string resource_handle = 6;
+}
+
+message RegisterEndpointResult {
+  uint64 request_id = 1;
+  oneof outcome {
+    RegisterEndpointSuccess success = 2;
+    Failure failure = 3;
+  }
+}
+
+message RegisterEndpointSuccess {
+  // 服务端侧句柄。Dispatch 用它指明被调的是哪个已注册 endpoint，
+  // Unregister 用它指明要撤下哪个。
+  //
+  // 与调用方的 endpoint_id 是【两个命名空间】：同一个数字在 App 连接和
+  // Provider 连接上毫无关系。
+  uint64 endpoint_id = 1;
+}
+
+// UnregisterEndpoint 让 Service 优雅撤下一个 endpoint（本文件扩展，号 26）。
+//
+// 为什么需要：NRCP §16.2 定义了 Provider 的 SHUTTING_DOWN 状态，而 §10.4 的
+// 原始消息集里只有 Register 没有 Unregister——Service 想停止服务只能断开整条
+// 连接，于是「优雅下线一个接口」和「进程崩了」在 wire 上无法区分，nervud 也
+// 就无法把前者当作可预期事件来处理（比如先排空在途 Dispatch 再撤 binding）。
+//
+// 撤下后 nervud 向持有该 binding 的调用方发 EndpointDied{SERVICE_SHUTTING_DOWN}。
+message UnregisterEndpoint {
+  uint64 request_id = 1;
+  uint64 endpoint_id = 2;
+
+  // 是否等待在途 Dispatch 完成再撤。false = 立即撤，在途调用以 UNAVAILABLE 终结。
+  bool drain = 3;
+}
+
+message UnregisterEndpointResult {
+  uint64 request_id = 1;
+  oneof outcome {
+    UnregisterEndpointSuccess success = 2;
+    Failure failure = 3;
+  }
+}
+
+message UnregisterEndpointSuccess {}
+
+// EndpointDied 通知调用方：binding 因【服务侧原因】失效。
+//
+// 与 EndpointRevoked 的区别不是修辞：Died 意味着「以后可能还能用」，SDK 应当
+// 重新 Resolve（可能要退避）；Revoked 意味着「权限没了」，重新 Resolve 只会
+// 再被拒一次。两者用同一个消息会让 SDK 只能盲目重试。
+message EndpointDied {
+  uint64 endpoint_id = 1;
+  EndpointDiedReason reason = 2;
+}
+
+enum EndpointDiedReason {
+  ENDPOINT_DIED_REASON_UNSPECIFIED = 0;
+  // Service 进程退出或连接断开。
+  ENDPOINT_DIED_REASON_SERVICE_GONE = 1;
+  // Service 正在优雅下线（UnregisterEndpoint / SHUTTING_DOWN）。
+  ENDPOINT_DIED_REASON_SERVICE_SHUTTING_DOWN = 2;
+  // 绑定的 Resource 进入 fault/offline（NRCP §16.2）。
+  ENDPOINT_DIED_REASON_RESOURCE_FAULT = 3;
+  // Service 重启，binding generation 已失效。
+  ENDPOINT_DIED_REASON_SERVICE_RESTARTED = 4;
+}
+
+// EndpointRevoked 通知调用方：binding 因【调用方侧原因】被撤销。
+// 支持动态撤权——不必等到下一次调用被拒，也不必断开整条连接。
+message EndpointRevoked {
+  uint64 endpoint_id = 1;
+  EndpointRevokedReason reason = 2;
+}
+
+enum EndpointRevokedReason {
+  ENDPOINT_REVOKED_REASON_UNSPECIFIED = 0;
+  // 用户或 Policy 撤销了所需 Permission。
+  ENDPOINT_REVOKED_REASON_PERMISSION_REVOKED = 1;
+  // 调用方 Package 被卸载或停用。
+  ENDPOINT_REVOKED_REASON_PACKAGE_DISABLED = 2;
+  // Policy 因持续违规暂停了该 UID 的访问（§10.11）。
+  ENDPOINT_REVOKED_REASON_POLICY_SUSPENDED = 3;
+}
+
+// =============================================================================
+// 调用（§10.6、§10.7）
+// =============================================================================
+
+// Request 是调用方发起的一次 RPC。
+//
+// 每个 Request 最终【最多只有一个】终结 Response（§10.7）。这条不变量是
+// route 表、超时、取消与迟到 DispatchResult 丢弃规则共同保证的，不是自然成立的。
+message Request {
+  // 调用者 SDK 在当前连接内生成的原子递增值（§10.6）。
+  //
+  // 【0 永久保留】，首个请求为 1，绝不回绕：达到上限时关闭并重建连接。
+  // 匹配键是 (内部 connection 对象, request_id)，所以不同连接上的相同数字
+  // 互不冲突，即使两个进程同属一个 Package、共享 UID。
+  //
+  // 同一连接内出现重复的、仍在处理中的 request_id 是协议违规。
+  uint64 request_id = 1;
+
+  // 由 ResolveEndpoint 取得，本连接作用域。
+  uint64 endpoint_id = 2;
+
+  // 接口 schema 中稳定的数字方法 ID。发布后保持稳定，删除后同样保留不用。
+  uint32 method_id = 3;
+
+  // 调用者期望的超时（毫秒）。
+  //
+  // 【0 表示使用方法默认值，不表示无限】。nervud 按方法最大值收紧，并在接收
+  // 时立刻转换成本机【单调时钟】deadline——用墙钟会让一次 NTP 校时把全部
+  // 在途调用推向立即超时或永不超时。
+  uint32 timeout_ms = 4;
+
+  // 方法专属 Protobuf 请求的序列化 bytes。类型由
+  // endpoint_id + 选中 interface_version + method_id 唯一决定。
+  bytes payload = 5;
+}
+
+message Response {
+  // 原样对应 Request.request_id。
+  uint64 request_id = 1;
+  oneof outcome {
+    Success success = 2;
+    Failure failure = 3;
+  }
+}
+
+// Cancel 是【尽力】取消（§10.7）。
+//
+// 刻意没有 CancelResult：被取消请求的终结 Response 就是结果，再加一个结果会
+// 制造「一个 Request 两个终结响应」的歧义。取消成功表现为该 request_id 的
+// Response 带 CANCELLED；若工作已完成则照常返回原结果。
+//
+// 它能停止尚未提交的工作，但【不能】假装已经发生的电机动作、文件提交或外部
+// 副作用被自动回滚。SDK 不得据此认为副作用未发生。
+message Cancel {
+  uint64 request_id = 1;
+}
+
+// =============================================================================
+// 订阅与事件（§10.8）
+// =============================================================================
+
+// Subscribe 订阅某个 endpoint 上的一类事件。
+//
+// 订阅是【推送】不是轮询：订阅成功后由服务端主动发 Event，客户端不再发起查询。
+message Subscribe {
+  uint64 request_id = 1;
+  uint64 endpoint_id = 2;
+
+  // 接口 schema 中稳定的数字事件 ID。按 (endpoint, event_id) 订阅而不是订阅
+  // 整个 endpoint：预算、背压策略与权限都是按事件类型声明的，粗粒度订阅会让
+  // 一个 lossy 的遥测流和一个 reliable 的安全事件流共享同一套规则。
+  uint32 event_id = 3;
+
+  // 订阅参数的序列化 bytes（过滤条件、采样率等），可为空。
+  // 类型由 endpoint + event_id 决定。
+  bytes payload = 4;
+}
+
+message SubscribeResult {
+  uint64 request_id = 1;
+  oneof outcome {
+    SubscribeSuccess success = 2;
+    Failure failure = 3;
+  }
+}
+
+message SubscribeSuccess {
+  // 本连接作用域的订阅句柄，由 nervud 生成。
+  //
+  // 【同一连接内永不复用】：复用会让退订后到达的在途 Event 被错认成新订阅的
+  // 数据，而这种错认在遥测/状态流里几乎无法被察觉。
+  uint64 subscription_id = 1;
+
+  // 本订阅的投递类别，决定客户端该如何解释 sequence 缺口。见 DeliveryClass。
+  DeliveryClass delivery_class = 2;
+}
+
+// DeliveryClass 把 §10.8 的背压表变成 wire 上的显式声明（本文件扩展）。
+//
+// 为什么必须显式：§10.8 允许 State 合并、允许 schema 声明的 Telemetry 丢弃，
+// 两者在 wire 上都表现为 sequence 跳号——但客户端的正确反应完全相反。
+// 只发 sequence 而不说类别，客户端无从判断该「什么都不做」还是「数据永久丢失」。
+enum DeliveryClass {
+  DELIVERY_CLASS_UNSPECIFIED = 0;
+
+  // 不得静默丢弃：控制结果、Safety 事件、控制指令。
+  // 投递不下时必须明确失败或断开慢消费者，绝不能悄悄跳过。
+  // 本类别下 Event.dropped 恒为 0，非 0 即服务端违规。
+  DELIVERY_CLASS_RELIABLE = 1;
+
+  // 可合并：只保留最新状态。dropped>0 表示中间态被跳过，
+  // 但【当前这条就是最新值】，客户端无需补拉。
+  DELIVERY_CLASS_STATE = 2;
+
+  // 可丢弃：仅当 schema 明确声明 lossy 才允许。
+  // dropped>0 表示数据【永久丢失】，需要完整序列的客户端必须自行补偿。
+  DELIVERY_CLASS_LOSSY = 3;
+}
+
+// Unsubscribe 取消订阅。
+message Unsubscribe {
+  uint64 request_id = 1;
+  uint64 subscription_id = 2;
+}
+
+// UnsubscribeResult 是本文件的扩展（号 44）。
+//
+// 为什么必须有：§10.4 里 Resolve/Register/Subscribe 都成对，唯独 Unsubscribe
+// 单向。缺了它有三个具体后果——
+//   1. 客户端无法区分「退订已生效，后面这条是在途消息」与「nervud 漏拆了」；
+//   2. §10.8 要求「控制结果不得静默丢弃」，一个没有结果的控制消息本身就
+//      违反这条；
+//   3. §10.12 要求断线时把全部 pending 完成为 UNAVAILABLE，没有 pending 条目
+//      的 Unsubscribe 会成为 SDK 里的特例分支——特例正是 bug 的栖息地。
+//
+// 收到本结果后，该 subscription_id 上不会再有任何 Event。
+message UnsubscribeResult {
+  uint64 request_id = 1;
+  oneof outcome {
+    UnsubscribeSuccess success = 2;
+    Failure failure = 3;
+  }
+}
+
+message UnsubscribeSuccess {}
+
+// Event 是服务端推送。它【不】冒充某个 Response，也不占用业务 request_id。
+message Event {
+  uint64 subscription_id = 1;
+
+  // 该订阅内单调递增的序号，从 1 开始。
+  //
+  // 缺口 = 有事件没送到。缺口的【含义】由 delivery_class 决定，缺口的
+  // 【数量】由 dropped 给出：只有两者都有，客户端才知道发生了什么。
+  uint64 sequence = 2;
+
+  // 事件来源 endpoint。冗余于 subscription_id，但让客户端不必查表就能路由。
+  uint64 endpoint_id = 3;
+
+  // schema 中稳定的数字事件 ID。
+  uint32 event_id = 4;
+
+  // 事件专属 Protobuf bytes。
+  bytes payload = 5;
+
+  // 自上一条【已投递】Event 起，被合并或丢弃的事件条数（本文件扩展）。
+  //
+  // 语义随 delivery_class 变化：
+  //   RELIABLE → 恒为 0；非 0 即服务端违反了自己声明的类别
+  //   STATE    → 被合并掉的中间态条数；当前这条是最新值，无需补拉
+  //   LOSSY    → 永久丢失的条数；需要完整序列的客户端据此补偿或告警
+  //
+  // 有了它，客户端不必再从 sequence 差值里反推「这次跳号到底要不要紧」。
+  uint64 dropped = 6;
+}
+
+// SubscriptionClosed 是本文件的扩展（号 45）：服务端单方面终止一个订阅。
+//
+// 为什么必须有：原始消息集里订阅只能由客户端 Unsubscribe 终止。于是
+//   - endpoint 失效时，客户端只能从 EndpointDied 反推「哪些订阅跟着没了」，
+//     而这个反推需要客户端自己维护 endpoint→subscriptions 的映射；
+//   - 想只掐掉一个刷爆队列的 lossy 订阅（而不是按 §10.8 关掉整条连接，
+//     连带杀死同连接上无辜的 Safety 订阅）时，根本无法表达。
+//
+// 收到后该 subscription_id 立即失效，客户端无需再发 Unsubscribe。
+message SubscriptionClosed {
+  uint64 subscription_id = 1;
+  SubscriptionClosedReason reason = 2;
+}
+
+enum SubscriptionClosedReason {
+  SUBSCRIPTION_CLOSED_REASON_UNSPECIFIED = 0;
+  // 所属 endpoint 失效（详情见同时发出的 EndpointDied）。
+  SUBSCRIPTION_CLOSED_REASON_ENDPOINT_DIED = 1;
+  // 所属 endpoint 被撤权（详情见同时发出的 EndpointRevoked）。
+  SUBSCRIPTION_CLOSED_REASON_ENDPOINT_REVOKED = 2;
+  // 客户端消费过慢，nervud 选择只终止本订阅而非关闭整条连接。
+  SUBSCRIPTION_CLOSED_REASON_BACKPRESSURE = 3;
+  // nervud 正在停机。
+  SUBSCRIPTION_CLOSED_REASON_SERVER_SHUTDOWN = 4;
+}
+
+// =============================================================================
+// 转发给外部 Service（§10.7）
+// =============================================================================
+
+// Dispatch 是 nervud 转发给被选中 Service 的调用。
+//
+// 【只出现在 nervud ↔ Service 的连接上】，普通调用者既不发送也不接收。
+// Service 永远不持有客户端 socket，也无权决定结果写给谁——这正是不能直接
+// 复用客户端 request_id 做全局路由的原因。
+message Dispatch {
+  // nervud 生成的路由 ID，只在 nervud 与【被选中的那条 Service 连接】之间
+  // 有效，对调用者与其他 Service 不可见。
+  //
+  // nervud 侧 route_id 映射到 (目标 Service 连接、endpoint binding generation、
+  // 来源连接、来源 request_id、deadline、method schema)。generation 等信息
+  // 【不上 wire】——Service 无法伪造它不知道的东西。
+  uint64 route_id = 1;
+
+  // Service 侧 endpoint 句柄，即 RegisterEndpointSuccess.endpoint_id。
+  uint64 endpoint_id = 2;
+
+  uint32 method_id = 3;
+
+  // 本次调用【剩余】的时间预算（毫秒），而不是原始 timeout。
+  //
+  // 排队与转发已经消耗掉一部分，把原始值传下去会让 Service 以为自己有更多
+  // 时间，产生「Service 还在算、nervud 已经超时回了 DEADLINE_EXCEEDED」的
+  // 撕裂。Service 应据此设置自己的内部 deadline。
+  uint32 remaining_ms = 4;
+
+  bytes payload = 5;
+
+  // 由 nervud 附加的可信调用者上下文。Service 可以读，但不能用它绕过已经
+  // 生效的 nervud Policy，更不能自行创造身份或权限裁决（§10.2）。
+  CallerContext caller = 6;
+}
+
+// CallerContext 是 ConnectionContext 中可以外传的那一部分（§10.2）。
+//
+// 【internal_connection_id 永不出现在这里】——它不离开 nervud。
+// 普通 Request 中也不得出现调用者自填的可信身份字段：权限永远由 nervud 按
+// 连接上下文执行，不按 payload 里的 source:"system" 或包名字符串执行。
+message CallerContext {
+  string package_id = 1;
+  string component_id = 2;
+
+  // 来自 Linux 内核的 SO_PEERCRED，不来自任何 Envelope 字段。
+  uint32 uid = 3;
+  uint32 gid = 4;
+  // PID 会随进程退出被回收，仅供诊断与日志关联，【不得】用于事后反查 /proc
+  // 并信任结果。
+  int32 pid = 5;
+
+  TrustProfile trust_profile = 6;
+
+  // 本次调用相关的、已授予的权限。是 nervud 裁决结果的【只读投影】，
+  // 供 Service 做二次 fail-closed 复核，不是让 Service 重新裁决。
+  repeated string granted_permissions = 7;
+}
+
+// TrustProfile 是信任与权限 profile，不是第三种软件类型（§7）。
+//
+// 只读系统镜像中的平台/OEM 签名 Package 才有资格获得非 ORDINARY profile；
+// 动态安装的开发者签名 Package 即使声明了 Service 也仍是 ORDINARY。
+// manifest 不能自封 system。
+enum TrustProfile {
+  TRUST_PROFILE_UNSPECIFIED = 0;
+  TRUST_PROFILE_ORDINARY = 1;
+  TRUST_PROFILE_OEM = 2;
+  TRUST_PROFILE_PLATFORM = 3;
+}
+
+// DispatchResult 是 Service 返回给 nervud 的结果。
+//
+// nervud 只在【来源 Service 连接、binding generation、route 状态、deadline
+// 全部匹配】时接受它。未知、重复、撤销后或超时后的迟到结果一律丢弃并 Audit，
+// 绝不能生成第二个终结 Response（§10.7）。
+//
+// nervud 不透传：必须按权威 method schema 解码 detail，校验 (code, reason)
+// 允许映射、字段长度与值域，丢弃未知字段后重新编码。畸形 detail、非法 outcome
+// 组合或违反 Provider Contract 的结果，对调用者一律归一化为 INTERNAL，
+// 完整原因只进 Audit。
+message DispatchResult {
+  uint64 route_id = 1;
+  oneof outcome {
+    Success success = 2;
+    Failure failure = 3;
+  }
+}
+
+// CancelDispatch 是本文件的扩展（号 52）：nervud 通知 Service 停止在途工作。
+//
+// 为什么必须有：客户端有 Cancel(request_id) → nervud，但原始消息集里
+// nervud → Service 没有任何取消通道。于是 §10.7 承诺的「Cancel 可以停止尚未
+// 提交的工作」在跨进程调用上根本无法兑现——Service 会一直算到自己的 deadline，
+// 白白占着 Resource、ControlLease 和 CPU 预算。对机器人尤其糟糕：一个被放弃的
+// 长动作仍在占着执行器。
+//
+// 与 Cancel 同为尽力而为，且同样没有结果消息：Service 照常返回 DispatchResult
+// （通常带 CANCELLED），那就是结果。
+message CancelDispatch {
+  uint64 route_id = 1;
+  CancelDispatchReason reason = 2;
+}
+
+enum CancelDispatchReason {
+  CANCEL_DISPATCH_REASON_UNSPECIFIED = 0;
+  // 调用方主动发了 Cancel。
+  CANCEL_DISPATCH_REASON_CLIENT_CANCELLED = 1;
+  // 调用已超过 deadline，nervud 已向调用方回了 DEADLINE_EXCEEDED。
+  CANCEL_DISPATCH_REASON_DEADLINE_EXCEEDED = 2;
+  // 调用方连接已断开，结果无处可送。
+  CANCEL_DISPATCH_REASON_CLIENT_GONE = 3;
+}
+
+// =============================================================================
+// 保活
+// =============================================================================
+
+// Ping / Pong 用于探测对端存活与测量 RTT。任一侧都可以发起。
+//
+// nonce 由发起方选择，应答方【原样回显】。没有 nonce 就无法把 Pong 对应回
+// 某个 Ping，在有多个在途探测时既测不准 RTT，也无法发现应答丢失。
+//
+// 保活【不能】替代 deadline：一条连接可以 Ping 得很欢却永远不回某个 Response。
+message Ping {
+  uint64 nonce = 1;
+}
+
+message Pong {
+  uint64 nonce = 1;
+}

@@ -1,0 +1,23 @@
+version: v2
+
+modules:
+  - path: proto
+
+lint:
+  use:
+    - STANDARD
+
+# breaking 检查承接架构 §10.12 的兼容规则：
+#   已发布字段号永不改变含义/类型/复用；删除时写 reserved；
+#   method_id / event_id 发布后保持稳定，删除后同样保留不用。
+#
+# 选 FILE（最严）而不是 WIRE：wire 兼容只保证字节能解析，改个字段名照样
+# 打断三种语言的生成代码。本仓库的产物是给 Go/Kotlin/Java 直接编译的，
+# 源码兼容和 wire 兼容同等重要。
+#
+# 注意：schema 冻结【之前】不要在 CI 里开这一项。NRCP §22.6 明确允许
+# Rewrite v1 阶段做破坏性调整；提前开只会逼着人用 --force 绕过，
+# 那反而会养成绕过它的习惯。冻结时再打开，并记下 baseline ref。
+breaking:
+  use:
+    - FILE

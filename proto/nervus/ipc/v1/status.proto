@@ -1,0 +1,206 @@
+// Nervus IPC v1 —— 通用结果语义
+//
+// 本文件定义跨全部 Interface 稳定的「失败类别」与 Success/Failure outcome 形状。
+// 架构依据：nervud 架构文档 §10.4、§10.12；NRCP 文档 §19。
+//
+// 兼容规则（§10.12，写在这里是因为它约束本文件的每一次修改）：
+//   - 已发布字段号与枚举值永不改变含义、类型或复用；
+//   - 删除时把号与名写入 reserved，不补空档；
+//   - 新增字段必须有安全默认语义，旧接收方可忽略未知字段。
+
+syntax = "proto3";
+
+package nervus.ipc.v1;
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+
+// GitHub 组织名是 nervus-os，但【连字符在 Java 包名里非法】——JLS §3.8 规定
+// 包名每段必须是合法标识符，只允许字母、数字、_ 和 $。因此这里去掉连字符。
+//
+// 将来发布 Maven Central 时 groupId 可以写成 io.github.nervus-os：groupId 是
+// Maven 坐标而不是 Java 包名，允许连字符，两者不必相同。
+option java_package = "io.github.nervusos.ipc.v1";
+option java_multiple_files = true;
+
+// 显式指定外层类名。java_multiple_files=true 时每个消息各占一个文件，但仍有
+// 一个持有 descriptor 的外层类，其默认名由文件名推导（status.proto → Status）。
+// 统一加 Proto 后缀可以永久避开「外层类名与某个消息/枚举同名」的编译冲突。
+option java_outer_classname = "StatusProto";
+
+// StatusCode 是 IPC v1 跨接口通用的 RPC【结果类别】。
+//
+// 它回答的是「属于哪一类失败」，不是「机器人为什么失败」：
+//
+//	位置 A（本枚举）—— 跨全部 Interface 稳定，SDK 据此决定重试/报错/断线
+//	位置 B（typed error_detail）—— 随各 Interface schema 演进，回答领域细因
+//
+// SAFETY_LATCHED、STALE_EPOCH、LOCOMOTION_NOT_READY 这类机器人细因【只能】进
+// 位置 B（NRCP §19）。不得因为新增硬件能力就往本枚举里追加值——那会让每个
+// OEM 都有动机扩全局枚举，最终谁也无法穷举 SDK 需要处理的失败集合。
+// 确需新的跨接口通用类别时走 IPC 协议 major 演进，不由业务 schema 私自追加。
+//
+// 错误在哪一层被发现【不】决定它属于 A 还是 B：Resource/Lease/Safety/epoch 本
+// 来就由 nervud 掌握，nervud 可以在派发前就产出类型化细因；Provider 也可以在
+// fail-closed 复核后返回细因。分层依据只有一条——调用者是否需要据此采取
+// 机器人/接口特定的动作。
+enum StatusCode {
+  // 永远不是合法结果。
+  //
+  // proto3 的 enum 缺省值是 0，因此「漏填」「字段被裁掉」「来自未知新版本」
+  // 三种情况都会落到这里。接收方必须 fail closed —— 绝不能因为「不是已知的
+  // 失败码」就当成成功。OK/ACCEPTED 使用非零编号正是为了这条。
+  STATUS_CODE_UNSPECIFIED = 0;
+
+  // --- 成功码：只能出现在 Success outcome 中 ---
+
+  // 调用完成，payload 是方法专属响应（可以为空）。
+  STATUS_CODE_OK = 1;
+
+  // 系统已可靠接收创建请求，【不表示】最终成功（§10.9）。
+  //
+  // 只允许用于 Method Registry 标记 produces_operation=true 的方法，且
+  // Operation Manager 必须先登记 operation_id、调用者、Resource、origin
+  // method/schema 与取消边界，nervud 才能生成本成功响应。
+  // 外部 Service 不能仅靠返回 ACCEPTED 就凭空创造一个 Operation。
+  //
+  // [v2+] Rewrite v1 可以完全不暴露 produces_operation 方法。
+  STATUS_CODE_ACCEPTED = 2;
+
+  // --- 失败码：只能出现在 Failure outcome 中 ---
+
+  // 方法参数本身非法（字段缺失、越界、枚举未知、格式错误）。
+  //
+  // 注意与 RESOURCE_EXHAUSTED 的边界（§10.11）：payload 超出该方法额度是
+  // 配额问题，返回 RESOURCE_EXHAUSTED 且不得进入业务 handler；只有字段
+  // 内容本身非法才是 INVALID_ARGUMENT。
+  STATUS_CODE_INVALID_ARGUMENT = 3;
+
+  // 连接身份不成立：握手未完成、SO_PEERCRED 无法映射到已注册 Package、
+  // 声明的 Component ID 与启动记录不符。
+  STATUS_CODE_UNAUTHENTICATED = 4;
+
+  // 身份成立但无权：manifest 未声明、Policy 拒绝、权限已被撤销。
+  //
+  // 【只能由 nervud 产生】。Provider 不得自行创造本码——权限裁决是内核职责，
+  // Provider 返回它一律归一化为 INTERNAL 并写 Audit（NRCP §19）。
+  STATUS_CODE_PERMISSION_DENIED = 5;
+
+  // 目标不存在（caller 可见投影内）：endpoint_id/method_id/subscription_id
+  // 未知，或 Selector 没有匹配到 caller-visible 的 Resource。
+  //
+  // 「caller 可见」是关键：隐藏 Resource 必须表现为不存在，不能通过
+  // NOT_FOUND 与其他码的差异被枚举出来（§10.5）。
+  STATUS_CODE_NOT_FOUND = 6;
+
+  // 前置条件不满足：状态机不允许、Resource 被占用、Lease 未持有、
+  // Safety 已锁存、接口版本无交集。
+  //
+  // 本码自身【没有信息量】，它几乎总是要配一个 typed error_detail 才能让
+  // 调用者知道该做什么（NRCP §19 的映射表）。
+  STATUS_CODE_FAILED_PRECONDITION = 7;
+
+  // 配额耗尽：并发数、字节速率、队列预算、方法 payload 额度（§10.11）。
+  // 属于「稍后重试可能成功」的一类，与 INVALID_ARGUMENT 相反。
+  STATUS_CODE_RESOURCE_EXHAUSTED = 8;
+
+  // 超过 deadline。timeout_ms=0 表示使用方法默认值，【不表示】永不超时。
+  STATUS_CODE_DEADLINE_EXCEEDED = 9;
+
+  // 被取消。注意 Cancel 是尽力而为：本码表示工作被停止，
+  // 【不表示】已经发生的电机动作、文件提交或外部副作用被回滚（§10.7）。
+  STATUS_CODE_CANCELLED = 10;
+
+  // 当前不可用：Provider/ROS/MCU 或绑定链路断开、Service 正在重启。
+  // SDK 断线时把全部 pending 完成为本码（§10.12）。
+  STATUS_CODE_UNAVAILABLE = 11;
+
+  // 内核内部错误，或 Service 违反了 Provider Contract（返回畸形 detail、
+  // 非法 outcome 组合、越权创造裁决）。
+  //
+  // 对调用者是一个不透明的终点：完整根因只进受控 Audit，不通过 wire 泄露
+  // 内部路径、其他 Package、调用栈或权限策略细节（§10.12）。
+  STATUS_CODE_INTERNAL = 12;
+}
+
+// Success 是唯一的成功分支。
+//
+// 不变量（接收方【必须】校验，oneof 只保证分支互斥，管不了取值）：
+//
+//	code ∈ {OK, ACCEPTED}
+//
+// 业务失败不得伪装成 Success 后把失败塞进 payload——那会让 SDK 的错误处理
+// 完全失效，也让 Audit 看不见失败（§10.4、NRCP §19）。
+message Success {
+  StatusCode code = 1;
+
+  // 方法专属 Protobuf 响应的序列化 bytes，可以为空。
+  //
+  // 【不使用 google.protobuf.Any，也不接受客户端提供的 type URL】：
+  // 类型由 endpoint_id + 选中的 interface_version + method_id 唯一决定，
+  // 接收方用生成代码解码。允许发送方自报类型等于允许它选择接收方的解析器。
+  bytes payload = 2;
+}
+
+// Failure 是唯一的失败分支。
+//
+// 不变量（接收方必须校验）：
+//
+//	code ∉ {UNSPECIFIED, OK, ACCEPTED}
+//
+// 任何非法组合一律 fail closed 为协议违规 / INTERNAL。
+message Failure {
+  StatusCode code = 1;
+
+  // 仅供人阅读，【不参与程序判断】。
+  //
+  // 禁止原样透传 Service/Provider 的自由文本：nervud 只能从受审计模板和
+  // 已脱敏的结构化字段生成，并施加长度上限（由 nervud 实现强制，schema
+  // 无法表达）。程序不得对本字段做 switch，也不得据它本地化分支。
+  string public_message = 2;
+
+  // 可选的类型化细因，序列化后的 Protobuf bytes。
+  //
+  // 类型由【外层消息类型】决定，不由本字段自述：
+  //   普通 Response/DispatchResult → interface_version + method_id 决定
+  //   ResolveEndpointResult        → ResolveEndpointErrorDetail
+  //   其余 *Result                 → 各自消息类型固定的 detail 类型
+  //
+  // nervud 必须按权威 method schema 解码 Service 提交的 detail，校验
+  // (code, reason) 允许映射、字段长度、枚举值域，丢弃未知字段后【重新编码】
+  // 再转发——不得把 Service 的原始 bytes 直接透传给调用者（§10.7）。
+  bytes error_detail = 3;
+}
+
+// ResolveEndpointErrorDetail 是 ResolveEndpointResult 失败时的固定 detail 类型。
+//
+// 它属于控制面而不是某个 Interface，因此定义在 IPC schema 里；
+// BaseMotionErrorDetail 那类接口细因定义在各自的 interface schema 中。
+message ResolveEndpointErrorDetail {
+  ResolveEndpointReason reason = 1;
+}
+
+// ResolveEndpointReason 的取值与通用 code 的映射固定为（NRCP §19）：
+//
+//	INTERFACE_NOT_FOUND  → NOT_FOUND
+//	VERSION_MISMATCH     → FAILED_PRECONDITION
+//	RESOURCE_NOT_FOUND   → NOT_FOUND
+//	RESOURCE_AMBIGUOUS   → FAILED_PRECONDITION
+//
+// 全部基于 caller 可见投影：隐藏的 Resource 不参与候选计数，也不参与
+// AMBIGUOUS 判定——否则调用者可以用「变没变成 AMBIGUOUS」来探测自己看不见的
+// 硬件（§10.5）。
+enum ResolveEndpointReason {
+  RESOLVE_ENDPOINT_REASON_UNSPECIFIED = 0;
+
+  // caller 可见投影中不存在该逻辑 Interface。
+  RESOLVE_ENDPOINT_REASON_INTERFACE_NOT_FOUND = 1;
+
+  // Interface 存在，但请求的版本范围与本机支持范围无交集。
+  RESOLVE_ENDPOINT_REASON_VERSION_MISMATCH = 2;
+
+  // Selector 合法，但没有匹配到任何 caller-visible 的 Resource。
+  RESOLVE_ENDPOINT_REASON_RESOURCE_NOT_FOUND = 3;
+
+  // Selector 合法且匹配到多个 caller-visible 候选，且没有唯一选择规则。
+  RESOLVE_ENDPOINT_REASON_RESOURCE_AMBIGUOUS = 4;
+}

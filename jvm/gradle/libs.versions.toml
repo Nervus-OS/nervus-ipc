@@ -1,0 +1,30 @@
+# 版本集中管理。全部已在 WSL Debian 上实际构建验证通过（见根 README「验证记录」）。
+#
+# protobuf 那一项不是「取最新就行」，它有硬约束：
+#
+#   protobuf-java 运行时版本必须 >= 生成这批代码所用 protoc 的版本。
+#
+#   protoc v27（对应 Java 4.27.x）起，生成代码里带运行时版本自检，运行时低于
+#   生成器会在类加载时直接抛异常，而不是安静地跑错。
+#   当前生成用的是 protoc 29.3，因此这里锁 4.29.3 —— 两者必须一起升，
+#   不能各自取最新。
+
+[versions]
+# Kotlin 编译器 / 标准库。KGP 由 Gradle 从插件门户拉取，不需要本机装 kotlinc。
+kotlin = "2.1.0"
+
+# protobuf-java + protobuf-kotlin 运行时。见上方版本对齐约束。
+protobuf = "4.29.3"
+
+# JVM 字节码目标。17 是保守的 LTS 下限，产物 class major version = 61（已验证）。
+# 构建机装的是哪个 JDK 无所谓：settings.gradle.kts 的 foojay 解析器会按需
+# provision 一个 17 工具链，保证换机器构建结果不变。
+jvmTarget = "17"
+
+[libraries]
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
+# protobuf-kotlin 是 DSL builder，【建立在】protobuf-java 之上而非替代它，两个都要。
+protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

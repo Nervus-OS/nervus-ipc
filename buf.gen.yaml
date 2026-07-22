@@ -1,0 +1,56 @@
+version: v2
+
+# clean: 生成前清掉上一轮产物，避免删掉一个 .proto 后旧的产物还留在仓库里
+# 被继续编译——那种「幽灵类型」极难排查。
+#
+# ⚠ clean 会【整目录删除】每个 plugin 的 out。因此每个 out 都必须指向一个
+#   只含生成物的目录。这不是理论风险：最初把 Go 的 out 写成 `go`，
+#   第一次 buf generate 就把 go/go.mod 和 go/go.sum 一起删了。
+clean: true
+
+# 三种语言在【同一次 buf generate】里一起生成。
+#
+# 这不是为了省事，而是 NRCP §22.6「同一轮实现必须依赖一份已冻结的 schema」
+# 的执行机制：一个 commit 里躺着 schema 和三份产物，CI 一条
+# `buf generate && git diff --exit-code` 同时覆盖全部语言。
+# 拆成多个仓库后，「Go 从哪个 schema 生成的」和「JVM 从哪个 schema 生成的」
+# 就变成两个可以各自漂移的事实，且漂移后两边都能编译、只在行为上不一致。
+plugins:
+  # --- Go ------------------------------------------------------------------
+  #
+  # 使用【本地】插件而不是 buf 远程插件（buf.build/protocolbuffers/go）。
+  # 远程插件很方便，但它把一个在线服务放进了 TCB 的供应链。架构原文：
+  # 「Protobuf 只是公开的二进制编码和代码生成格式，不依赖 Google 的在线服务」——
+  # 换成依赖 BSR 只是换了个厂商再违反同一句话。
+  #
+  # 插件版本由 go/go.mod 的 tool 指令钉死（google.golang.org/protobuf v1.36.11）。
+  # 安装：go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.11
+  - local: protoc-gen-go
+    # out 配合 opt module=<前缀>：protoc-gen-go 从每个 .proto 的 go_package
+    # 里剥掉该前缀，按剩余部分决定落盘位置。
+    #   go_package = ".../nervus-ipc/go/protocol/ipcv1;ipcv1"
+    #   module     = ".../nervus-ipc/go/protocol"
+    #   ⇒ 剩余 "ipcv1"，落在 go/protocol/ipcv1/*.pb.go
+    #
+    # module 这里刻意写到 protocol 一级（而不是真正的模块路径 .../go），
+    # 好让 out 能收窄到 go/protocol —— 它只装生成物，被 clean 整个删掉也无妨。
+    # 写成 out: go 的话 clean 会连 go/go.mod 一起删。
+    # protoc-gen-go 的 module 参数只用于计算输出路径，不要求等于真实模块路径。
+    out: go/protocol
+    opt:
+      - module=github.com/nervus-os/nervus-ipc/go/protocol
+
+  # --- JVM -----------------------------------------------------------------
+  #
+  # java 与 kotlin 是 protoc 的【内置】生成器（protoc_builtin），不是独立插件，
+  # 因此这两项要求 PATH 上有 protoc 本体；Go 那侧只要 protoc-gen-go 即可。
+  #
+  # 两个都要：protobuf-kotlin 生成的是 DSL builder，它【建立在】protobuf-java
+  # 生成的消息类之上，不是替代品。只生成 kotlin 会编译不过。
+  #
+  # 落盘位置遵循 Gradle 约定的 src/main/{java,kotlin}，具体包路径由 .proto 的
+  # java_package + java_multiple_files 决定。
+  - protoc_builtin: java
+    out: jvm/protocol/src/main/java
+  - protoc_builtin: kotlin
+    out: jvm/protocol/src/main/kotlin

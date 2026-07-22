@@ -1,0 +1,15 @@
+# 注意：go/protocol/**/*.pb.go 是【故意提交】的，不要往这里加忽略规则。
+# 理由见 README「生成物提交进仓库」。
+
+# 本地构建产物
+/bin/
+/build/
+
+# JVM
+.gradle/
+jvm/**/build/
+
+# 编辑器
+.idea/
+.vscode/
+*.swp
