@@ -1,0 +1,135 @@
+// Nervus IPC v1 —— Safety 边界消息  [REWRITE-v1 / experimental]
+//
+// 本文件冻结 ①内核 nervud 与 ②OEM Provider 之间在 Safety 边界上交换的「事实」
+// （NRCP §14.3）。NRCP 不在这里重新实现 Safety Policy——决定权、锁存、motion epoch
+// 撤销、升级与 re-arm 都在 nervud 内核；本文件只表达 Provider 边界需要说清楚的最小事实：
+//
+//	SafetyHalt(epoch, reason, accept_deadline)   nervud → Provider：停机要求
+//	HaltAccepted(epoch)                          Provider → nervud：已接受（≠ 已停稳）
+//	StopProgress(epoch, phase)                   Provider → nervud：物理停止进度
+//	StandstillConfirmed(epoch, evidence)         Provider → nervud：取得可信停稳证据
+//	ProviderFault(epoch, code)                   Provider → nervud：故障
+//
+// 承载方式（走专用高优先级 Safety Path 还是 Dispatch，§14.5）属于实现规范，留待冻结；
+// 因此本文件只定义消息与枚举，【不】改动 envelope.proto 的 oneof 或字段号。
+//
+// [REWRITE-v1] 标注 experimental：按 NRCP §22.6，冻结前允许破坏性调整，第三方不得
+// 假设本文件的字段/枚举已稳定。CI 的 buf breaking 在正式冻结前保持关闭。
+//
+// 兼容规则（§10.12，正式冻结后生效）：已发布字段号与枚举值永不改变含义、类型或复用；
+// 删除写入 reserved；新增字段须有安全默认；所有枚举以 *_UNSPECIFIED = 0 起始并 fail closed。
+
+syntax = "proto3";
+
+package nervus.ipc.v1;
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+
+// 连字符在 Java 包名里非法，理由见 status.proto。
+option java_package = "io.github.nervusos.ipc.v1";
+option java_multiple_files = true;
+option java_outer_classname = "SafetyProto";
+
+// =============================================================================
+// 边界消息
+// =============================================================================
+
+// SafetyHalt 是 nervud 向 Provider 发出的停机要求。
+//
+// motion_epoch 是本次锁存的撤销世代号：Provider 必须以它为界废止旧命令，且回报中
+// 必须回带同一 epoch；陈旧 epoch 的回报一律被 nervud 忽略（§10.5）。
+message SafetyHalt {
+  // 当前锁存世代。恒非零（§10.5）。
+  uint64 motion_epoch = 1;
+
+  // 触发原因（仅供审计/设备策略参考，不改变「必须停」这一事实）。
+  HaltReason reason = 2;
+
+  // Provider 确认接受（回 HaltAccepted）的期限，毫秒。0 表示使用 Safety Contract
+  // 的 provider_accept_timeout 默认值，【不表示】无限等待（§14.4）。
+  uint32 accept_deadline_ms = 3;
+}
+
+// HaltAccepted 表示 Provider 已接受停机要求。【不表示】已经物理停稳——只有
+// StandstillConfirmed 或受信硬件状态才表示停稳（NRCP §14.3）。
+message HaltAccepted {
+  uint64 motion_epoch = 1;
+}
+
+// StopProgress 报告物理停止进度推进到某个相位。与顶层 Safety Gate 正交。
+message StopProgress {
+  uint64 motion_epoch = 1;
+  StopPhase phase = 2;
+}
+
+// StandstillConfirmed 表示取得可信物理停稳证据。没有编码器/速度估计等证据能力的
+// 设备不得发送本消息（不得把「输出已归零」伪装成停稳，NRCP §14.1）。
+message StandstillConfirmed {
+  uint64 motion_epoch = 1;
+  StandstillEvidence evidence = 2;
+}
+
+// ProviderFault 报告 Provider 故障。nervud 据此把 Provider/Resource 置 FAULT 并按
+// 风险升级；对普通调用者的公开细因用 RESOURCE_FAULT，不暴露 PROVIDER_FAULT（§19）。
+message ProviderFault {
+  uint64 motion_epoch = 1;
+  FaultCode code = 2;
+}
+
+// =============================================================================
+// 枚举（数值与 nervud internal/safety 的本地镜像常量对齐；proto 是唯一真源）
+// =============================================================================
+
+// StopPhase 是实际停止进度的相位（架构 §6 / NRCP §14.1）。正常链单调前进；
+// DELIVERY_FAULT / STANDSTILL_TIMEOUT 是任意非终态可进入的终态旁支。无停稳证据能力
+// 的设备封顶在 OUTPUT_DISABLED。
+enum StopPhase {
+  STOP_PHASE_UNSPECIFIED = 0;
+  STOP_PHASE_REQUESTED = 1;
+  STOP_PHASE_SENT = 2;
+  STOP_PHASE_PROVIDER_ACCEPTED = 3;
+  STOP_PHASE_MCU_ACKED = 4;
+  STOP_PHASE_OUTPUT_DISABLED = 5;
+  STOP_PHASE_STANDSTILL_CONFIRMED = 6;
+  STOP_PHASE_DELIVERY_FAULT = 7;
+  STOP_PHASE_STANDSTILL_TIMEOUT = 8;
+}
+
+// HaltReason 是 Safety 触发原因（仅参考）。
+enum HaltReason {
+  HALT_REASON_UNSPECIFIED = 0;
+  HALT_REASON_OPERATOR_ESTOP = 1;         // 人工/UI 软件急停
+  HALT_REASON_DEADMAN_TIMEOUT = 2;        // deadman / 命令新鲜度失效
+  HALT_REASON_PROVIDER_FAULT = 3;         // Provider 故障触发
+  HALT_REASON_HEARTBEAT_LOST = 4;         // 与 Provider/MCU 心跳丢失
+  HALT_REASON_SUPERVISOR_ESCALATION = 5;  // Supervisor 超时升级
+  HALT_REASON_EXTERNAL_TRIP = 6;          // 外部（MCU/独立硬件）上报导致的锁存
+}
+
+// FaultCode 是 Provider 故障分类。
+enum FaultCode {
+  FAULT_CODE_UNSPECIFIED = 0;
+  FAULT_CODE_DEVICE_ERROR = 1;  // 设备/驱动错误
+  FAULT_CODE_LINK_LOST = 2;     // 到控制器/MCU 的链路断开
+}
+
+// StandstillEvidence 是停稳证据的来源类型。
+enum StandstillEvidence {
+  STANDSTILL_EVIDENCE_UNSPECIFIED = 0;
+  STANDSTILL_EVIDENCE_ENCODER = 1;           // 编码器读数
+  STANDSTILL_EVIDENCE_VELOCITY_ESTIMATE = 2; // 速度估计
+  STANDSTILL_EVIDENCE_HARDWARE_STATE = 3;    // 受信硬件状态（如抱闸到位）
+}
+
+// BaseMotionErrorReason 是控制接口（BaseMotion）失败时的 typed error_detail reason
+// （NRCP §19「位置 B」）。SAFETY_LATCHED / STALE_EPOCH 这类机器人细因【只能】进这里，
+// 不进通用 StatusCode（见 status.proto 的 StatusCode 说明）。
+//
+// [REWRITE-v1] 先在 safety.proto 落占位；BaseMotion 接口正式落地时会移入其自身
+// interface schema（届时按兼容规则处理号迁移）。
+enum BaseMotionErrorReason {
+  BASE_MOTION_ERROR_REASON_UNSPECIFIED = 0;
+  BASE_MOTION_ERROR_REASON_SAFETY_LATCHED = 1;       // 对应通用码 FAILED_PRECONDITION
+  BASE_MOTION_ERROR_REASON_STALE_EPOCH = 2;          // 命令属于已撤销的 motion epoch
+  BASE_MOTION_ERROR_REASON_LOCOMOTION_NOT_READY = 3; // 尚未进入 locomotion-ready
+}
