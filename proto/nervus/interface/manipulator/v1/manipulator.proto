@@ -1,0 +1,240 @@
+// Nervus 标准接口 · Manipulator@1  [REWRITE-v1 / experimental]
+//
+// interface_id = nervus.interface.manipulator.arm ，major = 1，experimental。
+//   Feature     = nervus.feature.manipulator.arm
+//   Permission  = nervus.permission.manipulator.control
+//   Resource    = nervus.resource.manipulator.arm （role 如 main/left/right）
+//
+// 语义边界（NRCP §17 / §13.2）：
+//   机械臂不是移动底座，语义是【关节 / 末端位姿 / 轨迹 / 夹爪 / 回零】。
+//   逆运动学、轨迹规划、碰撞检测本身是 OEM Provider 的活，本 schema【不】实现
+//   算法，只定义边界消息、method_id 与错误语义。
+//
+// 长任务是 operation（NRCP §11）：MoveToPose / MoveJointTrajectory / GoHome 三个
+//   移动类方法是长任务，method_meta.returns_operation = true，dispatch 走
+//   operation.Create（B5），成功以 STATUS_CODE_ACCEPTED + operation_id 应答；
+//   SetGripper / Stop 是短命令，非 operation。
+//
+// 单位与坐标系（NRCP §17.1，务必读进注释）：
+//   关节角 = rad；关节角速度 = rad/s；笛卡尔位置 = m；四元数无量纲；
+//   坐标系一律用显式 frame 字符串（如 "base_link"），【禁止】含糊或隐式默认。
+//
+// [REWRITE-v1] experimental：v2 前允许破坏性调整，第三方不得假设已稳定。
+//   正式冻结后遵循 §10.12：method_id / 字段号 / 枚举值永不改含义或复用，
+//   删除写 reserved，新增字段须有安全默认，枚举以 *_UNSPECIFIED = 0 起始。
+
+syntax = "proto3";
+
+package nervus.interface.manipulator.v1;
+
+// method_meta 自定义 option + RiskClass 来自机制层。
+import "nervus/ipc/v1/method_registry.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/interface/manipulatorv1;manipulatorv1";
+
+// Java 包名不能含连字符，也不能用保留字 "interface"（JLS §3.9）——因此这里用
+// "iface" 段。proto package 用 "interface" 不受影响（那只是 wire/命名用途）。
+option java_package = "io.github.nervusos.iface.manipulator.v1";
+option java_multiple_files = true;
+option java_outer_classname = "ManipulatorProto";
+
+// =============================================================================
+// method_id 枚举 + Method Registry 元数据
+// =============================================================================
+
+// ManipulatorMethod 的每个枚举值【就是】该方法的 wire method_id（进
+// Request.method_id）。逐值挂 (nervus.ipc.v1.method_meta)，让 nervud 与 SDK
+// 从 descriptor 抽取 Registry，不在 Go/Kotlin 里另写清单。
+//
+// method_meta.method_id 冗余等于枚举数字值（抽取工具会校验一致）。
+enum ManipulatorMethod {
+  MANIPULATOR_METHOD_UNSPECIFIED = 0;
+
+  // 只读：关节位 / 末端位姿 / readiness / limits / epoch。
+  MANIPULATOR_METHOD_GET_ARM_STATE = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.manipulator.v1.GetArmStateRequest"
+    response_type: "nervus.interface.manipulator.v1.ArmState"
+  }];
+
+  // 状态事件流（订阅，非 request/response）。响应类型即事件 payload 类型。
+  MANIPULATOR_METHOD_SUBSCRIBE_ARM_STATE = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.manipulator.v1.SubscribeArmStateRequest"
+    response_type: "nervus.interface.manipulator.v1.ArmState"
+  }];
+
+  // 末端移到笛卡尔位姿（含 frame）。长任务 → operation。
+  MANIPULATOR_METHOD_MOVE_TO_POSE = 3 [(nervus.ipc.v1.method_meta) = {
+    method_id: 3
+    required_permission: "nervus.permission.manipulator.control"
+    risk_class: RISK_CLASS_PHYSICAL_CONTROL
+    requires_control_lease: true
+    returns_operation: true
+    needs_user_confirmation: true
+    request_type: "nervus.interface.manipulator.v1.MoveToPoseRequest"
+    response_type: "nervus.interface.manipulator.v1.ManipulatorMoveResult"
+  }];
+
+  // 关节空间轨迹。长任务 → operation。
+  MANIPULATOR_METHOD_MOVE_JOINT_TRAJECTORY = 4 [(nervus.ipc.v1.method_meta) = {
+    method_id: 4
+    required_permission: "nervus.permission.manipulator.control"
+    risk_class: RISK_CLASS_PHYSICAL_CONTROL
+    requires_control_lease: true
+    returns_operation: true
+    needs_user_confirmation: true
+    request_type: "nervus.interface.manipulator.v1.MoveJointTrajectoryRequest"
+    response_type: "nervus.interface.manipulator.v1.ManipulatorMoveResult"
+  }];
+
+  // 回零 / 收拢位。长任务 → operation。
+  MANIPULATOR_METHOD_GO_HOME = 5 [(nervus.ipc.v1.method_meta) = {
+    method_id: 5
+    required_permission: "nervus.permission.manipulator.control"
+    risk_class: RISK_CLASS_PHYSICAL_CONTROL
+    requires_control_lease: true
+    returns_operation: true
+    needs_user_confirmation: true
+    request_type: "nervus.interface.manipulator.v1.GoHomeRequest"
+    response_type: "nervus.interface.manipulator.v1.ManipulatorMoveResult"
+  }];
+
+  // 夹爪开合（短命令，非 operation），但仍驱动执行器 → 需 lease。
+  MANIPULATOR_METHOD_SET_GRIPPER = 6 [(nervus.ipc.v1.method_meta) = {
+    method_id: 6
+    required_permission: "nervus.permission.manipulator.control"
+    risk_class: RISK_CLASS_PHYSICAL_CONTROL
+    requires_control_lease: true
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.manipulator.v1.SetGripperRequest"
+    response_type: ""
+  }];
+
+  // 普通受控停止（非 SafetyHalt）。需 lease，短命令。
+  MANIPULATOR_METHOD_STOP = 7 [(nervus.ipc.v1.method_meta) = {
+    method_id: 7
+    required_permission: "nervus.permission.manipulator.control"
+    risk_class: RISK_CLASS_PHYSICAL_CONTROL
+    requires_control_lease: true
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.manipulator.v1.StopRequest"
+    response_type: ""
+  }];
+}
+
+// =============================================================================
+// 消息（单位/坐标系见文件头与逐字段注释）
+// =============================================================================
+
+// JointState —— 关节空间状态。position/velocity 的索引与 Provider 的关节顺序
+// 一一对应（顺序由 Provider Descriptor / ArmState.limits 长度约束）。
+message JointState {
+  repeated double position_rad = 1;    // 各关节角，rad
+  repeated double velocity_rad_s = 2;  // 各关节角速度，rad/s
+}
+
+// Pose —— 笛卡尔位姿，位置 m + 单位四元数（无量纲）。frame 必须显式给出。
+message Pose {
+  string frame = 1;   // 坐标系，如 "base_link"。【禁止含糊】：空 = INVALID_ARGUMENT。
+  double x = 2;       // m
+  double y = 3;       // m
+  double z = 4;       // m
+  double qx = 5;      // 四元数分量（无量纲）
+  double qy = 6;
+  double qz = 7;
+  double qw = 8;
+}
+
+// ArmReadiness —— 机械臂就绪态。*_UNSPECIFIED=0 fail closed。
+enum ArmReadiness {
+  ARM_READINESS_UNSPECIFIED = 0;
+  ARM_READINESS_READY = 1;
+  ARM_READINESS_NOT_READY = 2;
+  ARM_READINESS_TRANSITIONING = 3;
+  ARM_READINESS_FAULT = 4;
+}
+
+// ArmState —— GetArmState / SubscribeArmState 的状态载荷。
+message ArmState {
+  ArmReadiness readiness = 1;
+  JointState joints = 2;
+  Pose tcp_pose = 3;                     // 末端（tool center point）位姿
+  repeated double joint_lower_rad = 4;   // 各关节下限，rad（索引对齐 joints）
+  repeated double joint_upper_rad = 5;   // 各关节上限，rad
+  uint64 active_motion_epoch = 6;        // 当前 motion epoch（陈旧命令据此判废）
+}
+
+message GetArmStateRequest {}
+message SubscribeArmStateRequest {}
+
+// MoveToPoseRequest —— 末端移到目标位姿。
+message MoveToPoseRequest {
+  Pose target = 1;
+  double max_vel_scale = 2;  // 速度缩放，取值 0..1；越界 → INVALID_ARGUMENT
+}
+
+// MoveJointTrajectoryPoint —— 关节轨迹上的一个途经点。
+message MoveJointTrajectoryPoint {
+  repeated double position_rad = 1;    // 各关节目标角，rad（索引对齐 ArmState）
+  int64 time_from_start_nanos = 2;     // 相对轨迹起点的时间，ns，单调递增
+}
+
+// MoveJointTrajectoryRequest —— 关节空间轨迹。
+message MoveJointTrajectoryRequest {
+  repeated MoveJointTrajectoryPoint points = 1;
+}
+
+message GoHomeRequest {}
+
+// SetGripperRequest —— 夹爪开合。
+message SetGripperRequest {
+  double opening = 1;     // 0 = 闭合，1 = 全开；越界 → INVALID_ARGUMENT
+  double max_effort = 2;  // 最大力矩/力限（0 = Provider 默认）
+}
+
+message StopRequest {}
+
+// ManipulatorMoveResult —— 移动类 operation 的成功终态载荷（NRCP §11）。
+// operation 终态载荷类型由 origin 方法绑定决定（method_meta.response_type）。
+message ManipulatorMoveResult {
+  Pose final_pose = 1;  // 到位后的实际末端位姿
+}
+
+// =============================================================================
+// 错误 detail（NRCP §19「位置 B」）
+// =============================================================================
+
+// ManipulatorReason —— Manipulator 失败的 typed error_detail reason。
+//
+// 业务失败一律走 Failure outcome（通用 StatusCode 位置 A + 本 reason 位置 B），
+// 【不得】藏进 Success payload（NRCP §19）。PERMISSION_DENIED / DEADLINE_EXCEEDED
+// / CANCELLED / UNAVAILABLE 只作位置 A 通用码，不在此重复。
+//
+// 所有值以 *_UNSPECIFIED=0 起始，fail closed。
+enum ManipulatorReason {
+  MANIPULATOR_REASON_UNSPECIFIED = 0;
+  MANIPULATOR_REASON_NOT_READY = 1;           // 未进入 READY
+  MANIPULATOR_REASON_SAFETY_LATCHED = 2;      // Safety 已锁存
+  MANIPULATOR_REASON_STALE_EPOCH = 3;         // 命令属已撤销的 motion epoch
+  MANIPULATOR_REASON_CONTROL_NOT_HELD = 4;    // 未持有 ControlLease
+  MANIPULATOR_REASON_JOINT_LIMIT = 5;         // 超关节限位
+  MANIPULATOR_REASON_UNREACHABLE_POSE = 6;    // IK 无解 / 超工作空间
+  MANIPULATOR_REASON_COLLISION = 7;           // 碰撞检测拦截
+  MANIPULATOR_REASON_RESOURCE_UNAVAILABLE = 8;// Resource/链路不可用
+  MANIPULATOR_REASON_RESOURCE_FAULT = 9;      // Resource 故障
+}
+
+message ManipulatorErrorDetail {
+  ManipulatorReason reason = 1;
+}

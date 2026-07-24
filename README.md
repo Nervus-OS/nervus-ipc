@@ -104,8 +104,9 @@ nervus-ipc/
 │   │   ├── schema.proto              Interface schema bundle 分发（§8.4）
 │   │   ├── method_registry.proto     method_meta option 机制（扩展号 60001）
 │   │   └── provider_descriptor.proto Provider 数据驱动契约（§7.2/§7.3）
-│   ├── nervus/interface/basemotion/v1/  标准接口 BaseMotion@1
-│   └── com/acme/dog/v1/                 OEM 私有接口样例（可拓展性验收）
+│   ├── nervus/interface/basemotion/v1/   标准接口 BaseMotion@1（机械狗移动主线）
+│   ├── nervus/interface/manipulator/v1/  标准接口 Manipulator@1（机械臂）
+│   └── com/acme/dog/v1/                  OEM 私有接口样例（可拓展性验收）
 ├── go/
 │   ├── go.mod                  module github.com/nervus-os/nervus-ipc/go
 │   ├── protocol/               生成的 Go 类型（提交进仓库，见下）
@@ -225,7 +226,7 @@ NRCP §22.6 明确允许 Rewrite v1 阶段做破坏性调整，提前开只会�
 已验证通过（最近一次：精简为 Go + Java 双语言后）：
 
 - [x] `buf lint`（STANDARD 规则集）通过
-- [x] `buf generate` 产出 8 个 `.pb.go` + 168 个 `.java`
+- [x] `buf generate` 产出 9 个 `.pb.go` + 一批 `.java`
 - [x] **生成确定性**：连续两次 `buf generate` 产物 sha256 完全一致
       —— 这是「CI 重新生成后 `git diff --exit-code`」这条门禁能成立的前提
 - [x] Go 侧 `go build ./... && go test ./...` 全绿（`golden` + `registry`）
