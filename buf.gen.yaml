@@ -54,3 +54,26 @@ plugins:
     out: jvm/protocol/src/main/java
   - protoc_builtin: kotlin
     out: jvm/protocol/src/main/kotlin
+
+  # --- Python --------------------------------------------------------------
+  #
+  # python 与 pyi 同为 protoc 的【内置】生成器（protoc_builtin），同样要求 PATH
+  # 上有 protoc 本体（与 java/kotlin 一致；Go 那侧只要 protoc-gen-go）。
+  #
+  # 为什么 C 组（ROS provider / 感知 / Agent，语言决策 2026-07-24）用 Python：
+  # adapter 是桥接层非控制环，runtime 效率无所谓；硬实时在 ROS/MCU。Python SDK
+  # 从这里生成的类型【复用】编解码 Envelope，绝不手搓信封（红线 #3，同 Kotlin）。
+  #
+  # 落盘 python/protocol：与 go/protocol、jvm/protocol 并列，只装生成物——
+  # 【clean 会整目录删】，故手写 SDK 放在 python/sdk（另一顶层目录）而非这里。
+  # protoc 的 python_out 按 .proto 的包路径落盘：
+  #   proto/nervus/ipc/v1/envelope.proto ⇒ python/protocol/nervus/ipc/v1/envelope_pb2.py
+  # 生成物用 PEP 420 命名空间包（无 __init__.py），消费方把 python/protocol 置于
+  # 源根（sys.path）即可 `from nervus.ipc.v1 import envelope_pb2`。
+  #
+  # 两个都要：pyi 生成 .pyi 类型存根，让 SDK/Provider 在编辑器里对生成类型有
+  # 补全与类型检查；python 生成运行时 _pb2.py 本体。
+  - protoc_builtin: python
+    out: python/protocol
+  - protoc_builtin: pyi
+    out: python/protocol
