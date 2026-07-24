@@ -1,5 +1,11 @@
 // Nervus IPC v1 —— Provider Descriptor（数据驱动接口契约）  [REWRITE-v1 / experimental]
 //
+// [KERNEL: NOT WIRED] nervud 尚未从签名 Descriptor 数据驱动注册接口/资源/权限，
+// 三张表仍是编译期硬编码：endpoint.DefaultInterfaceCatalog（1 条）、
+// resource.DefaultRegistry（1 条）、permission.DefaultCatalog（7 条占位）。
+// 本文件正是替换它们的解药，接线后「加一款机器人 = 装一个签名 Provider 包」
+// 才真正成立。校验辅助已在 go/registry.ValidateOEMNamespace。
+//
 // 本文件冻结 Provider 在其签名 Manifest 里声明「我实现/管理什么」的 wire 结构
 // （NRCP §7.2/§7.3 的 wire 形态），是 WP-A4 的主交付物。
 //

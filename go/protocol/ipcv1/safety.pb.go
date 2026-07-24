@@ -1,5 +1,11 @@
 // Nervus IPC v1 —— Safety 边界消息  [REWRITE-v1 / experimental]
 //
+// [KERNEL: NOT WIRED] nervud 能编译这些类型，但【没有消费路径】：internal/safety
+// 的投递端是 NopPath（SendHalt 直接 return nil）、上报端是 NopReports（返回 nil
+// channel）。也就是说停机判定/锁存/epoch 递增全在跑，但停机信号发不出去、
+// 停稳事实收不回来。承载方式（专用高优先级 Safety Path 还是 Dispatch，§14.5）
+// 尚未冻结，是接线前必须先做的决定。
+//
 // 本文件冻结 ①内核 nervud 与 ②OEM Provider 之间在 Safety 边界上交换的「事实」
 // （NRCP §14.3）。NRCP 不在这里重新实现 Safety Policy——决定权、锁存、motion epoch
 // 撤销、升级与 re-arm 都在 nervud 内核；本文件只表达 Provider 边界需要说清楚的最小事实：

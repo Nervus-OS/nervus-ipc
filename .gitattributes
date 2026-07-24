@@ -1,0 +1,32 @@
+# golden vectors 是【逐字节精确】的 protobuf 序列化产物（NRCP §22.6）。
+#
+# 必须显式声明 binary，不能依赖 git 的文本/二进制自动探测：探测的依据是文件
+# 前 8000 字节里有没有 NUL。一个恰好不含 NUL、又含 0x0A/0x0D 的向量会被判成
+# 文本，在 core.autocrlf=true 的 Windows 检出时把 0x0A 换成 0x0D0A —— 于是
+# Go / JVM 两侧断言同时失败，而 diff 看上去「没有任何改动」，极难排查。
+#
+# binary 等价于 -text -diff，同时关掉换行转换与文本 diff。
+*.binpb binary
+
+# 其余一律 LF。生成物（.pb.go / .java）也在内，它们的 sha256 是
+# 「连续两次 buf generate 一致」这条门禁的依据，不能因平台而异。
+*.go        text eol=lf
+*.java      text eol=lf
+*.kt        text eol=lf
+*.kts       text eol=lf
+*.proto     text eol=lf
+*.yaml      text eol=lf
+*.json      text eol=lf
+*.textproto text eol=lf
+*.md        text eol=lf
+go.mod      text eol=lf
+go.sum      text eol=lf
+gradlew     text eol=lf
+*.properties text eol=lf
+*.toml      text eol=lf
+
+# Windows 批处理必须 CRLF，否则 cmd.exe 解析异常
+*.bat text eol=crlf
+
+# Gradle wrapper jar
+*.jar binary

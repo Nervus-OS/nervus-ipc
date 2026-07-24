@@ -1,5 +1,9 @@
 // Nervus IPC v1 —— 通用 Method Registry 机制  [REWRITE-v1 / experimental]
 //
+// [KERNEL: NOT WIRED] nervud 尚未从 descriptor 抽取 Method Registry——方法级
+// 权限判定还没接（internal/endpoint 目前只做到 interface 粒度，见其 catalog.go）。
+// 抽取代码本身已在 go/registry.ExtractMethodMetas 并有测试，缺的是内核侧接线。
+//
 // 本文件定义一套【与具体接口无关】的机制：把每个 method 的元数据
 // （权限 / 风险级 / 是否需 ControlLease / 是否 operation / 是否需用户确认 /
 // 请求响应消息类型）用 protobuf【自定义 option】挂在该接口的 method_id

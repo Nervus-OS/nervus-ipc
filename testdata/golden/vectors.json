@@ -1,0 +1,98 @@
+[
+  {
+    "name": "response_success_ok",
+    "kind": "envelope",
+    "file": "response_success_ok.binpb",
+    "doc": "Response 成功，code=OK，payload 非空"
+  },
+  {
+    "name": "response_failure_permission_denied",
+    "kind": "envelope",
+    "file": "response_failure_permission_denied.binpb",
+    "doc": "Response 失败，code=PERMISSION_DENIED，带 public_message"
+  },
+  {
+    "name": "response_failure_unavailable",
+    "kind": "envelope",
+    "file": "response_failure_unavailable.binpb",
+    "doc": "Response 失败，code=UNAVAILABLE，无 detail（断线/重启类）"
+  },
+  {
+    "name": "resolve_failure_interface_not_found",
+    "kind": "envelope",
+    "file": "resolve_failure_interface_not_found.binpb",
+    "doc": "ResolveEndpointResult 失败，NOT_FOUND + reason=INTERFACE_NOT_FOUND"
+  },
+  {
+    "name": "resolve_failure_version_mismatch",
+    "kind": "envelope",
+    "file": "resolve_failure_version_mismatch.binpb",
+    "doc": "ResolveEndpointResult 失败，FAILED_PRECONDITION + reason=VERSION_MISMATCH"
+  },
+  {
+    "name": "resolve_failure_unknown_reason",
+    "kind": "envelope",
+    "file": "resolve_failure_unknown_reason.binpb",
+    "doc": "error_detail 里 reason=99（未知），外层 NOT_FOUND 不变；旧 SDK 须保留通用 code"
+  },
+  {
+    "name": "failure_malformed_detail_internal",
+    "kind": "envelope",
+    "file": "failure_malformed_detail_internal.binpb",
+    "doc": "Response 失败，INTERNAL，error_detail 为无法解析的垃圾字节（nervud 归一化结果）"
+  },
+  {
+    "name": "acquire_control_human_base",
+    "kind": "envelope",
+    "file": "acquire_control_human_base.binpb",
+    "doc": "AcquireControl：HUMAN 申请 base.main，期望时效 500ms"
+  },
+  {
+    "name": "acquire_control_ai_arm",
+    "kind": "envelope",
+    "file": "acquire_control_ai_arm.binpb",
+    "doc": "AcquireControl：AI 申请 arm.main，期望时效 1s"
+  },
+  {
+    "name": "acquire_control_result_success",
+    "kind": "envelope",
+    "file": "acquire_control_result_success.binpb",
+    "doc": "AcquireControlResult 成功：lease_id/motion_epoch/deadline/resource_handle"
+  },
+  {
+    "name": "acquire_control_result_held_by_human",
+    "kind": "envelope",
+    "file": "acquire_control_result_held_by_human.binpb",
+    "doc": "AcquireControlResult 失败：FAILED_PRECONDITION + reason=HELD_BY_HUMAN（可区分原因）"
+  },
+  {
+    "name": "acquire_control_result_unknown_reason",
+    "kind": "envelope",
+    "file": "acquire_control_result_unknown_reason.binpb",
+    "doc": "AcquireControlResult 失败：control-lease reason=99（未知），外层 FAILED_PRECONDITION 不变"
+  },
+  {
+    "name": "release_control",
+    "kind": "envelope",
+    "file": "release_control.binpb",
+    "doc": "ReleaseControl：释放本连接持有的 lease"
+  },
+  {
+    "name": "release_control_result_success",
+    "kind": "envelope",
+    "file": "release_control_result_success.binpb",
+    "doc": "ReleaseControlResult 成功，code=OK"
+  },
+  {
+    "name": "interface_schema_bundle",
+    "kind": "interface_schema_bundle",
+    "file": "interface_schema_bundle.binpb",
+    "doc": "单个 OEM 私有接口的 InterfaceSchemaBundle（interface_id/version/schema_hash/fds）"
+  },
+  {
+    "name": "interface_schema_bundle_set",
+    "kind": "interface_schema_bundle_set",
+    "file": "interface_schema_bundle_set.binpb",
+    "doc": "一个 .nspkg 携带的多接口 bundle 集合"
+  }
+]

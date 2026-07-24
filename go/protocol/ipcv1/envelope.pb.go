@@ -937,11 +937,17 @@ type Envelope_Response struct {
 }
 
 type Envelope_Cancel struct {
+	// [KERNEL: NOT IMPLEMENTED] nervud 收到即关闭连接并审计为 UnsupportedBody。
+	// SDK 不得发送。实现状态见 README「实现状态」表。
 	Cancel *Cancel `protobuf:"bytes,32,opt,name=cancel,proto3,oneof"`
 }
 
 type Envelope_Subscribe struct {
 	// --- 订阅与事件 ---
+	// [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
+	// Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
+	// SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
+	// SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
 	Subscribe *Subscribe `protobuf:"bytes,40,opt,name=subscribe,proto3,oneof"`
 }
 
@@ -977,6 +983,8 @@ type Envelope_DispatchResult struct {
 
 type Envelope_CancelDispatch struct {
 	// 52 是本文件的扩展：没有它，被取消的调用会让 Service 一直算到自己超时。
+	// [KERNEL: NOT IMPLEMENTED] nervud 目前不会发出 CancelDispatch（上游的
+	// Cancel(32) 尚未实现，没有触发源）。ServiceHost 可以先不处理它。
 	CancelDispatch *CancelDispatch `protobuf:"bytes,52,opt,name=cancel_dispatch,json=cancelDispatch,proto3,oneof"`
 }
 
@@ -995,6 +1003,14 @@ type Envelope_AcquireControl struct {
 	// App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
 	// 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
 	// 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+	//
+	// [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
+	// 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
+	// wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
+	//
+	// 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
+	// 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
+	// Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
 	AcquireControl *AcquireControl `protobuf:"bytes,70,opt,name=acquire_control,json=acquireControl,proto3,oneof"`
 }
 

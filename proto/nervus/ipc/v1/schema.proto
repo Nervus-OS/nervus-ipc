@@ -1,5 +1,8 @@
 // Nervus IPC v1 —— Interface schema bundle 分发  [REWRITE-v1 / experimental]
 //
+// [KERNEL: NOT WIRED] nervud 尚无消费路径：装包期的 schema bundle 验证与
+// RobotCatalog 投影都还没落地。本文件目前只冻结形状。
+//
 // 本文件定义 OEM / 第三方 Interface 的【类型信息如何随 .nspkg 分发、被 nervud
 // 在安装时验证、再供 SDK / Agent 解码】的 wire 结构（NRCP §8.4）。
 //

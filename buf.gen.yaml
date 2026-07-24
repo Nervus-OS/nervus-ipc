@@ -42,38 +42,29 @@ plugins:
 
   # --- JVM -----------------------------------------------------------------
   #
-  # java 与 kotlin 是 protoc 的【内置】生成器（protoc_builtin），不是独立插件，
-  # 因此这两项要求 PATH 上有 protoc 本体；Go 那侧只要 protoc-gen-go 即可。
+  # java 是 protoc 的【内置】生成器（protoc_builtin），不是独立插件，因此要求
+  # PATH 上有 protoc 本体；Go 那侧只要 protoc-gen-go 即可。
   #
-  # 两个都要：protobuf-kotlin 生成的是 DSL builder，它【建立在】protobuf-java
-  # 生成的消息类之上，不是替代品。只生成 kotlin 会编译不过。
+  # 【只生成 java，不生成 kotlin】。protobuf-kotlin 产出的是 DSL builder，建立在
+  # protobuf-java 的消息类之上、是可选糖而非替代品——而 nervus-app-sdk 全程用
+  # Java 的 .newBuilder()，jvm 侧的 golden vectors 测试同样（50 处 newBuilder，
+  # 零处 DSL）。既然一处都没用到，多生成的 90 个 .kt 就是纯噪音：它们要进 git、
+  # 要过评审、要参与编译，却没有任何消费者。
   #
-  # 落盘位置遵循 Gradle 约定的 src/main/{java,kotlin}，具体包路径由 .proto 的
+  # 若将来确实要用 DSL，把 kotlin 生成器加回来即可（它不改变 wire，也不影响
+  # 已生成的 Java 类型）。
+  #
+  # 落盘位置遵循 Gradle 约定的 src/main/java，具体包路径由 .proto 的
   # java_package + java_multiple_files 决定。
   - protoc_builtin: java
     out: jvm/protocol/src/main/java
-  - protoc_builtin: kotlin
-    out: jvm/protocol/src/main/kotlin
 
-  # --- Python --------------------------------------------------------------
+  # --- 已移除：Python ---------------------------------------------------------
   #
-  # python 与 pyi 同为 protoc 的【内置】生成器（protoc_builtin），同样要求 PATH
-  # 上有 protoc 本体（与 java/kotlin 一致；Go 那侧只要 protoc-gen-go）。
+  # 曾经生成 python/protocol 并配套一份手写 python/sdk，理由是「C 组（ROS
+  # adapter / 感知 / Agent）用 Python」。该语言决策已作废：系统服务用 Go。
   #
-  # 为什么 C 组（ROS provider / 感知 / Agent，语言决策 2026-07-24）用 Python：
-  # adapter 是桥接层非控制环，runtime 效率无所谓；硬实时在 ROS/MCU。Python SDK
-  # 从这里生成的类型【复用】编解码 Envelope，绝不手搓信封（红线 #3，同 Kotlin）。
-  #
-  # 落盘 python/protocol：与 go/protocol、jvm/protocol 并列，只装生成物——
-  # 【clean 会整目录删】，故手写 SDK 放在 python/sdk（另一顶层目录）而非这里。
-  # protoc 的 python_out 按 .proto 的包路径落盘：
-  #   proto/nervus/ipc/v1/envelope.proto ⇒ python/protocol/nervus/ipc/v1/envelope_pb2.py
-  # 生成物用 PEP 420 命名空间包（无 __init__.py），消费方把 python/protocol 置于
-  # 源根（sys.path）即可 `from nervus.ipc.v1 import envelope_pb2`。
-  #
-  # 两个都要：pyi 生成 .pyi 类型存根，让 SDK/Provider 在编辑器里对生成类型有
-  # 补全与类型检查；python 生成运行时 _pb2.py 本体。
-  - protoc_builtin: python
-    out: python/protocol
-  - protoc_builtin: pyi
-    out: python/protocol
+  # 移除的不只是生成器，还有整个 python/ 目录（生成物 + 手写 SDK + 测试）。
+  # 留着的代价不是磁盘，是「三份 SDK 各自实现同一套分帧握手」的漂移面，以及
+  # 每次改 schema 都要多维护一侧 golden vectors。要恢复的话把两个
+  # protoc_builtin（python + pyi）加回来重跑即可，生成物是纯派生的。
