@@ -1,0 +1,40 @@
+# OEM 私有 Provider Descriptor 样例（A4 §5，可拓展验收）
+#
+# 虚构 OEM「Acme」的机械狗包。它声明了：
+#   - 一个**非标准**私有接口 com.acme.dog.interface.raw_gait@1
+#   - 一个绑定自身签名的**自定义权限** com.acme.dog.permission.raw_gait
+#   - 一个私有资源类型 com.acme.dog.resource.gait_engine
+# 全部落在 com.acme.dog.* 命名空间下（红线 #3：命名空间隔离 + Custom Permission
+# 绑定签名）。装上这个签名包后，App 可 Resolve/调用 raw_gait，**nervud 一行不改**。
+#
+# 文本格式对应 nervus.ipc.v1.ProviderDescriptor。
+
+package_id: "com.acme.dog"
+
+interfaces {
+  interface_id: "com.acme.dog.interface.raw_gait"
+  versions: 1
+  schema_hash: "\xAA\xBB\xCC\xDD"
+  # 指向下面 permissions 里定义的 OEM 自定义权限，绑定 Acme 签名身份。
+  required_permission: "com.acme.dog.permission.raw_gait"
+  resource_risk_floor: RISK_CLASS_PHYSICAL_CONTROL
+}
+
+resources {
+  stable_role: "gait.main"
+  resource_type: "com.acme.dog.resource.gait_engine"
+  access_mode: RESOURCE_ACCESS_MODE_EXCLUSIVE_CONTROL
+  risk_class: RISK_CLASS_PHYSICAL_CONTROL
+}
+
+permissions {
+  id: "com.acme.dog.permission.raw_gait"
+  # 物理危险 → 需用户显式同意；OEM 不能把它调成 NORMAL 静默授予（nervud 校验）。
+  grant_mode: GRANT_MODE_USER_CONSENT
+  risk_class: RISK_CLASS_PHYSICAL_CONTROL
+  display_name { zh_cn: "原始步态控制" en: "Raw gait control" }
+  description {
+    zh_cn: "允许直接下发底层步态相位参数，绕过标准速度抽象。"
+    en: "Allows sending low-level gait phase parameters directly, bypassing the standard velocity abstraction."
+  }
+}

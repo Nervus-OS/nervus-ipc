@@ -1,0 +1,164 @@
+// Nervus 标准接口 · BaseMotion@1  [REWRITE-v1 / experimental]
+//
+// interface_id = nervus.interface.motion.base ，major = 1，experimental。
+//   Feature     = nervus.feature.motion.base
+//   Permission  = nervus.permission.motion.control
+//   Resource    = nervus.resource.motion.base （role 如 main）
+//
+// 机械狗走这个标准接口：机体速度 → 步态（NRCP §17.2），26 号 demo 的移动主线。
+//
+// 归属说明：本文件是 A2（BaseMotion proto）的落地，与 A3 一起落库是因为 A3 要求
+//   「A2 也回填这套 Method Registry option」——机制以 A3 的 method_registry.proto
+//   为准，本文件的 BaseMotionMethod 枚举即回填结果。
+//
+// 语义边界（NRCP §17.2，务必读原文）：
+//   - SetVelocity 是机体坐标系下的【短时速度目标层】，不是「自行准备并开始移动」
+//     的高层意图；【不隐式执行】站立等长姿态转换。
+//   - 站立/起身/坐下属独立 Posture 接口/Operation（不在本接口）。
+//   - 差速车可不支持 linear_y，但必须在 MotionState.supports_linear_y 明确报告。
+//   - 腿式 Provider 前提不满足（坐下/姿态转换中）时返回 FAILED_PRECONDITION +
+//     BaseMotionReason.LOCOMOTION_NOT_READY，不得把耗时站立塞进 SetVelocity。
+//   - Stop() 是普通受控停止，【不替代】SafetyHalt（SafetyHalt 不受 App Permission
+//     控制，不在本接口）。
+//
+// 单位与坐标系：linear = m/s，angular = rad/s，均为【机体坐标系】。
+//   linear_x 机体前向为正；linear_y 机体左向为正；angular_z 逆时针为正。
+//
+// [REWRITE-v1] experimental：v2 前允许破坏性调整；正式冻结后遵循 §10.12。
+
+syntax = "proto3";
+
+package nervus.interface.basemotion.v1;
+
+import "nervus/ipc/v1/method_registry.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/interface/basemotionv1;basemotionv1";
+
+// Java 包名不能含连字符，也不能用保留字 "interface" —— 用 "iface" 段（见
+// manipulator.proto 同款说明）。
+option java_package = "io.github.nervusos.iface.basemotion.v1";
+option java_multiple_files = true;
+option java_outer_classname = "BaseMotionProto";
+
+// =============================================================================
+// method_id 枚举 + Method Registry 元数据
+// =============================================================================
+
+// BaseMotionMethod 的每个枚举值就是 wire method_id。逐值挂
+// (nervus.ipc.v1.method_meta)，与 Manipulator 共用同一套机制。
+enum BaseMotionMethod {
+  BASE_MOTION_METHOD_UNSPECIFIED = 0;
+
+  // 机体速度目标（短命令，非 operation）。驱动执行器 → 需 lease。
+  // 成功以 ACCEPTED 空 success 应答（已可靠接收，非最终停稳）。
+  BASE_MOTION_METHOD_SET_VELOCITY = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    required_permission: "nervus.permission.motion.control"
+    risk_class: RISK_CLASS_PHYSICAL_CONTROL
+    requires_control_lease: true
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.basemotion.v1.SetVelocityRequest"
+    response_type: ""
+  }];
+
+  // 普通受控停止（非 SafetyHalt）。需 lease，短命令。
+  BASE_MOTION_METHOD_STOP = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    required_permission: "nervus.permission.motion.control"
+    risk_class: RISK_CLASS_PHYSICAL_CONTROL
+    requires_control_lease: true
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.basemotion.v1.StopRequest"
+    response_type: ""
+  }];
+
+  // 只读运动状态。
+  BASE_MOTION_METHOD_GET_MOTION_STATE = 3 [(nervus.ipc.v1.method_meta) = {
+    method_id: 3
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.basemotion.v1.GetMotionStateRequest"
+    response_type: "nervus.interface.basemotion.v1.MotionState"
+  }];
+
+  // 运动状态事件流（订阅）。
+  BASE_MOTION_METHOD_SUBSCRIBE_MOTION_STATE = 4 [(nervus.ipc.v1.method_meta) = {
+    method_id: 4
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.basemotion.v1.SubscribeMotionStateRequest"
+    response_type: "nervus.interface.basemotion.v1.MotionState"
+  }];
+}
+
+// =============================================================================
+// 消息
+// =============================================================================
+
+// SetVelocityRequest —— 机体坐标系速度目标。sequence/deadline/epoch 等可信字段
+// 由 nervud 的 ExecutionContext 附加，App【不填】（NRCP §10.3）。
+message SetVelocityRequest {
+  double linear_x = 1;   // m/s，机体前向为正
+  double linear_y = 2;   // m/s，机体左向为正（差速车不支持则忽略并在 state 报告）
+  double angular_z = 3;  // rad/s，逆时针为正
+}
+
+message StopRequest {}
+message GetMotionStateRequest {}
+message SubscribeMotionStateRequest {}
+
+// Readiness —— 运动就绪态。*_UNSPECIFIED=0 fail closed。
+enum Readiness {
+  READINESS_UNSPECIFIED = 0;
+  READINESS_READY = 1;
+  READINESS_NOT_READY = 2;
+  READINESS_TRANSITIONING = 3;
+  READINESS_FAULT = 4;
+}
+
+// VelocityLimits —— 速度上限（供 SDK/UI 约束输入）。
+message VelocityLimits {
+  double max_linear = 1;   // m/s
+  double max_angular = 2;  // rad/s
+}
+
+// MotionState —— GetMotionState / SubscribeMotionState 的状态载荷（§17.2 最小集）。
+message MotionState {
+  Readiness readiness = 1;
+  bool supports_linear_x = 2;
+  bool supports_linear_y = 3;   // 差速车在此报告 false
+  bool supports_angular_z = 4;
+  VelocityLimits velocity_limits = 5;
+  uint64 active_motion_epoch = 6;
+}
+
+// =============================================================================
+// 错误 detail（NRCP §19「位置 B」）
+// =============================================================================
+
+// BaseMotionReason —— BaseMotion 失败的 typed error_detail reason。
+//
+// 注意：safety.proto 里另有一个 BASE_MOTION_ERROR_REASON_* 占位枚举（A1 落的
+// 临时占位）。本接口正式落地后，BaseMotion 的 reason 以本文件为准；safety.proto
+// 的占位按兼容规则另行迁移，不在本 WP 改动它（避免打断 A1 已提交产物）。
+//
+// 业务失败一律走 Failure outcome，不藏进 Success payload。所有值 *_UNSPECIFIED=0。
+enum BaseMotionReason {
+  BASE_MOTION_REASON_UNSPECIFIED = 0;
+  BASE_MOTION_REASON_LOCOMOTION_NOT_READY = 1;
+  BASE_MOTION_REASON_SAFETY_LATCHED = 2;
+  BASE_MOTION_REASON_STALE_EPOCH = 3;
+  BASE_MOTION_REASON_CONTROL_NOT_HELD = 4;
+  BASE_MOTION_REASON_RESOURCE_UNAVAILABLE = 5;
+  BASE_MOTION_REASON_RESOURCE_FAULT = 6;
+}
+
+message BaseMotionErrorDetail {
+  BaseMotionReason reason = 1;
+}

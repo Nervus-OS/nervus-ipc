@@ -772,6 +772,126 @@ public object EnvelopeKt {
     public fun hasPong(): kotlin.Boolean {
       return _builder.hasPong()
     }
+
+    /**
+     * ```
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * ```
+     *
+     * `.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];`
+     */
+    public var acquireControl: io.github.nervusos.ipc.v1.AcquireControl
+      @JvmName("getAcquireControl")
+      get() = _builder.acquireControl
+      @JvmName("setAcquireControl")
+      set(value) {
+        _builder.acquireControl = value
+      }
+    /**
+     * ```
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * ```
+     *
+     * `.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];`
+     */
+    public fun clearAcquireControl() {
+      _builder.clearAcquireControl()
+    }
+    /**
+     * ```
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * ```
+     *
+     * `.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];`
+     * @return Whether the acquireControl field is set.
+     */
+    public fun hasAcquireControl(): kotlin.Boolean {
+      return _builder.hasAcquireControl()
+    }
+
+    /**
+     * `.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];`
+     */
+    public var acquireControlResult: io.github.nervusos.ipc.v1.AcquireControlResult
+      @JvmName("getAcquireControlResult")
+      get() = _builder.acquireControlResult
+      @JvmName("setAcquireControlResult")
+      set(value) {
+        _builder.acquireControlResult = value
+      }
+    /**
+     * `.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];`
+     */
+    public fun clearAcquireControlResult() {
+      _builder.clearAcquireControlResult()
+    }
+    /**
+     * `.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];`
+     * @return Whether the acquireControlResult field is set.
+     */
+    public fun hasAcquireControlResult(): kotlin.Boolean {
+      return _builder.hasAcquireControlResult()
+    }
+
+    /**
+     * `.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];`
+     */
+    public var releaseControl: io.github.nervusos.ipc.v1.ReleaseControl
+      @JvmName("getReleaseControl")
+      get() = _builder.releaseControl
+      @JvmName("setReleaseControl")
+      set(value) {
+        _builder.releaseControl = value
+      }
+    /**
+     * `.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];`
+     */
+    public fun clearReleaseControl() {
+      _builder.clearReleaseControl()
+    }
+    /**
+     * `.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];`
+     * @return Whether the releaseControl field is set.
+     */
+    public fun hasReleaseControl(): kotlin.Boolean {
+      return _builder.hasReleaseControl()
+    }
+
+    /**
+     * `.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];`
+     */
+    public var releaseControlResult: io.github.nervusos.ipc.v1.ReleaseControlResult
+      @JvmName("getReleaseControlResult")
+      get() = _builder.releaseControlResult
+      @JvmName("setReleaseControlResult")
+      set(value) {
+        _builder.releaseControlResult = value
+      }
+    /**
+     * `.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];`
+     */
+    public fun clearReleaseControlResult() {
+      _builder.clearReleaseControlResult()
+    }
+    /**
+     * `.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];`
+     * @return Whether the releaseControlResult field is set.
+     */
+    public fun hasReleaseControlResult(): kotlin.Boolean {
+      return _builder.hasReleaseControlResult()
+    }
     public val bodyCase: io.github.nervusos.ipc.v1.Envelope.BodyCase
     @kotlin.jvm.JvmName("getBodyCase")
       get() = _builder.getBodyCase()
@@ -856,4 +976,16 @@ public val io.github.nervusos.ipc.v1.EnvelopeOrBuilder.pingOrNull: io.github.ner
 
 public val io.github.nervusos.ipc.v1.EnvelopeOrBuilder.pongOrNull: io.github.nervusos.ipc.v1.Pong?
   get() = if (hasPong()) getPong() else null
+
+public val io.github.nervusos.ipc.v1.EnvelopeOrBuilder.acquireControlOrNull: io.github.nervusos.ipc.v1.AcquireControl?
+  get() = if (hasAcquireControl()) getAcquireControl() else null
+
+public val io.github.nervusos.ipc.v1.EnvelopeOrBuilder.acquireControlResultOrNull: io.github.nervusos.ipc.v1.AcquireControlResult?
+  get() = if (hasAcquireControlResult()) getAcquireControlResult() else null
+
+public val io.github.nervusos.ipc.v1.EnvelopeOrBuilder.releaseControlOrNull: io.github.nervusos.ipc.v1.ReleaseControl?
+  get() = if (hasReleaseControl()) getReleaseControl() else null
+
+public val io.github.nervusos.ipc.v1.EnvelopeOrBuilder.releaseControlResultOrNull: io.github.nervusos.ipc.v1.ReleaseControlResult?
+  get() = if (hasReleaseControlResult()) getReleaseControlResult() else null
 

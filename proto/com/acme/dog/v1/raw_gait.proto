@@ -1,0 +1,119 @@
+// OEM 私有接口样例：com.acme.dog.interface.raw_gait@1  [REWRITE-v1 / experimental]
+//
+// 这是 WP-A4 的**可拓展验收样例**（A4 §5）。它存在的唯一目的是证明一件事：
+//
+//	一家 OEM（虚构的 Acme）想给自己的机械狗加一个**标准接口里没有的**私有接口
+//	——直接下发步态相位参数的 raw_gait——只需要：
+//	  ① 在自己的命名空间 com.acme.* 写这一个 .proto，
+//	  ② 用 nervus 冻结的 Method Registry 机制（method_registry.proto）挂 method_meta，
+//	  ③ 在 Provider Descriptor 里声明这个接口 + 它的自定义权限。
+//	**nervud 一行 Go 都不用改**，装上这个签名包后 App 就能 Resolve/调用它。
+//	这就是 `00` 第 3 节「加接口不改内核」的活证据。
+//
+// 注意本文件**不在** nervus.* 命名空间：它是 OEM 私有的，proto package、接口 ID、
+// 自定义权限 ID、资源类型全部落在 com.acme.dog.* 下（`00` 红线：命名空间隔离，
+// Custom Permission 绑定签名）。它**只** import nervus 的通用机制文件，不反向
+// 依赖任何 nervus 接口——机制是共享的，语义是私有的。
+//
+// [REWRITE-v1] experimental：字段/method_id 冻结前可破坏性调整。
+
+syntax = "proto3";
+
+// OEM 私有命名空间。与标准接口 nervus.* 完全隔离。
+package com.acme.dog.v1;
+
+// 复用 nervus 冻结的通用机制：RiskClass 枚举 + method_meta option。
+// OEM 不重新发明这套机制，只使用它——这正是「机制在内核/协议，语义在包」。
+import "nervus/ipc/v1/method_registry.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/oem/acme/dog/v1;dogv1";
+
+option java_package = "com.acme.dog.v1";
+option java_multiple_files = true;
+option java_outer_classname = "RawGaitProto";
+
+// =============================================================================
+// method_id 枚举 + method_meta（数据驱动的核心：元数据长在 proto 里）
+// =============================================================================
+
+// RawGaitMethod 是 raw_gait 接口的方法目录。每个枚举值挂 (nervus.ipc.v1.method_meta)。
+// nervud/SDK/Agent 从生成的 EnumValueOptions 抽取这些 MethodMeta，得到该 OEM 接口
+// 的 method 级权限/风险/确认要求——**抽取逻辑与标准接口完全一样，内核不认得
+// "acme" 这个名字**。约定：枚举值编号 == method_id。
+enum RawGaitMethod {
+  RAW_GAIT_METHOD_UNSPECIFIED = 0;
+
+  // 只读：读取当前步态相位与支持的步态集合。无副作用、无需 lease、无需确认。
+  RAW_GAIT_METHOD_GET_GAIT_STATE = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    is_read_only: true
+    is_motion: false
+    request_type: "com.acme.dog.v1.GetGaitStateRequest"
+    response_type: "com.acme.dog.v1.GaitState"
+  }];
+
+  // 物理控制：直接下发原始步态相位参数（越过标准 BaseMotion 的速度抽象）。
+  // 这是危险动作：驱动执行器、需 OEM 自定义权限、需持 lease、Agent 调用需系统确认框。
+  // required_permission 指向本包命名空间下的自定义权限（在 Descriptor 里定义并绑签名）。
+  RAW_GAIT_METHOD_SET_RAW_GAIT = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    required_permission: "com.acme.dog.permission.raw_gait"
+    risk_class: RISK_CLASS_PHYSICAL_CONTROL
+    requires_control_lease: true
+    returns_operation: false
+    needs_user_confirmation: true
+    is_read_only: false
+    is_motion: true
+    request_type: "com.acme.dog.v1.SetRawGaitRequest"
+    response_type: "com.acme.dog.v1.SetRawGaitResponse"
+  }];
+}
+
+// =============================================================================
+// 消息（单位/坐标系写进注释，NRCP §17.1）
+// =============================================================================
+
+// 支持的步态类型（OEM 私有语义，标准接口里不存在）。
+enum GaitType {
+  GAIT_TYPE_UNSPECIFIED = 0;
+  GAIT_TYPE_TROT = 1;   // 对角小跑
+  GAIT_TYPE_WALK = 2;   // 慢走
+  GAIT_TYPE_BOUND = 3;  // 前后腿同步跳跃
+}
+
+message GetGaitStateRequest {}
+
+message GaitState {
+  GaitType active_gait = 1;
+  double phase = 2;                     // 当前相位，弧度 rad，[0, 2π)
+  repeated GaitType supported_gaits = 3;
+}
+
+// 原始步态下发：绕过标准速度抽象，直接给相位偏置与步频。这类"裸控制"正是
+// OEM 才会暴露、标准接口刻意不提供的东西——样例的意义就在于它非标。
+message SetRawGaitRequest {
+  GaitType gait = 1;
+  double stride_frequency_hz = 2;       // 步频，Hz
+  double phase_offset_rad = 3;          // 相位偏置，rad
+  // sequence/deadline/epoch 由 nervud ExecutionContext 附加，App 不填（NRCP §10.3）。
+}
+
+message SetRawGaitResponse {}
+
+// 错误 detail（NRCP §19，位置 B）。OEM 私有细因走自己的 typed detail，
+// 不污染通用 StatusCode。
+enum RawGaitReason {
+  RAW_GAIT_REASON_UNSPECIFIED = 0;
+  RAW_GAIT_REASON_SAFETY_LATCHED = 1;
+  RAW_GAIT_REASON_CONTROL_NOT_HELD = 2;
+  RAW_GAIT_REASON_UNSUPPORTED_GAIT = 3;
+  RAW_GAIT_REASON_PHASE_OUT_OF_RANGE = 4;
+}
+
+message RawGaitErrorDetail {
+  RawGaitReason reason = 1;
+}

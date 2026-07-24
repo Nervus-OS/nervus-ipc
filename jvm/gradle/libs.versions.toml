@@ -21,10 +21,19 @@ protobuf = "4.29.3"
 # provision 一个 17 工具链，保证换机器构建结果不变。
 jvmTarget = "17"
 
+# JUnit 5（Jupiter）—— 仅用于 protocol 模块的 golden vectors 测试。
+# 通过 BOM 统一版本，测试运行时由 junit-platform-launcher 提供。
+junit = "5.11.3"
+
 [libraries]
 protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
 # protobuf-kotlin 是 DSL builder，【建立在】protobuf-java 之上而非替代它，两个都要。
 protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf" }
+
+# JUnit 5：BOM 对齐 jupiter 各构件版本；launcher 供测试运行时发现引擎。
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

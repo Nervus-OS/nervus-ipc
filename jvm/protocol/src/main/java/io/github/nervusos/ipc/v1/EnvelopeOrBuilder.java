@@ -500,5 +500,89 @@ public interface EnvelopeOrBuilder extends
    */
   io.github.nervusos.ipc.v1.PongOrBuilder getPongOrBuilder();
 
+  /**
+   * <pre>
+   * --- 控制租约（ControlLease，§10.2）---
+   * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+   * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+   * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+   * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+   * @return Whether the acquireControl field is set.
+   */
+  boolean hasAcquireControl();
+  /**
+   * <pre>
+   * --- 控制租约（ControlLease，§10.2）---
+   * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+   * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+   * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+   * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+   * @return The acquireControl.
+   */
+  io.github.nervusos.ipc.v1.AcquireControl getAcquireControl();
+  /**
+   * <pre>
+   * --- 控制租约（ControlLease，§10.2）---
+   * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+   * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+   * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+   * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+   */
+  io.github.nervusos.ipc.v1.AcquireControlOrBuilder getAcquireControlOrBuilder();
+
+  /**
+   * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+   * @return Whether the acquireControlResult field is set.
+   */
+  boolean hasAcquireControlResult();
+  /**
+   * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+   * @return The acquireControlResult.
+   */
+  io.github.nervusos.ipc.v1.AcquireControlResult getAcquireControlResult();
+  /**
+   * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+   */
+  io.github.nervusos.ipc.v1.AcquireControlResultOrBuilder getAcquireControlResultOrBuilder();
+
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+   * @return Whether the releaseControl field is set.
+   */
+  boolean hasReleaseControl();
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+   * @return The releaseControl.
+   */
+  io.github.nervusos.ipc.v1.ReleaseControl getReleaseControl();
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+   */
+  io.github.nervusos.ipc.v1.ReleaseControlOrBuilder getReleaseControlOrBuilder();
+
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+   * @return Whether the releaseControlResult field is set.
+   */
+  boolean hasReleaseControlResult();
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+   * @return The releaseControlResult.
+   */
+  io.github.nervusos.ipc.v1.ReleaseControlResult getReleaseControlResult();
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+   */
+  io.github.nervusos.ipc.v1.ReleaseControlResultOrBuilder getReleaseControlResultOrBuilder();
+
   io.github.nervusos.ipc.v1.Envelope.BodyCase getBodyCase();
 }

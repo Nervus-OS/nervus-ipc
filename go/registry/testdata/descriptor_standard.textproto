@@ -1,0 +1,41 @@
+# 标准 Provider Descriptor 样例（平台镜像内置，A4 §2）
+#
+# 这份声明由平台镜像随标准 Provider 分发，喂给 nervud 的接口→权限/风险/资源
+# 就来自这里，而不是 endpoint.DefaultInterfaceCatalog() 的硬编码 Go 常量表。
+# 标准接口的 required_permission 指向平台内置权限（nervus.permission.*），
+# permissions 为空（不需要自定义权限）。
+#
+# 文本格式对应 nervus.ipc.v1.ProviderDescriptor。schema_hash 此处用占位字节，
+# 真实值由 A5 的 descriptor bundle 计算并与 RegisterEndpoint / RobotCatalog 对齐。
+
+package_id: "nervus.platform.motion"
+
+interfaces {
+  interface_id: "nervus.interface.motion.base"
+  versions: 1
+  schema_hash: "\x00\x01\x02\x03"
+  required_permission: "nervus.permission.motion.control"
+  resource_risk_floor: RISK_CLASS_PHYSICAL_CONTROL
+}
+
+interfaces {
+  interface_id: "nervus.interface.manipulator.arm"
+  versions: 1
+  schema_hash: "\x04\x05\x06\x07"
+  required_permission: "nervus.permission.manipulator.control"
+  resource_risk_floor: RISK_CLASS_PHYSICAL_CONTROL
+}
+
+resources {
+  stable_role: "base.main"
+  resource_type: "nervus.resource.motion.base"
+  access_mode: RESOURCE_ACCESS_MODE_EXCLUSIVE_CONTROL
+  risk_class: RISK_CLASS_PHYSICAL_CONTROL
+}
+
+resources {
+  stable_role: "arm.main"
+  resource_type: "nervus.resource.manipulator.arm"
+  access_mode: RESOURCE_ACCESS_MODE_EXCLUSIVE_CONTROL
+  risk_class: RISK_CLASS_PHYSICAL_CONTROL
+}

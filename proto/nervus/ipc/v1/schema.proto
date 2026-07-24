@@ -1,0 +1,80 @@
+// Nervus IPC v1 —— Interface schema bundle 分发  [REWRITE-v1 / experimental]
+//
+// 本文件定义 OEM / 第三方 Interface 的【类型信息如何随 .nspkg 分发、被 nervud
+// 在安装时验证、再供 SDK / Agent 解码】的 wire 结构（NRCP §8.4）。
+//
+// 为什么必须有它：可拓展第一原则要求"不改内核就能加接口"（总协调 §3）。一个
+// OEM 私有接口的消息类型不在任何一方的编译期已知集合里——SDK / Agent 想解码它的
+// Request/Response/error_detail，只能拿到该接口的 Protobuf 描述符。本文件就是这份
+// 描述符的分发信封。
+//
+// 铁律（NRCP §8.4）：
+//   - 只用【安装时已验证、hash 匹配】的 bundle。禁止运行期从 Provider 下载任意
+//     schema 直接喂模型 / SDK——那等于让被 prompt injection 攻破的 Provider 选择
+//     解析器（对照 status.proto：不接受发送方自报 type URL 是同一条原则）。
+//   - RobotCatalog / ResolveEndpoint 投影里带 interface_id / version / schema_hash；
+//     三者与本 bundle 一致才允许调用。schema_hash 是唯一的绑定锚点。
+//
+// 本文件【不】进入 Envelope oneof：schema bundle 不是控制面 Frame，而是随包携带、
+// 安装期消费的元数据。它不占用任何 Envelope body 号。
+//
+// [REWRITE-v1] experimental：冻结前允许破坏性调整（NRCP §22.6）。
+// 兼容规则（§10.12，冻结后生效）：已发布字段号永不复用；删除写 reserved；
+// 新增字段须有安全默认；所有枚举以 *_UNSPECIFIED = 0 起始并 fail closed。
+
+syntax = "proto3";
+
+package nervus.ipc.v1;
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+
+// 连字符在 Java 包名里非法，理由见 status.proto。
+option java_package = "io.github.nervusos.ipc.v1";
+option java_multiple_files = true;
+option java_outer_classname = "SchemaProto";
+
+// =============================================================================
+// InterfaceSchemaBundle
+// =============================================================================
+
+// InterfaceSchemaBundle 是【单个】Interface 的类型信息包。
+//
+// 它携带一份自包含的 FileDescriptorSet（含该接口 Request/Response/event/
+// error_detail 消息的完整描述符及其传递依赖），加上把它钉死到目录投影的
+// interface_id / version / schema_hash 三元组。
+message InterfaceSchemaBundle {
+  // 逻辑接口 ID，如 "nervus.interface.motion.base" 或 OEM 私有的
+  // "com.acme.interface.gripper"。与 ResolveEndpoint.interface_id 同一命名空间。
+  string interface_id = 1;
+
+  // 接口 major 版本。与 ResolveEndpointSuccess.interface_major 对齐。
+  // 用 major 而非 major.minor：minor 只增不减、向后兼容，同一 bundle 覆盖
+  // 一个 major 下的全部 minor；跨 major 是不同 bundle。
+  uint32 version = 2;
+
+  // 本 bundle 内容的确定性标识（对 file_descriptor_set 的规范化哈希）。
+  //
+  // 这是唯一的绑定锚点：安装时 nervud 计算并登记它；RobotCatalog /
+  // ResolveEndpoint 投影回显它；SDK 校验本地解码用的 bundle 与投影一致。
+  // 不一致即 schema 漂移，必须在第一次调用前暴露，而不是让某个字段被静默丢弃。
+  // 具体哈希算法由 nervud 实现约定（不在 wire 上自述，避免"选择校验器"攻击）。
+  bytes schema_hash = 3;
+
+  // 序列化后的 google.protobuf.FileDescriptorSet。
+  //
+  // 【刻意用 bytes 而非直接 import descriptor.proto 的类型】：本仓库要在三种语言
+  // 里生成，且 bundle 常常只是被存储 / 转发 / 计算 hash（安装器、Catalog 投影），
+  // 而不是当场反射解析。用 bytes 让这些环节无需链接 protobuf 的 descriptor 运行时；
+  // 真正需要反射解码的一侧（SDK / Agent）再自行 parse 成 FileDescriptorSet。
+  // 这也让 schema_hash 的计算对象是一段明确的字节串，跨语言无歧义。
+  bytes file_descriptor_set = 4;
+}
+
+// InterfaceSchemaBundleSet 是一个 .nspkg 携带的【全部】接口 bundle 的集合。
+//
+// 一个包可以实现多个接口（一个多功能 Provider）。安装时 nervud 逐个验证：
+// 每个 bundle 的 schema_hash 与其 file_descriptor_set 自洽，且与 manifest
+// 声明的 interface_id / version 一致。任一不符则 fail closed，整包拒绝安装。
+message InterfaceSchemaBundleSet {
+  repeated InterfaceSchemaBundle bundles = 1;
+}

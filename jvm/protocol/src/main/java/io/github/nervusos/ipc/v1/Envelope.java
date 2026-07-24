@@ -80,6 +80,10 @@ private static final long serialVersionUID = 0L;
     CANCEL_DISPATCH(52),
     PING(60),
     PONG(61),
+    ACQUIRE_CONTROL(70),
+    ACQUIRE_CONTROL_RESULT(71),
+    RELEASE_CONTROL(72),
+    RELEASE_CONTROL_RESULT(73),
     BODY_NOT_SET(0);
     private final int value;
     private BodyCase(int value) {
@@ -121,6 +125,10 @@ private static final long serialVersionUID = 0L;
         case 52: return CANCEL_DISPATCH;
         case 60: return PING;
         case 61: return PONG;
+        case 70: return ACQUIRE_CONTROL;
+        case 71: return ACQUIRE_CONTROL_RESULT;
+        case 72: return RELEASE_CONTROL;
+        case 73: return RELEASE_CONTROL_RESULT;
         case 0: return BODY_NOT_SET;
         default: return null;
       }
@@ -1021,6 +1029,154 @@ private static final long serialVersionUID = 0L;
     return io.github.nervusos.ipc.v1.Pong.getDefaultInstance();
   }
 
+  public static final int ACQUIRE_CONTROL_FIELD_NUMBER = 70;
+  /**
+   * <pre>
+   * --- 控制租约（ControlLease，§10.2）---
+   * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+   * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+   * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+   * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+   * @return Whether the acquireControl field is set.
+   */
+  @java.lang.Override
+  public boolean hasAcquireControl() {
+    return bodyCase_ == 70;
+  }
+  /**
+   * <pre>
+   * --- 控制租约（ControlLease，§10.2）---
+   * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+   * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+   * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+   * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+   * @return The acquireControl.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.AcquireControl getAcquireControl() {
+    if (bodyCase_ == 70) {
+       return (io.github.nervusos.ipc.v1.AcquireControl) body_;
+    }
+    return io.github.nervusos.ipc.v1.AcquireControl.getDefaultInstance();
+  }
+  /**
+   * <pre>
+   * --- 控制租约（ControlLease，§10.2）---
+   * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+   * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+   * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+   * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.AcquireControlOrBuilder getAcquireControlOrBuilder() {
+    if (bodyCase_ == 70) {
+       return (io.github.nervusos.ipc.v1.AcquireControl) body_;
+    }
+    return io.github.nervusos.ipc.v1.AcquireControl.getDefaultInstance();
+  }
+
+  public static final int ACQUIRE_CONTROL_RESULT_FIELD_NUMBER = 71;
+  /**
+   * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+   * @return Whether the acquireControlResult field is set.
+   */
+  @java.lang.Override
+  public boolean hasAcquireControlResult() {
+    return bodyCase_ == 71;
+  }
+  /**
+   * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+   * @return The acquireControlResult.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.AcquireControlResult getAcquireControlResult() {
+    if (bodyCase_ == 71) {
+       return (io.github.nervusos.ipc.v1.AcquireControlResult) body_;
+    }
+    return io.github.nervusos.ipc.v1.AcquireControlResult.getDefaultInstance();
+  }
+  /**
+   * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.AcquireControlResultOrBuilder getAcquireControlResultOrBuilder() {
+    if (bodyCase_ == 71) {
+       return (io.github.nervusos.ipc.v1.AcquireControlResult) body_;
+    }
+    return io.github.nervusos.ipc.v1.AcquireControlResult.getDefaultInstance();
+  }
+
+  public static final int RELEASE_CONTROL_FIELD_NUMBER = 72;
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+   * @return Whether the releaseControl field is set.
+   */
+  @java.lang.Override
+  public boolean hasReleaseControl() {
+    return bodyCase_ == 72;
+  }
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+   * @return The releaseControl.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.ReleaseControl getReleaseControl() {
+    if (bodyCase_ == 72) {
+       return (io.github.nervusos.ipc.v1.ReleaseControl) body_;
+    }
+    return io.github.nervusos.ipc.v1.ReleaseControl.getDefaultInstance();
+  }
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.ReleaseControlOrBuilder getReleaseControlOrBuilder() {
+    if (bodyCase_ == 72) {
+       return (io.github.nervusos.ipc.v1.ReleaseControl) body_;
+    }
+    return io.github.nervusos.ipc.v1.ReleaseControl.getDefaultInstance();
+  }
+
+  public static final int RELEASE_CONTROL_RESULT_FIELD_NUMBER = 73;
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+   * @return Whether the releaseControlResult field is set.
+   */
+  @java.lang.Override
+  public boolean hasReleaseControlResult() {
+    return bodyCase_ == 73;
+  }
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+   * @return The releaseControlResult.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.ReleaseControlResult getReleaseControlResult() {
+    if (bodyCase_ == 73) {
+       return (io.github.nervusos.ipc.v1.ReleaseControlResult) body_;
+    }
+    return io.github.nervusos.ipc.v1.ReleaseControlResult.getDefaultInstance();
+  }
+  /**
+   * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.ReleaseControlResultOrBuilder getReleaseControlResultOrBuilder() {
+    if (bodyCase_ == 73) {
+       return (io.github.nervusos.ipc.v1.ReleaseControlResult) body_;
+    }
+    return io.github.nervusos.ipc.v1.ReleaseControlResult.getDefaultInstance();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1112,6 +1268,18 @@ private static final long serialVersionUID = 0L;
     }
     if (bodyCase_ == 61) {
       output.writeMessage(61, (io.github.nervusos.ipc.v1.Pong) body_);
+    }
+    if (bodyCase_ == 70) {
+      output.writeMessage(70, (io.github.nervusos.ipc.v1.AcquireControl) body_);
+    }
+    if (bodyCase_ == 71) {
+      output.writeMessage(71, (io.github.nervusos.ipc.v1.AcquireControlResult) body_);
+    }
+    if (bodyCase_ == 72) {
+      output.writeMessage(72, (io.github.nervusos.ipc.v1.ReleaseControl) body_);
+    }
+    if (bodyCase_ == 73) {
+      output.writeMessage(73, (io.github.nervusos.ipc.v1.ReleaseControlResult) body_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -1225,6 +1393,22 @@ private static final long serialVersionUID = 0L;
     if (bodyCase_ == 61) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(61, (io.github.nervusos.ipc.v1.Pong) body_);
+    }
+    if (bodyCase_ == 70) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(70, (io.github.nervusos.ipc.v1.AcquireControl) body_);
+    }
+    if (bodyCase_ == 71) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(71, (io.github.nervusos.ipc.v1.AcquireControlResult) body_);
+    }
+    if (bodyCase_ == 72) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(72, (io.github.nervusos.ipc.v1.ReleaseControl) body_);
+    }
+    if (bodyCase_ == 73) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(73, (io.github.nervusos.ipc.v1.ReleaseControlResult) body_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -1343,6 +1527,22 @@ private static final long serialVersionUID = 0L;
         if (!getPong()
             .equals(other.getPong())) return false;
         break;
+      case 70:
+        if (!getAcquireControl()
+            .equals(other.getAcquireControl())) return false;
+        break;
+      case 71:
+        if (!getAcquireControlResult()
+            .equals(other.getAcquireControlResult())) return false;
+        break;
+      case 72:
+        if (!getReleaseControl()
+            .equals(other.getReleaseControl())) return false;
+        break;
+      case 73:
+        if (!getReleaseControlResult()
+            .equals(other.getReleaseControlResult())) return false;
+        break;
       case 0:
       default:
     }
@@ -1457,6 +1657,22 @@ private static final long serialVersionUID = 0L;
       case 61:
         hash = (37 * hash) + PONG_FIELD_NUMBER;
         hash = (53 * hash) + getPong().hashCode();
+        break;
+      case 70:
+        hash = (37 * hash) + ACQUIRE_CONTROL_FIELD_NUMBER;
+        hash = (53 * hash) + getAcquireControl().hashCode();
+        break;
+      case 71:
+        hash = (37 * hash) + ACQUIRE_CONTROL_RESULT_FIELD_NUMBER;
+        hash = (53 * hash) + getAcquireControlResult().hashCode();
+        break;
+      case 72:
+        hash = (37 * hash) + RELEASE_CONTROL_FIELD_NUMBER;
+        hash = (53 * hash) + getReleaseControl().hashCode();
+        break;
+      case 73:
+        hash = (37 * hash) + RELEASE_CONTROL_RESULT_FIELD_NUMBER;
+        hash = (53 * hash) + getReleaseControlResult().hashCode();
         break;
       case 0:
       default:
@@ -1674,6 +1890,18 @@ private static final long serialVersionUID = 0L;
       if (pongBuilder_ != null) {
         pongBuilder_.clear();
       }
+      if (acquireControlBuilder_ != null) {
+        acquireControlBuilder_.clear();
+      }
+      if (acquireControlResultBuilder_ != null) {
+        acquireControlResultBuilder_.clear();
+      }
+      if (releaseControlBuilder_ != null) {
+        releaseControlBuilder_.clear();
+      }
+      if (releaseControlResultBuilder_ != null) {
+        releaseControlResultBuilder_.clear();
+      }
       bodyCase_ = 0;
       body_ = null;
       return this;
@@ -1817,6 +2045,22 @@ private static final long serialVersionUID = 0L;
           pongBuilder_ != null) {
         result.body_ = pongBuilder_.build();
       }
+      if (bodyCase_ == 70 &&
+          acquireControlBuilder_ != null) {
+        result.body_ = acquireControlBuilder_.build();
+      }
+      if (bodyCase_ == 71 &&
+          acquireControlResultBuilder_ != null) {
+        result.body_ = acquireControlResultBuilder_.build();
+      }
+      if (bodyCase_ == 72 &&
+          releaseControlBuilder_ != null) {
+        result.body_ = releaseControlBuilder_.build();
+      }
+      if (bodyCase_ == 73 &&
+          releaseControlResultBuilder_ != null) {
+        result.body_ = releaseControlResultBuilder_.build();
+      }
     }
 
     @java.lang.Override
@@ -1932,6 +2176,22 @@ private static final long serialVersionUID = 0L;
         }
         case PONG: {
           mergePong(other.getPong());
+          break;
+        }
+        case ACQUIRE_CONTROL: {
+          mergeAcquireControl(other.getAcquireControl());
+          break;
+        }
+        case ACQUIRE_CONTROL_RESULT: {
+          mergeAcquireControlResult(other.getAcquireControlResult());
+          break;
+        }
+        case RELEASE_CONTROL: {
+          mergeReleaseControl(other.getReleaseControl());
+          break;
+        }
+        case RELEASE_CONTROL_RESULT: {
+          mergeReleaseControlResult(other.getReleaseControlResult());
           break;
         }
         case BODY_NOT_SET: {
@@ -2142,6 +2402,34 @@ private static final long serialVersionUID = 0L;
               bodyCase_ = 61;
               break;
             } // case 490
+            case 562: {
+              input.readMessage(
+                  getAcquireControlFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bodyCase_ = 70;
+              break;
+            } // case 562
+            case 570: {
+              input.readMessage(
+                  getAcquireControlResultFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bodyCase_ = 71;
+              break;
+            } // case 570
+            case 578: {
+              input.readMessage(
+                  getReleaseControlFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bodyCase_ = 72;
+              break;
+            } // case 578
+            case 586: {
+              input.readMessage(
+                  getReleaseControlResultFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bodyCase_ = 73;
+              break;
+            } // case 586
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -6001,6 +6289,646 @@ private static final long serialVersionUID = 0L;
       bodyCase_ = 61;
       onChanged();
       return pongBuilder_;
+    }
+
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.AcquireControl, io.github.nervusos.ipc.v1.AcquireControl.Builder, io.github.nervusos.ipc.v1.AcquireControlOrBuilder> acquireControlBuilder_;
+    /**
+     * <pre>
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+     * @return Whether the acquireControl field is set.
+     */
+    @java.lang.Override
+    public boolean hasAcquireControl() {
+      return bodyCase_ == 70;
+    }
+    /**
+     * <pre>
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+     * @return The acquireControl.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.AcquireControl getAcquireControl() {
+      if (acquireControlBuilder_ == null) {
+        if (bodyCase_ == 70) {
+          return (io.github.nervusos.ipc.v1.AcquireControl) body_;
+        }
+        return io.github.nervusos.ipc.v1.AcquireControl.getDefaultInstance();
+      } else {
+        if (bodyCase_ == 70) {
+          return acquireControlBuilder_.getMessage();
+        }
+        return io.github.nervusos.ipc.v1.AcquireControl.getDefaultInstance();
+      }
+    }
+    /**
+     * <pre>
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+     */
+    public Builder setAcquireControl(io.github.nervusos.ipc.v1.AcquireControl value) {
+      if (acquireControlBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        body_ = value;
+        onChanged();
+      } else {
+        acquireControlBuilder_.setMessage(value);
+      }
+      bodyCase_ = 70;
+      return this;
+    }
+    /**
+     * <pre>
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+     */
+    public Builder setAcquireControl(
+        io.github.nervusos.ipc.v1.AcquireControl.Builder builderForValue) {
+      if (acquireControlBuilder_ == null) {
+        body_ = builderForValue.build();
+        onChanged();
+      } else {
+        acquireControlBuilder_.setMessage(builderForValue.build());
+      }
+      bodyCase_ = 70;
+      return this;
+    }
+    /**
+     * <pre>
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+     */
+    public Builder mergeAcquireControl(io.github.nervusos.ipc.v1.AcquireControl value) {
+      if (acquireControlBuilder_ == null) {
+        if (bodyCase_ == 70 &&
+            body_ != io.github.nervusos.ipc.v1.AcquireControl.getDefaultInstance()) {
+          body_ = io.github.nervusos.ipc.v1.AcquireControl.newBuilder((io.github.nervusos.ipc.v1.AcquireControl) body_)
+              .mergeFrom(value).buildPartial();
+        } else {
+          body_ = value;
+        }
+        onChanged();
+      } else {
+        if (bodyCase_ == 70) {
+          acquireControlBuilder_.mergeFrom(value);
+        } else {
+          acquireControlBuilder_.setMessage(value);
+        }
+      }
+      bodyCase_ = 70;
+      return this;
+    }
+    /**
+     * <pre>
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+     */
+    public Builder clearAcquireControl() {
+      if (acquireControlBuilder_ == null) {
+        if (bodyCase_ == 70) {
+          bodyCase_ = 0;
+          body_ = null;
+          onChanged();
+        }
+      } else {
+        if (bodyCase_ == 70) {
+          bodyCase_ = 0;
+          body_ = null;
+        }
+        acquireControlBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+     */
+    public io.github.nervusos.ipc.v1.AcquireControl.Builder getAcquireControlBuilder() {
+      return getAcquireControlFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.AcquireControlOrBuilder getAcquireControlOrBuilder() {
+      if ((bodyCase_ == 70) && (acquireControlBuilder_ != null)) {
+        return acquireControlBuilder_.getMessageOrBuilder();
+      } else {
+        if (bodyCase_ == 70) {
+          return (io.github.nervusos.ipc.v1.AcquireControl) body_;
+        }
+        return io.github.nervusos.ipc.v1.AcquireControl.getDefaultInstance();
+      }
+    }
+    /**
+     * <pre>
+     * --- 控制租约（ControlLease，§10.2）---
+     * 70-73 是本文件的扩展。原始消息集（§10.4 给出的 body 号）没有 lease 通道，
+     * App 因此拿不到运动 lease、狗/臂动不了（A5 背景）。ControlLease 在协议语义
+     * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
+     * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.AcquireControl, io.github.nervusos.ipc.v1.AcquireControl.Builder, io.github.nervusos.ipc.v1.AcquireControlOrBuilder> 
+        getAcquireControlFieldBuilder() {
+      if (acquireControlBuilder_ == null) {
+        if (!(bodyCase_ == 70)) {
+          body_ = io.github.nervusos.ipc.v1.AcquireControl.getDefaultInstance();
+        }
+        acquireControlBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.AcquireControl, io.github.nervusos.ipc.v1.AcquireControl.Builder, io.github.nervusos.ipc.v1.AcquireControlOrBuilder>(
+                (io.github.nervusos.ipc.v1.AcquireControl) body_,
+                getParentForChildren(),
+                isClean());
+        body_ = null;
+      }
+      bodyCase_ = 70;
+      onChanged();
+      return acquireControlBuilder_;
+    }
+
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.AcquireControlResult, io.github.nervusos.ipc.v1.AcquireControlResult.Builder, io.github.nervusos.ipc.v1.AcquireControlResultOrBuilder> acquireControlResultBuilder_;
+    /**
+     * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+     * @return Whether the acquireControlResult field is set.
+     */
+    @java.lang.Override
+    public boolean hasAcquireControlResult() {
+      return bodyCase_ == 71;
+    }
+    /**
+     * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+     * @return The acquireControlResult.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.AcquireControlResult getAcquireControlResult() {
+      if (acquireControlResultBuilder_ == null) {
+        if (bodyCase_ == 71) {
+          return (io.github.nervusos.ipc.v1.AcquireControlResult) body_;
+        }
+        return io.github.nervusos.ipc.v1.AcquireControlResult.getDefaultInstance();
+      } else {
+        if (bodyCase_ == 71) {
+          return acquireControlResultBuilder_.getMessage();
+        }
+        return io.github.nervusos.ipc.v1.AcquireControlResult.getDefaultInstance();
+      }
+    }
+    /**
+     * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+     */
+    public Builder setAcquireControlResult(io.github.nervusos.ipc.v1.AcquireControlResult value) {
+      if (acquireControlResultBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        body_ = value;
+        onChanged();
+      } else {
+        acquireControlResultBuilder_.setMessage(value);
+      }
+      bodyCase_ = 71;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+     */
+    public Builder setAcquireControlResult(
+        io.github.nervusos.ipc.v1.AcquireControlResult.Builder builderForValue) {
+      if (acquireControlResultBuilder_ == null) {
+        body_ = builderForValue.build();
+        onChanged();
+      } else {
+        acquireControlResultBuilder_.setMessage(builderForValue.build());
+      }
+      bodyCase_ = 71;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+     */
+    public Builder mergeAcquireControlResult(io.github.nervusos.ipc.v1.AcquireControlResult value) {
+      if (acquireControlResultBuilder_ == null) {
+        if (bodyCase_ == 71 &&
+            body_ != io.github.nervusos.ipc.v1.AcquireControlResult.getDefaultInstance()) {
+          body_ = io.github.nervusos.ipc.v1.AcquireControlResult.newBuilder((io.github.nervusos.ipc.v1.AcquireControlResult) body_)
+              .mergeFrom(value).buildPartial();
+        } else {
+          body_ = value;
+        }
+        onChanged();
+      } else {
+        if (bodyCase_ == 71) {
+          acquireControlResultBuilder_.mergeFrom(value);
+        } else {
+          acquireControlResultBuilder_.setMessage(value);
+        }
+      }
+      bodyCase_ = 71;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+     */
+    public Builder clearAcquireControlResult() {
+      if (acquireControlResultBuilder_ == null) {
+        if (bodyCase_ == 71) {
+          bodyCase_ = 0;
+          body_ = null;
+          onChanged();
+        }
+      } else {
+        if (bodyCase_ == 71) {
+          bodyCase_ = 0;
+          body_ = null;
+        }
+        acquireControlResultBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+     */
+    public io.github.nervusos.ipc.v1.AcquireControlResult.Builder getAcquireControlResultBuilder() {
+      return getAcquireControlResultFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.AcquireControlResultOrBuilder getAcquireControlResultOrBuilder() {
+      if ((bodyCase_ == 71) && (acquireControlResultBuilder_ != null)) {
+        return acquireControlResultBuilder_.getMessageOrBuilder();
+      } else {
+        if (bodyCase_ == 71) {
+          return (io.github.nervusos.ipc.v1.AcquireControlResult) body_;
+        }
+        return io.github.nervusos.ipc.v1.AcquireControlResult.getDefaultInstance();
+      }
+    }
+    /**
+     * <code>.nervus.ipc.v1.AcquireControlResult acquire_control_result = 71 [json_name = "acquireControlResult"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.AcquireControlResult, io.github.nervusos.ipc.v1.AcquireControlResult.Builder, io.github.nervusos.ipc.v1.AcquireControlResultOrBuilder> 
+        getAcquireControlResultFieldBuilder() {
+      if (acquireControlResultBuilder_ == null) {
+        if (!(bodyCase_ == 71)) {
+          body_ = io.github.nervusos.ipc.v1.AcquireControlResult.getDefaultInstance();
+        }
+        acquireControlResultBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.AcquireControlResult, io.github.nervusos.ipc.v1.AcquireControlResult.Builder, io.github.nervusos.ipc.v1.AcquireControlResultOrBuilder>(
+                (io.github.nervusos.ipc.v1.AcquireControlResult) body_,
+                getParentForChildren(),
+                isClean());
+        body_ = null;
+      }
+      bodyCase_ = 71;
+      onChanged();
+      return acquireControlResultBuilder_;
+    }
+
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.ReleaseControl, io.github.nervusos.ipc.v1.ReleaseControl.Builder, io.github.nervusos.ipc.v1.ReleaseControlOrBuilder> releaseControlBuilder_;
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+     * @return Whether the releaseControl field is set.
+     */
+    @java.lang.Override
+    public boolean hasReleaseControl() {
+      return bodyCase_ == 72;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+     * @return The releaseControl.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.ReleaseControl getReleaseControl() {
+      if (releaseControlBuilder_ == null) {
+        if (bodyCase_ == 72) {
+          return (io.github.nervusos.ipc.v1.ReleaseControl) body_;
+        }
+        return io.github.nervusos.ipc.v1.ReleaseControl.getDefaultInstance();
+      } else {
+        if (bodyCase_ == 72) {
+          return releaseControlBuilder_.getMessage();
+        }
+        return io.github.nervusos.ipc.v1.ReleaseControl.getDefaultInstance();
+      }
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+     */
+    public Builder setReleaseControl(io.github.nervusos.ipc.v1.ReleaseControl value) {
+      if (releaseControlBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        body_ = value;
+        onChanged();
+      } else {
+        releaseControlBuilder_.setMessage(value);
+      }
+      bodyCase_ = 72;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+     */
+    public Builder setReleaseControl(
+        io.github.nervusos.ipc.v1.ReleaseControl.Builder builderForValue) {
+      if (releaseControlBuilder_ == null) {
+        body_ = builderForValue.build();
+        onChanged();
+      } else {
+        releaseControlBuilder_.setMessage(builderForValue.build());
+      }
+      bodyCase_ = 72;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+     */
+    public Builder mergeReleaseControl(io.github.nervusos.ipc.v1.ReleaseControl value) {
+      if (releaseControlBuilder_ == null) {
+        if (bodyCase_ == 72 &&
+            body_ != io.github.nervusos.ipc.v1.ReleaseControl.getDefaultInstance()) {
+          body_ = io.github.nervusos.ipc.v1.ReleaseControl.newBuilder((io.github.nervusos.ipc.v1.ReleaseControl) body_)
+              .mergeFrom(value).buildPartial();
+        } else {
+          body_ = value;
+        }
+        onChanged();
+      } else {
+        if (bodyCase_ == 72) {
+          releaseControlBuilder_.mergeFrom(value);
+        } else {
+          releaseControlBuilder_.setMessage(value);
+        }
+      }
+      bodyCase_ = 72;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+     */
+    public Builder clearReleaseControl() {
+      if (releaseControlBuilder_ == null) {
+        if (bodyCase_ == 72) {
+          bodyCase_ = 0;
+          body_ = null;
+          onChanged();
+        }
+      } else {
+        if (bodyCase_ == 72) {
+          bodyCase_ = 0;
+          body_ = null;
+        }
+        releaseControlBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+     */
+    public io.github.nervusos.ipc.v1.ReleaseControl.Builder getReleaseControlBuilder() {
+      return getReleaseControlFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.ReleaseControlOrBuilder getReleaseControlOrBuilder() {
+      if ((bodyCase_ == 72) && (releaseControlBuilder_ != null)) {
+        return releaseControlBuilder_.getMessageOrBuilder();
+      } else {
+        if (bodyCase_ == 72) {
+          return (io.github.nervusos.ipc.v1.ReleaseControl) body_;
+        }
+        return io.github.nervusos.ipc.v1.ReleaseControl.getDefaultInstance();
+      }
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControl release_control = 72 [json_name = "releaseControl"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.ReleaseControl, io.github.nervusos.ipc.v1.ReleaseControl.Builder, io.github.nervusos.ipc.v1.ReleaseControlOrBuilder> 
+        getReleaseControlFieldBuilder() {
+      if (releaseControlBuilder_ == null) {
+        if (!(bodyCase_ == 72)) {
+          body_ = io.github.nervusos.ipc.v1.ReleaseControl.getDefaultInstance();
+        }
+        releaseControlBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.ReleaseControl, io.github.nervusos.ipc.v1.ReleaseControl.Builder, io.github.nervusos.ipc.v1.ReleaseControlOrBuilder>(
+                (io.github.nervusos.ipc.v1.ReleaseControl) body_,
+                getParentForChildren(),
+                isClean());
+        body_ = null;
+      }
+      bodyCase_ = 72;
+      onChanged();
+      return releaseControlBuilder_;
+    }
+
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.ReleaseControlResult, io.github.nervusos.ipc.v1.ReleaseControlResult.Builder, io.github.nervusos.ipc.v1.ReleaseControlResultOrBuilder> releaseControlResultBuilder_;
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+     * @return Whether the releaseControlResult field is set.
+     */
+    @java.lang.Override
+    public boolean hasReleaseControlResult() {
+      return bodyCase_ == 73;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+     * @return The releaseControlResult.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.ReleaseControlResult getReleaseControlResult() {
+      if (releaseControlResultBuilder_ == null) {
+        if (bodyCase_ == 73) {
+          return (io.github.nervusos.ipc.v1.ReleaseControlResult) body_;
+        }
+        return io.github.nervusos.ipc.v1.ReleaseControlResult.getDefaultInstance();
+      } else {
+        if (bodyCase_ == 73) {
+          return releaseControlResultBuilder_.getMessage();
+        }
+        return io.github.nervusos.ipc.v1.ReleaseControlResult.getDefaultInstance();
+      }
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+     */
+    public Builder setReleaseControlResult(io.github.nervusos.ipc.v1.ReleaseControlResult value) {
+      if (releaseControlResultBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        body_ = value;
+        onChanged();
+      } else {
+        releaseControlResultBuilder_.setMessage(value);
+      }
+      bodyCase_ = 73;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+     */
+    public Builder setReleaseControlResult(
+        io.github.nervusos.ipc.v1.ReleaseControlResult.Builder builderForValue) {
+      if (releaseControlResultBuilder_ == null) {
+        body_ = builderForValue.build();
+        onChanged();
+      } else {
+        releaseControlResultBuilder_.setMessage(builderForValue.build());
+      }
+      bodyCase_ = 73;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+     */
+    public Builder mergeReleaseControlResult(io.github.nervusos.ipc.v1.ReleaseControlResult value) {
+      if (releaseControlResultBuilder_ == null) {
+        if (bodyCase_ == 73 &&
+            body_ != io.github.nervusos.ipc.v1.ReleaseControlResult.getDefaultInstance()) {
+          body_ = io.github.nervusos.ipc.v1.ReleaseControlResult.newBuilder((io.github.nervusos.ipc.v1.ReleaseControlResult) body_)
+              .mergeFrom(value).buildPartial();
+        } else {
+          body_ = value;
+        }
+        onChanged();
+      } else {
+        if (bodyCase_ == 73) {
+          releaseControlResultBuilder_.mergeFrom(value);
+        } else {
+          releaseControlResultBuilder_.setMessage(value);
+        }
+      }
+      bodyCase_ = 73;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+     */
+    public Builder clearReleaseControlResult() {
+      if (releaseControlResultBuilder_ == null) {
+        if (bodyCase_ == 73) {
+          bodyCase_ = 0;
+          body_ = null;
+          onChanged();
+        }
+      } else {
+        if (bodyCase_ == 73) {
+          bodyCase_ = 0;
+          body_ = null;
+        }
+        releaseControlResultBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+     */
+    public io.github.nervusos.ipc.v1.ReleaseControlResult.Builder getReleaseControlResultBuilder() {
+      return getReleaseControlResultFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.ReleaseControlResultOrBuilder getReleaseControlResultOrBuilder() {
+      if ((bodyCase_ == 73) && (releaseControlResultBuilder_ != null)) {
+        return releaseControlResultBuilder_.getMessageOrBuilder();
+      } else {
+        if (bodyCase_ == 73) {
+          return (io.github.nervusos.ipc.v1.ReleaseControlResult) body_;
+        }
+        return io.github.nervusos.ipc.v1.ReleaseControlResult.getDefaultInstance();
+      }
+    }
+    /**
+     * <code>.nervus.ipc.v1.ReleaseControlResult release_control_result = 73 [json_name = "releaseControlResult"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.ReleaseControlResult, io.github.nervusos.ipc.v1.ReleaseControlResult.Builder, io.github.nervusos.ipc.v1.ReleaseControlResultOrBuilder> 
+        getReleaseControlResultFieldBuilder() {
+      if (releaseControlResultBuilder_ == null) {
+        if (!(bodyCase_ == 73)) {
+          body_ = io.github.nervusos.ipc.v1.ReleaseControlResult.getDefaultInstance();
+        }
+        releaseControlResultBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.ReleaseControlResult, io.github.nervusos.ipc.v1.ReleaseControlResult.Builder, io.github.nervusos.ipc.v1.ReleaseControlResultOrBuilder>(
+                (io.github.nervusos.ipc.v1.ReleaseControlResult) body_,
+                getParentForChildren(),
+                isClean());
+        body_ = null;
+      }
+      bodyCase_ = 73;
+      onChanged();
+      return releaseControlResultBuilder_;
     }
 
     // @@protoc_insertion_point(builder_scope:nervus.ipc.v1.Envelope)

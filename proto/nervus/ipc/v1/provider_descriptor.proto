@@ -1,0 +1,196 @@
+// Nervus IPC v1 —— Provider Descriptor（数据驱动接口契约）  [REWRITE-v1 / experimental]
+//
+// 本文件冻结 Provider 在其签名 Manifest 里声明「我实现/管理什么」的 wire 结构
+// （NRCP §7.2/§7.3 的 wire 形态），是 WP-A4 的主交付物。
+//
+// 它存在的唯一理由是**消灭硬编码**（`00` 红线 #4、§3）：
+//
+//	现状反例：nervud 的 endpoint.DefaultInterfaceCatalog() 把「接口→所需权限」
+//	          写成编译期 Go 常量表，只认 nervus.interface.motion.base 一项。
+//	          OEM 想加一个接口就得改 nervud、重编内核——违反可拓展第一原则。
+//
+//	本文件之后：接口→权限/风险/所需 Resource 类型，从**已验证的签名 Descriptor**
+//	          数据驱动注册进 endpoint 目录（落地点见文件尾「数据驱动接线」，交 B2）。
+//	          加一款机器人 = 装一个签名 Provider 包，nervud 一行不改。
+//
+// 关键红线（写进 schema 注释，供实现者与评审共同守）：
+//   1. Descriptor 只是 Provider 的**声明**，不是裁决。nervud 必须独立验证：
+//      签名/来源、该信任 profile 是否被允许实现该接口、物理 Resource 是否满足
+//      最低保护级、Custom Permission 是否绑定定义者签名（NRCP §7.3）。
+//   2. **授权权力只在 nervud**（`00` 红线 #2）：OEM 只声明，nervud 按交集裁决。
+//      OEM **不能**把系统危险权限调低、**不能**自封 system/HUMAN/SAFETY。
+//   3. **命名空间隔离**（`00` 红线、NRCP §4.4/§9.2）：OEM 私有接口/权限/资源类型
+//      必须在定义者自己的命名空间下（com.acme.*），Custom Permission 绑定签名身份。
+//
+// 本文件本身**不**定义裁决逻辑，只定义 Provider 能说出口的「事实」的形状；
+// 校验与裁决在 nervud。RiskClass 复用 method_registry.proto（三处风险分级一致）。
+//
+// [REWRITE-v1] experimental；兼容规则同 method_registry.proto（§10.12）。
+
+syntax = "proto3";
+
+package nervus.ipc.v1;
+
+// RiskClass 复用机制层文件（A3 的 method_registry.proto），三处风险分级一致。
+import "nervus/ipc/v1/method_registry.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+
+option java_package = "io.github.nervusos.ipc.v1";
+option java_multiple_files = true;
+option java_outer_classname = "ProviderDescriptorProto";
+
+// =============================================================================
+// 顶层：ProviderDescriptor
+// =============================================================================
+
+// ProviderDescriptor 是一个 Provider 包在其 Manifest 中对 nervud 的完整声明
+// （NRCP §7.2）。安装/RegisterEndpoint 时随签名 Manifest 提交，nervud 验证后
+// 据此**数据驱动**地填充 endpoint 接口目录、Resource 注册表与权限目录。
+//
+// 这里没有任何「授权」字段：Provider 声明它**打算**实现/管理什么，
+// 能不能、以什么权限，全部由 nervud 独立裁决（红线 #2）。
+message ProviderDescriptor {
+  // 定义者 Package ID。标准 Provider 用平台命名空间；OEM 用自己的反写域名
+  // 命名空间（如 com.acme.dog）。下面所有 OEM 私有 id 必须落在这个命名空间下，
+  // nervud 校验前缀归属（红线 #3）。
+  string package_id = 1;
+
+  // 本 Provider 实现的接口。喂进 endpoint 接口目录（替换硬编码，见文件尾）。
+  repeated ProvidedInterface interfaces = 2;
+
+  // 本 Provider 管理的物理/逻辑资源。喂进 Resource 注册表（B2）。
+  repeated ManagedResource resources = 3;
+
+  // 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
+  // （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+  repeated DefinedPermission permissions = 4;
+}
+
+// =============================================================================
+// ProvidedInterface：一个被实现的接口 + 接口级门槛
+// =============================================================================
+
+// ProvidedInterface 声明「本 Provider 实现某接口的某些版本，服务它需要什么权限」。
+// required_permission 就是替换 DefaultInterfaceCatalog 硬编码的那一项：Resolve
+// 阶段的接口级权限门槛，从这里数据驱动注册进 endpoint 目录。
+message ProvidedInterface {
+  // 逻辑接口 ID。标准接口 nervus.interface.*；OEM 私有接口必须在定义者命名空间
+  // （com.acme.*）下，且 nervud 校验其前缀与 package_id 命名空间一致（红线 #3）。
+  string interface_id = 1;
+
+  // 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
+  repeated uint32 versions = 2;
+
+  // 该接口 descriptor bundle 的 hash（NRCP §8.4）。必须与 RegisterEndpoint 里
+  // Provider 声明的 interface_schema_hash、以及 RobotCatalog 投影一致；不一致
+  // 一律拒绝——避免用旧 schema 编译的 Provider 悄悄服务新接口，也避免运行期
+  // 下载任意 schema 直接喂模型/SDK（§8.4）。
+  bytes schema_hash = 3;
+
+  // 接口级权限门槛：Resolve 该接口所需权限 ID。
+  //   标准接口 → 指向平台内置权限（如 nervus.permission.motion.control）。
+  //   OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
+  //                 （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
+  // **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
+  // 方法级更细的权限叠加在 MethodMeta.required_permission（method_registry.proto）。
+  string required_permission = 4;
+
+  // 实现该接口所绑 Resource 的风险下限：nervud 校验被绑定的 ManagedResource
+  // 的 risk_class 不低于此值，防止把物理危险接口绑到一个自称无害的资源上
+  // （NRCP §7.3 最低保护级校验的输入之一）。
+  RiskClass resource_risk_floor = 5;
+}
+
+// =============================================================================
+// ManagedResource：一个被管理的资源
+// =============================================================================
+
+// ManagedResource 声明本 Provider 管理的一个资源（NRCP §7.2/§8）。喂进 Resource
+// 注册表，供 ResolveEndpoint 的 Selector 匹配。是否允许注册（尤其物理危险资源）
+// 由 nervud 按信任 profile 裁决——普通 App 不得注册物理危险 Resource（红线 #1）。
+message ManagedResource {
+  // 稳定角色名，如 "arm.left" / "base.main"。ResolveEndpoint 的 role selector 用它。
+  string stable_role = 1;
+
+  // 资源类型。标准 nervus.resource.*；OEM 私有类型在定义者命名空间下。
+  string resource_type = 2;
+
+  // 访问模式（独占控制 / 共享观察 …）。见 ResourceAccessMode。
+  ResourceAccessMode access_mode = 3;
+
+  // 资源风险级。nervud 据此校验最低保护级、决定 Lease/仲裁强度。
+  RiskClass risk_class = 4;
+}
+
+// ResourceAccessMode 是资源的访问语义。做成枚举而非自由字符串：访问模式驱动
+// 控制仲裁（谁能同时持有），是平台定义的**封闭词表**，OEM 不能自造一种仲裁
+// 语义（那属于机制变更，不是数据驱动加项）。未知值 fail closed 为最严（独占）。
+enum ResourceAccessMode {
+  // fail closed：未知按最严处理。
+  RESOURCE_ACCESS_MODE_UNSPECIFIED = 0;
+
+  // 独占控制：同一时刻至多一个 ControlLease 持有者（执行器类资源的默认）。
+  RESOURCE_ACCESS_MODE_EXCLUSIVE_CONTROL = 1;
+
+  // 共享观察：多方可只读订阅，无控制权（传感器状态类）。
+  RESOURCE_ACCESS_MODE_SHARED_OBSERVE = 2;
+}
+
+// =============================================================================
+// DefinedPermission：OEM 自定义权限
+// =============================================================================
+
+// DefinedPermission 是 Provider 在自己命名空间下定义的一个权限（NRCP §9.2）。
+// 只是**声明**：这个权限存在、叫什么、多危险、怎么授。是否接受、能不能用
+// 某个 grant_mode，由 nervud 裁决——OEM 不能把系统危险权限调低、不能自封
+// system_only 来绕过用户同意（红线 #2）。
+message DefinedPermission {
+  // 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
+  // nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+  string id = 1;
+
+  // 授予模式。做成枚举而非自由字符串：这是安全相关的**封闭平台词表**
+  // （§9.2），OEM 不能发明新的授予模式；未知值 fail closed 为「拒绝授予」。
+  GrantMode grant_mode = 2;
+
+  // 权限风险级，决定授权 UI 的强度与是否需用户显式同意。
+  RiskClass risk_class = 3;
+
+  // 展示名（授权 UI 用）。NRCP §9.2 要求中英文都有。
+  LocalizedText display_name = 4;
+
+  // 权限说明（授权 UI 用）。同样要求中英文。
+  LocalizedText description = 5;
+}
+
+// GrantMode 是权限的授予方式（NRCP §9.2）。封闭平台词表，nervud 据此决定授权
+// 路径；OEM 声明的自定义权限也只能选其中之一，且 nervud 会核对其风险是否配得上
+// 所选模式（例如物理危险权限不能选 normal 静默授予）。
+enum GrantMode {
+  // fail closed：未知授予模式一律拒绝授予。
+  GRANT_MODE_UNSPECIFIED = 0;
+
+  // 普通：安装即授予，无需用户交互（低风险）。
+  GRANT_MODE_NORMAL = 1;
+
+  // 需用户同意：运行期弹系统持有的确认框，用户显式授予（隐私/物理类）。
+  GRANT_MODE_USER_CONSENT = 2;
+
+  // 签名级：仅授予与定义者同签名的 Package（OEM 自家 App 用自家权限）。
+  GRANT_MODE_SIGNATURE = 3;
+
+  // 特权级：仅平台/OEM 签名的特权 Package（NRCP §9）。
+  GRANT_MODE_PRIVILEGED = 4;
+
+  // 系统专用：仅系统组件，普通/OEM App 一律不可得。
+  // OEM 不能用它给自己的权限自封系统身份——nervud 拒绝越权声明（红线 #2）。
+  GRANT_MODE_SYSTEM_ONLY = 5;
+}
+
+// LocalizedText 是需要面向用户展示、要求本地化的文本（NRCP §9.2）。
+// 授权/安装 UI 按 locale 取用；两者都应填，缺失时 UI 回退到 en。
+message LocalizedText {
+  string zh_cn = 1;
+  string en = 2;
+}

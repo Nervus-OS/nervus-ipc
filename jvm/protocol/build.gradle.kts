@@ -19,4 +19,14 @@ dependencies {
     // 看到 protobuf 运行时，否则一编译就是 "cannot access GeneratedMessage"。
     api(libs.protobuf.java)
     api(libs.protobuf.kotlin)
+
+    // golden vectors 测试（Go↔JVM 逐字节一致，NRCP §22.6）。仅测试期依赖。
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+// golden vectors 用 JUnit 5 平台运行。
+tasks.test {
+    useJUnitPlatform()
 }
