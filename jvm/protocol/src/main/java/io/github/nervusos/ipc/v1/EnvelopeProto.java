@@ -225,6 +225,26 @@ public final class EnvelopeProto {
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_nervus_ipc_v1_ControlLeaseErrorDetail_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_nervus_ipc_v1_LaunchComponent_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_nervus_ipc_v1_LaunchComponent_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_nervus_ipc_v1_LaunchComponentResult_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_nervus_ipc_v1_LaunchComponentResult_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_nervus_ipc_v1_LaunchComponentSuccess_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_nervus_ipc_v1_LaunchComponentSuccess_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_nervus_ipc_v1_LaunchComponentErrorDetail_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_nervus_ipc_v1_LaunchComponentErrorDetail_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -235,7 +255,7 @@ public final class EnvelopeProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\034nervus/ipc/v1/envelope.proto\022\rnervus.i" +
-      "pc.v1\032\032nervus/ipc/v1/status.proto\"\237\020\n\010En" +
+      "pc.v1\032\032nervus/ipc/v1/status.proto\"\314\021\n\010En" +
       "velope\022%\n\016protocol_major\030\001 \001(\rR\rprotocol" +
       "Major\022%\n\016protocol_minor\030\002 \001(\rR\rprotocolM" +
       "inor\022,\n\005hello\030\n \001(\0132\024.nervus.ipc.v1.Hell" +
@@ -287,202 +307,225 @@ public final class EnvelopeProto {
       "H \001(\0132\035.nervus.ipc.v1.ReleaseControlH\000R\016" +
       "releaseControl\022[\n\026release_control_result" +
       "\030I \001(\0132#.nervus.ipc.v1.ReleaseControlRes" +
-      "ultH\000R\024releaseControlResultB\006\n\004body\"\201\002\n\005" +
-      "Hello\022,\n\022min_protocol_major\030\001 \001(\rR\020minPr" +
-      "otocolMajor\022,\n\022max_protocol_major\030\002 \001(\rR" +
-      "\020maxProtocolMajor\022,\n\022max_protocol_minor\030" +
-      "\003 \001(\rR\020maxProtocolMinor\022\031\n\010sdk_name\030\004 \001(" +
-      "\tR\007sdkName\022\037\n\013sdk_version\030\005 \001(\tR\nsdkVers" +
-      "ion\0222\n\025declared_component_id\030\006 \001(\tR\023decl" +
-      "aredComponentId\"\205\001\n\010HelloAck\022:\n\007success\030" +
-      "\001 \001(\0132\036.nervus.ipc.v1.HelloAckSuccessH\000R" +
-      "\007success\0222\n\007failure\030\002 \001(\0132\026.nervus.ipc.v" +
-      "1.FailureH\000R\007failureB\t\n\007outcome\"\332\001\n\017Hell" +
-      "oAckSuccess\022%\n\016protocol_major\030\001 \001(\rR\rpro" +
-      "tocolMajor\022%\n\016protocol_minor\030\002 \001(\rR\rprot" +
-      "ocolMinor\022\035\n\npackage_id\030\003 \001(\tR\tpackageId" +
-      "\022!\n\014component_id\030\004 \001(\tR\013componentId\0227\n\006l" +
-      "imits\030\005 \001(\0132\037.nervus.ipc.v1.ConnectionLi" +
-      "mitsR\006limits\"\316\003\n\020ConnectionLimits\022&\n\017max" +
-      "_frame_bytes\030\001 \001(\rR\rmaxFrameBytes\022?\n\034def" +
-      "ault_method_payload_bytes\030\002 \001(\rR\031default" +
-      "MethodPayloadBytes\0222\n\025max_inflight_reque" +
-      "sts\030\003 \001(\rR\023maxInflightRequests\022;\n\032max_in" +
-      "flight_payload_bytes\030\004 \001(\004R\027maxInflightP" +
-      "ayloadBytes\0227\n\030max_outbound_queue_bytes\030" +
-      "\005 \001(\004R\025maxOutboundQueueBytes\022+\n\021max_subs" +
-      "criptions\030\006 \001(\rR\020maxSubscriptions\022,\n\022def" +
-      "ault_timeout_ms\030\007 \001(\rR\020defaultTimeoutMs\022" +
-      "$\n\016max_timeout_ms\030\010 \001(\rR\014maxTimeoutMs\022&\n" +
-      "\017idle_timeout_ms\030\t \001(\rR\ridleTimeoutMs\"\237\002" +
-      "\n\017ResolveEndpoint\022\035\n\nrequest_id\030\001 \001(\004R\tr" +
-      "equestId\022!\n\014interface_id\030\002 \001(\tR\013interfac" +
-      "eId\022.\n\023min_interface_major\030\003 \001(\rR\021minInt" +
-      "erfaceMajor\022.\n\023max_interface_major\030\004 \001(\r" +
-      "R\021maxInterfaceMajor\022;\n\010selector\030\005 \001(\0132\037." +
-      "nervus.ipc.v1.ResourceSelectorR\010selector" +
-      "\022-\n\022explicit_component\030\006 \001(\tR\021explicitCo" +
-      "mponent\":\n\020ResourceSelector\022\022\n\004type\030\001 \001(" +
-      "\tR\004type\022\022\n\004role\030\002 \001(\tR\004role\"\270\001\n\025ResolveE" +
-      "ndpointResult\022\035\n\nrequest_id\030\001 \001(\004R\treque" +
-      "stId\022A\n\007success\030\002 \001(\0132%.nervus.ipc.v1.Re" +
-      "solveEndpointSuccessH\000R\007success\0222\n\007failu" +
-      "re\030\003 \001(\0132\026.nervus.ipc.v1.FailureH\000R\007fail" +
-      "ureB\t\n\007outcome\"\223\002\n\026ResolveEndpointSucces" +
-      "s\022\037\n\013endpoint_id\030\001 \001(\004R\nendpointId\022\'\n\017in" +
-      "terface_major\030\002 \001(\rR\016interfaceMajor\022\'\n\017i" +
-      "nterface_minor\030\003 \001(\rR\016interfaceMinor\0222\n\025" +
-      "interface_schema_hash\030\004 \001(\014R\023interfaceSc" +
-      "hemaHash\022\'\n\017resource_handle\030\005 \001(\tR\016resou" +
-      "rceHandle\022)\n\020catalog_revision\030\006 \001(\004R\017cat" +
-      "alogRevision\"\203\002\n\020RegisterEndpoint\022\035\n\nreq" +
-      "uest_id\030\001 \001(\004R\trequestId\022!\n\014interface_id" +
-      "\030\002 \001(\tR\013interfaceId\022\'\n\017interface_major\030\003" +
-      " \001(\rR\016interfaceMajor\022\'\n\017interface_minor\030" +
-      "\004 \001(\rR\016interfaceMinor\0222\n\025interface_schem" +
-      "a_hash\030\005 \001(\014R\023interfaceSchemaHash\022\'\n\017res" +
-      "ource_handle\030\006 \001(\tR\016resourceHandle\"\272\001\n\026R" +
-      "egisterEndpointResult\022\035\n\nrequest_id\030\001 \001(" +
-      "\004R\trequestId\022B\n\007success\030\002 \001(\0132&.nervus.i" +
-      "pc.v1.RegisterEndpointSuccessH\000R\007success" +
-      "\0222\n\007failure\030\003 \001(\0132\026.nervus.ipc.v1.Failur" +
-      "eH\000R\007failureB\t\n\007outcome\":\n\027RegisterEndpo" +
-      "intSuccess\022\037\n\013endpoint_id\030\001 \001(\004R\nendpoin" +
-      "tId\"j\n\022UnregisterEndpoint\022\035\n\nrequest_id\030" +
-      "\001 \001(\004R\trequestId\022\037\n\013endpoint_id\030\002 \001(\004R\ne" +
-      "ndpointId\022\024\n\005drain\030\003 \001(\010R\005drain\"\276\001\n\030Unre" +
-      "gisterEndpointResult\022\035\n\nrequest_id\030\001 \001(\004" +
-      "R\trequestId\022D\n\007success\030\002 \001(\0132(.nervus.ip" +
-      "c.v1.UnregisterEndpointSuccessH\000R\007succes" +
-      "s\0222\n\007failure\030\003 \001(\0132\026.nervus.ipc.v1.Failu" +
-      "reH\000R\007failureB\t\n\007outcome\"\033\n\031UnregisterEn" +
-      "dpointSuccess\"j\n\014EndpointDied\022\037\n\013endpoin" +
-      "t_id\030\001 \001(\004R\nendpointId\0229\n\006reason\030\002 \001(\0162!" +
-      ".nervus.ipc.v1.EndpointDiedReasonR\006reaso" +
-      "n\"p\n\017EndpointRevoked\022\037\n\013endpoint_id\030\001 \001(" +
-      "\004R\nendpointId\022<\n\006reason\030\002 \001(\0162$.nervus.i" +
-      "pc.v1.EndpointRevokedReasonR\006reason\"\237\001\n\007" +
-      "Request\022\035\n\nrequest_id\030\001 \001(\004R\trequestId\022\037" +
-      "\n\013endpoint_id\030\002 \001(\004R\nendpointId\022\033\n\tmetho" +
-      "d_id\030\003 \001(\rR\010methodId\022\035\n\ntimeout_ms\030\004 \001(\r" +
-      "R\ttimeoutMs\022\030\n\007payload\030\005 \001(\014R\007payload\"\234\001" +
-      "\n\010Response\022\035\n\nrequest_id\030\001 \001(\004R\trequestI" +
-      "d\0222\n\007success\030\002 \001(\0132\026.nervus.ipc.v1.Succe" +
-      "ssH\000R\007success\0222\n\007failure\030\003 \001(\0132\026.nervus." +
-      "ipc.v1.FailureH\000R\007failureB\t\n\007outcome\"\'\n\006" +
-      "Cancel\022\035\n\nrequest_id\030\001 \001(\004R\trequestId\"\200\001" +
-      "\n\tSubscribe\022\035\n\nrequest_id\030\001 \001(\004R\trequest" +
-      "Id\022\037\n\013endpoint_id\030\002 \001(\004R\nendpointId\022\031\n\010e" +
-      "vent_id\030\003 \001(\rR\007eventId\022\030\n\007payload\030\004 \001(\014R" +
-      "\007payload\"\254\001\n\017SubscribeResult\022\035\n\nrequest_" +
-      "id\030\001 \001(\004R\trequestId\022;\n\007success\030\002 \001(\0132\037.n" +
-      "ervus.ipc.v1.SubscribeSuccessH\000R\007success" +
-      "\0222\n\007failure\030\003 \001(\0132\026.nervus.ipc.v1.Failur" +
-      "eH\000R\007failureB\t\n\007outcome\"\200\001\n\020SubscribeSuc" +
-      "cess\022\'\n\017subscription_id\030\001 \001(\004R\016subscript" +
-      "ionId\022C\n\016delivery_class\030\002 \001(\0162\034.nervus.i" +
-      "pc.v1.DeliveryClassR\rdeliveryClass\"U\n\013Un" +
-      "subscribe\022\035\n\nrequest_id\030\001 \001(\004R\trequestId" +
-      "\022\'\n\017subscription_id\030\002 \001(\004R\016subscriptionI" +
-      "d\"\260\001\n\021UnsubscribeResult\022\035\n\nrequest_id\030\001 " +
-      "\001(\004R\trequestId\022=\n\007success\030\002 \001(\0132!.nervus" +
-      ".ipc.v1.UnsubscribeSuccessH\000R\007success\0222\n" +
-      "\007failure\030\003 \001(\0132\026.nervus.ipc.v1.FailureH\000" +
-      "R\007failureB\t\n\007outcome\"\024\n\022UnsubscribeSucce" +
-      "ss\"\274\001\n\005Event\022\'\n\017subscription_id\030\001 \001(\004R\016s" +
-      "ubscriptionId\022\032\n\010sequence\030\002 \001(\004R\010sequenc" +
-      "e\022\037\n\013endpoint_id\030\003 \001(\004R\nendpointId\022\031\n\010ev" +
-      "ent_id\030\004 \001(\rR\007eventId\022\030\n\007payload\030\005 \001(\014R\007" +
-      "payload\022\030\n\007dropped\030\006 \001(\004R\007dropped\"~\n\022Sub" +
-      "scriptionClosed\022\'\n\017subscription_id\030\001 \001(\004" +
-      "R\016subscriptionId\022?\n\006reason\030\002 \001(\0162\'.nervu" +
-      "s.ipc.v1.SubscriptionClosedReasonR\006reaso" +
-      "n\"\326\001\n\010Dispatch\022\031\n\010route_id\030\001 \001(\004R\007routeI" +
-      "d\022\037\n\013endpoint_id\030\002 \001(\004R\nendpointId\022\033\n\tme" +
-      "thod_id\030\003 \001(\rR\010methodId\022!\n\014remaining_ms\030" +
-      "\004 \001(\rR\013remainingMs\022\030\n\007payload\030\005 \001(\014R\007pay" +
-      "load\0224\n\006caller\030\006 \001(\0132\034.nervus.ipc.v1.Cal" +
-      "lerContextR\006caller\"\372\001\n\rCallerContext\022\035\n\n" +
-      "package_id\030\001 \001(\tR\tpackageId\022!\n\014component" +
-      "_id\030\002 \001(\tR\013componentId\022\020\n\003uid\030\003 \001(\rR\003uid" +
-      "\022\020\n\003gid\030\004 \001(\rR\003gid\022\020\n\003pid\030\005 \001(\005R\003pid\022@\n\r" +
-      "trust_profile\030\006 \001(\0162\033.nervus.ipc.v1.Trus" +
-      "tProfileR\014trustProfile\022/\n\023granted_permis" +
-      "sions\030\007 \003(\tR\022grantedPermissions\"\236\001\n\016Disp" +
-      "atchResult\022\031\n\010route_id\030\001 \001(\004R\007routeId\0222\n" +
-      "\007success\030\002 \001(\0132\026.nervus.ipc.v1.SuccessH\000" +
-      "R\007success\0222\n\007failure\030\003 \001(\0132\026.nervus.ipc." +
-      "v1.FailureH\000R\007failureB\t\n\007outcome\"h\n\016Canc" +
-      "elDispatch\022\031\n\010route_id\030\001 \001(\004R\007routeId\022;\n" +
-      "\006reason\030\002 \001(\0162#.nervus.ipc.v1.CancelDisp" +
-      "atchReasonR\006reason\"\034\n\004Ping\022\024\n\005nonce\030\001 \001(" +
-      "\004R\005nonce\"\034\n\004Pong\022\024\n\005nonce\030\001 \001(\004R\005nonce\"\361" +
-      "\001\n\016AcquireControl\022\035\n\nrequest_id\030\001 \001(\004R\tr" +
-      "equestId\022I\n\020controller_class\030\002 \001(\0162\036.ner" +
-      "vus.ipc.v1.ControllerClassR\017controllerCl" +
-      "ass\022;\n\010resource\030\003 \001(\0132\037.nervus.ipc.v1.Re" +
-      "sourceSelectorR\010resource\0228\n\030requested_de" +
-      "adline_nanos\030\004 \001(\003R\026requestedDeadlineNan" +
-      "os\"\266\001\n\024AcquireControlResult\022\035\n\nrequest_i" +
-      "d\030\001 \001(\004R\trequestId\022@\n\007success\030\002 \001(\0132$.ne" +
-      "rvus.ipc.v1.AcquireControlSuccessH\000R\007suc" +
+      "ultH\000R\024releaseControlResult\022K\n\020launch_co" +
+      "mponent\030P \001(\0132\036.nervus.ipc.v1.LaunchComp" +
+      "onentH\000R\017launchComponent\022^\n\027launch_compo" +
+      "nent_result\030Q \001(\0132$.nervus.ipc.v1.Launch" +
+      "ComponentResultH\000R\025launchComponentResult" +
+      "B\006\n\004body\"\201\002\n\005Hello\022,\n\022min_protocol_major" +
+      "\030\001 \001(\rR\020minProtocolMajor\022,\n\022max_protocol" +
+      "_major\030\002 \001(\rR\020maxProtocolMajor\022,\n\022max_pr" +
+      "otocol_minor\030\003 \001(\rR\020maxProtocolMinor\022\031\n\010" +
+      "sdk_name\030\004 \001(\tR\007sdkName\022\037\n\013sdk_version\030\005" +
+      " \001(\tR\nsdkVersion\0222\n\025declared_component_i" +
+      "d\030\006 \001(\tR\023declaredComponentId\"\205\001\n\010HelloAc" +
+      "k\022:\n\007success\030\001 \001(\0132\036.nervus.ipc.v1.Hello" +
+      "AckSuccessH\000R\007success\0222\n\007failure\030\002 \001(\0132\026" +
+      ".nervus.ipc.v1.FailureH\000R\007failureB\t\n\007out" +
+      "come\"\332\001\n\017HelloAckSuccess\022%\n\016protocol_maj" +
+      "or\030\001 \001(\rR\rprotocolMajor\022%\n\016protocol_mino" +
+      "r\030\002 \001(\rR\rprotocolMinor\022\035\n\npackage_id\030\003 \001" +
+      "(\tR\tpackageId\022!\n\014component_id\030\004 \001(\tR\013com" +
+      "ponentId\0227\n\006limits\030\005 \001(\0132\037.nervus.ipc.v1" +
+      ".ConnectionLimitsR\006limits\"\316\003\n\020Connection" +
+      "Limits\022&\n\017max_frame_bytes\030\001 \001(\rR\rmaxFram" +
+      "eBytes\022?\n\034default_method_payload_bytes\030\002" +
+      " \001(\rR\031defaultMethodPayloadBytes\0222\n\025max_i" +
+      "nflight_requests\030\003 \001(\rR\023maxInflightReque" +
+      "sts\022;\n\032max_inflight_payload_bytes\030\004 \001(\004R" +
+      "\027maxInflightPayloadBytes\0227\n\030max_outbound" +
+      "_queue_bytes\030\005 \001(\004R\025maxOutboundQueueByte" +
+      "s\022+\n\021max_subscriptions\030\006 \001(\rR\020maxSubscri" +
+      "ptions\022,\n\022default_timeout_ms\030\007 \001(\rR\020defa" +
+      "ultTimeoutMs\022$\n\016max_timeout_ms\030\010 \001(\rR\014ma" +
+      "xTimeoutMs\022&\n\017idle_timeout_ms\030\t \001(\rR\ridl" +
+      "eTimeoutMs\"\237\002\n\017ResolveEndpoint\022\035\n\nreques" +
+      "t_id\030\001 \001(\004R\trequestId\022!\n\014interface_id\030\002 " +
+      "\001(\tR\013interfaceId\022.\n\023min_interface_major\030" +
+      "\003 \001(\rR\021minInterfaceMajor\022.\n\023max_interfac" +
+      "e_major\030\004 \001(\rR\021maxInterfaceMajor\022;\n\010sele" +
+      "ctor\030\005 \001(\0132\037.nervus.ipc.v1.ResourceSelec" +
+      "torR\010selector\022-\n\022explicit_component\030\006 \001(" +
+      "\tR\021explicitComponent\":\n\020ResourceSelector" +
+      "\022\022\n\004type\030\001 \001(\tR\004type\022\022\n\004role\030\002 \001(\tR\004role" +
+      "\"\270\001\n\025ResolveEndpointResult\022\035\n\nrequest_id" +
+      "\030\001 \001(\004R\trequestId\022A\n\007success\030\002 \001(\0132%.ner" +
+      "vus.ipc.v1.ResolveEndpointSuccessH\000R\007suc" +
       "cess\0222\n\007failure\030\003 \001(\0132\026.nervus.ipc.v1.Fa" +
-      "ilureH\000R\007failureB\t\n\007outcome\"\245\001\n\025AcquireC" +
-      "ontrolSuccess\022\031\n\010lease_id\030\001 \001(\004R\007leaseId" +
-      "\022!\n\014motion_epoch\030\002 \001(\004R\013motionEpoch\022%\n\016d" +
-      "eadline_nanos\030\003 \001(\003R\rdeadlineNanos\022\'\n\017re" +
-      "source_handle\030\004 \001(\tR\016resourceHandle\"J\n\016R" +
-      "eleaseControl\022\035\n\nrequest_id\030\001 \001(\004R\treque" +
-      "stId\022\031\n\010lease_id\030\002 \001(\004R\007leaseId\"\250\001\n\024Rele" +
-      "aseControlResult\022\035\n\nrequest_id\030\001 \001(\004R\tre" +
-      "questId\0222\n\007success\030\002 \001(\0132\026.nervus.ipc.v1" +
-      ".SuccessH\000R\007success\0222\n\007failure\030\003 \001(\0132\026.n" +
-      "ervus.ipc.v1.FailureH\000R\007failureB\t\n\007outco" +
-      "me\"Y\n\027ControlLeaseErrorDetail\022>\n\006reason\030" +
-      "\001 \001(\0162&.nervus.ipc.v1.ControlLeaseErrorR" +
-      "easonR\006reason*\346\001\n\022EndpointDiedReason\022$\n " +
-      "ENDPOINT_DIED_REASON_UNSPECIFIED\020\000\022%\n!EN" +
-      "DPOINT_DIED_REASON_SERVICE_GONE\020\001\022.\n*END" +
-      "POINT_DIED_REASON_SERVICE_SHUTTING_DOWN\020" +
-      "\002\022\'\n#ENDPOINT_DIED_REASON_RESOURCE_FAULT" +
-      "\020\003\022*\n&ENDPOINT_DIED_REASON_SERVICE_RESTA" +
-      "RTED\020\004*\314\001\n\025EndpointRevokedReason\022\'\n#ENDP" +
-      "OINT_REVOKED_REASON_UNSPECIFIED\020\000\022.\n*END" +
-      "POINT_REVOKED_REASON_PERMISSION_REVOKED\020" +
-      "\001\022,\n(ENDPOINT_REVOKED_REASON_PACKAGE_DIS" +
-      "ABLED\020\002\022,\n(ENDPOINT_REVOKED_REASON_POLIC" +
-      "Y_SUSPENDED\020\003*\200\001\n\rDeliveryClass\022\036\n\032DELIV" +
-      "ERY_CLASS_UNSPECIFIED\020\000\022\033\n\027DELIVERY_CLAS" +
-      "S_RELIABLE\020\001\022\030\n\024DELIVERY_CLASS_STATE\020\002\022\030" +
-      "\n\024DELIVERY_CLASS_LOSSY\020\003*\202\002\n\030Subscriptio" +
-      "nClosedReason\022*\n&SUBSCRIPTION_CLOSED_REA" +
-      "SON_UNSPECIFIED\020\000\022,\n(SUBSCRIPTION_CLOSED" +
-      "_REASON_ENDPOINT_DIED\020\001\022/\n+SUBSCRIPTION_" +
-      "CLOSED_REASON_ENDPOINT_REVOKED\020\002\022+\n\'SUBS" +
-      "CRIPTION_CLOSED_REASON_BACKPRESSURE\020\003\022.\n" +
-      "*SUBSCRIPTION_CLOSED_REASON_SERVER_SHUTD" +
-      "OWN\020\004*|\n\014TrustProfile\022\035\n\031TRUST_PROFILE_U" +
-      "NSPECIFIED\020\000\022\032\n\026TRUST_PROFILE_ORDINARY\020\001" +
-      "\022\025\n\021TRUST_PROFILE_OEM\020\002\022\032\n\026TRUST_PROFILE" +
-      "_PLATFORM\020\003*\301\001\n\024CancelDispatchReason\022&\n\"" +
-      "CANCEL_DISPATCH_REASON_UNSPECIFIED\020\000\022+\n\'" +
-      "CANCEL_DISPATCH_REASON_CLIENT_CANCELLED\020" +
-      "\001\022,\n(CANCEL_DISPATCH_REASON_DEADLINE_EXC" +
-      "EEDED\020\002\022&\n\"CANCEL_DISPATCH_REASON_CLIENT" +
-      "_GONE\020\003*h\n\017ControllerClass\022 \n\034CONTROLLER" +
-      "_CLASS_UNSPECIFIED\020\000\022\032\n\026CONTROLLER_CLASS" +
-      "_HUMAN\020\001\022\027\n\023CONTROLLER_CLASS_AI\020\002*\265\002\n\027Co" +
-      "ntrolLeaseErrorReason\022*\n&CONTROL_LEASE_E" +
-      "RROR_REASON_UNSPECIFIED\020\000\022,\n(CONTROL_LEA" +
-      "SE_ERROR_REASON_HELD_BY_HUMAN\020\001\022)\n%CONTR" +
-      "OL_LEASE_ERROR_REASON_HELD_BY_AI\020\002\0223\n/CO" +
-      "NTROL_LEASE_ERROR_REASON_RESOURCE_UNAVAI" +
-      "LABLE\020\003\022-\n)CONTROL_LEASE_ERROR_REASON_SA" +
-      "FETY_LATCHED\020\004\0221\n-CONTROL_LEASE_ERROR_RE" +
-      "ASON_INVALID_CONTROLLER\020\005Be\n\031io.github.n" +
-      "ervusos.ipc.v1B\rEnvelopeProtoP\001Z7github." +
-      "com/nervus-os/nervus-ipc/go/protocol/ipc" +
-      "v1;ipcv1b\006proto3"
+      "ilureH\000R\007failureB\t\n\007outcome\"\223\002\n\026ResolveE" +
+      "ndpointSuccess\022\037\n\013endpoint_id\030\001 \001(\004R\nend" +
+      "pointId\022\'\n\017interface_major\030\002 \001(\rR\016interf" +
+      "aceMajor\022\'\n\017interface_minor\030\003 \001(\rR\016inter" +
+      "faceMinor\0222\n\025interface_schema_hash\030\004 \001(\014" +
+      "R\023interfaceSchemaHash\022\'\n\017resource_handle" +
+      "\030\005 \001(\tR\016resourceHandle\022)\n\020catalog_revisi" +
+      "on\030\006 \001(\004R\017catalogRevision\"\203\002\n\020RegisterEn" +
+      "dpoint\022\035\n\nrequest_id\030\001 \001(\004R\trequestId\022!\n" +
+      "\014interface_id\030\002 \001(\tR\013interfaceId\022\'\n\017inte" +
+      "rface_major\030\003 \001(\rR\016interfaceMajor\022\'\n\017int" +
+      "erface_minor\030\004 \001(\rR\016interfaceMinor\0222\n\025in" +
+      "terface_schema_hash\030\005 \001(\014R\023interfaceSche" +
+      "maHash\022\'\n\017resource_handle\030\006 \001(\tR\016resourc" +
+      "eHandle\"\272\001\n\026RegisterEndpointResult\022\035\n\nre" +
+      "quest_id\030\001 \001(\004R\trequestId\022B\n\007success\030\002 \001" +
+      "(\0132&.nervus.ipc.v1.RegisterEndpointSucce" +
+      "ssH\000R\007success\0222\n\007failure\030\003 \001(\0132\026.nervus." +
+      "ipc.v1.FailureH\000R\007failureB\t\n\007outcome\":\n\027" +
+      "RegisterEndpointSuccess\022\037\n\013endpoint_id\030\001" +
+      " \001(\004R\nendpointId\"j\n\022UnregisterEndpoint\022\035" +
+      "\n\nrequest_id\030\001 \001(\004R\trequestId\022\037\n\013endpoin" +
+      "t_id\030\002 \001(\004R\nendpointId\022\024\n\005drain\030\003 \001(\010R\005d" +
+      "rain\"\276\001\n\030UnregisterEndpointResult\022\035\n\nreq" +
+      "uest_id\030\001 \001(\004R\trequestId\022D\n\007success\030\002 \001(" +
+      "\0132(.nervus.ipc.v1.UnregisterEndpointSucc" +
+      "essH\000R\007success\0222\n\007failure\030\003 \001(\0132\026.nervus" +
+      ".ipc.v1.FailureH\000R\007failureB\t\n\007outcome\"\033\n" +
+      "\031UnregisterEndpointSuccess\"j\n\014EndpointDi" +
+      "ed\022\037\n\013endpoint_id\030\001 \001(\004R\nendpointId\0229\n\006r" +
+      "eason\030\002 \001(\0162!.nervus.ipc.v1.EndpointDied" +
+      "ReasonR\006reason\"p\n\017EndpointRevoked\022\037\n\013end" +
+      "point_id\030\001 \001(\004R\nendpointId\022<\n\006reason\030\002 \001" +
+      "(\0162$.nervus.ipc.v1.EndpointRevokedReason" +
+      "R\006reason\"\237\001\n\007Request\022\035\n\nrequest_id\030\001 \001(\004" +
+      "R\trequestId\022\037\n\013endpoint_id\030\002 \001(\004R\nendpoi" +
+      "ntId\022\033\n\tmethod_id\030\003 \001(\rR\010methodId\022\035\n\ntim" +
+      "eout_ms\030\004 \001(\rR\ttimeoutMs\022\030\n\007payload\030\005 \001(" +
+      "\014R\007payload\"\234\001\n\010Response\022\035\n\nrequest_id\030\001 " +
+      "\001(\004R\trequestId\0222\n\007success\030\002 \001(\0132\026.nervus" +
+      ".ipc.v1.SuccessH\000R\007success\0222\n\007failure\030\003 " +
+      "\001(\0132\026.nervus.ipc.v1.FailureH\000R\007failureB\t" +
+      "\n\007outcome\"\'\n\006Cancel\022\035\n\nrequest_id\030\001 \001(\004R" +
+      "\trequestId\"\200\001\n\tSubscribe\022\035\n\nrequest_id\030\001" +
+      " \001(\004R\trequestId\022\037\n\013endpoint_id\030\002 \001(\004R\nen" +
+      "dpointId\022\031\n\010event_id\030\003 \001(\rR\007eventId\022\030\n\007p" +
+      "ayload\030\004 \001(\014R\007payload\"\254\001\n\017SubscribeResul" +
+      "t\022\035\n\nrequest_id\030\001 \001(\004R\trequestId\022;\n\007succ" +
+      "ess\030\002 \001(\0132\037.nervus.ipc.v1.SubscribeSucce" +
+      "ssH\000R\007success\0222\n\007failure\030\003 \001(\0132\026.nervus." +
+      "ipc.v1.FailureH\000R\007failureB\t\n\007outcome\"\200\001\n" +
+      "\020SubscribeSuccess\022\'\n\017subscription_id\030\001 \001" +
+      "(\004R\016subscriptionId\022C\n\016delivery_class\030\002 \001" +
+      "(\0162\034.nervus.ipc.v1.DeliveryClassR\rdelive" +
+      "ryClass\"U\n\013Unsubscribe\022\035\n\nrequest_id\030\001 \001" +
+      "(\004R\trequestId\022\'\n\017subscription_id\030\002 \001(\004R\016" +
+      "subscriptionId\"\260\001\n\021UnsubscribeResult\022\035\n\n" +
+      "request_id\030\001 \001(\004R\trequestId\022=\n\007success\030\002" +
+      " \001(\0132!.nervus.ipc.v1.UnsubscribeSuccessH" +
+      "\000R\007success\0222\n\007failure\030\003 \001(\0132\026.nervus.ipc" +
+      ".v1.FailureH\000R\007failureB\t\n\007outcome\"\024\n\022Uns" +
+      "ubscribeSuccess\"\274\001\n\005Event\022\'\n\017subscriptio" +
+      "n_id\030\001 \001(\004R\016subscriptionId\022\032\n\010sequence\030\002" +
+      " \001(\004R\010sequence\022\037\n\013endpoint_id\030\003 \001(\004R\nend" +
+      "pointId\022\031\n\010event_id\030\004 \001(\rR\007eventId\022\030\n\007pa" +
+      "yload\030\005 \001(\014R\007payload\022\030\n\007dropped\030\006 \001(\004R\007d" +
+      "ropped\"~\n\022SubscriptionClosed\022\'\n\017subscrip" +
+      "tion_id\030\001 \001(\004R\016subscriptionId\022?\n\006reason\030" +
+      "\002 \001(\0162\'.nervus.ipc.v1.SubscriptionClosed" +
+      "ReasonR\006reason\"\326\001\n\010Dispatch\022\031\n\010route_id\030" +
+      "\001 \001(\004R\007routeId\022\037\n\013endpoint_id\030\002 \001(\004R\nend" +
+      "pointId\022\033\n\tmethod_id\030\003 \001(\rR\010methodId\022!\n\014" +
+      "remaining_ms\030\004 \001(\rR\013remainingMs\022\030\n\007paylo" +
+      "ad\030\005 \001(\014R\007payload\0224\n\006caller\030\006 \001(\0132\034.nerv" +
+      "us.ipc.v1.CallerContextR\006caller\"\372\001\n\rCall" +
+      "erContext\022\035\n\npackage_id\030\001 \001(\tR\tpackageId" +
+      "\022!\n\014component_id\030\002 \001(\tR\013componentId\022\020\n\003u" +
+      "id\030\003 \001(\rR\003uid\022\020\n\003gid\030\004 \001(\rR\003gid\022\020\n\003pid\030\005" +
+      " \001(\005R\003pid\022@\n\rtrust_profile\030\006 \001(\0162\033.nervu" +
+      "s.ipc.v1.TrustProfileR\014trustProfile\022/\n\023g" +
+      "ranted_permissions\030\007 \003(\tR\022grantedPermiss" +
+      "ions\"\236\001\n\016DispatchResult\022\031\n\010route_id\030\001 \001(" +
+      "\004R\007routeId\0222\n\007success\030\002 \001(\0132\026.nervus.ipc" +
+      ".v1.SuccessH\000R\007success\0222\n\007failure\030\003 \001(\0132" +
+      "\026.nervus.ipc.v1.FailureH\000R\007failureB\t\n\007ou" +
+      "tcome\"h\n\016CancelDispatch\022\031\n\010route_id\030\001 \001(" +
+      "\004R\007routeId\022;\n\006reason\030\002 \001(\0162#.nervus.ipc." +
+      "v1.CancelDispatchReasonR\006reason\"\034\n\004Ping\022" +
+      "\024\n\005nonce\030\001 \001(\004R\005nonce\"\034\n\004Pong\022\024\n\005nonce\030\001" +
+      " \001(\004R\005nonce\"\361\001\n\016AcquireControl\022\035\n\nreques" +
+      "t_id\030\001 \001(\004R\trequestId\022I\n\020controller_clas" +
+      "s\030\002 \001(\0162\036.nervus.ipc.v1.ControllerClassR" +
+      "\017controllerClass\022;\n\010resource\030\003 \001(\0132\037.ner" +
+      "vus.ipc.v1.ResourceSelectorR\010resource\0228\n" +
+      "\030requested_deadline_nanos\030\004 \001(\003R\026request" +
+      "edDeadlineNanos\"\266\001\n\024AcquireControlResult" +
+      "\022\035\n\nrequest_id\030\001 \001(\004R\trequestId\022@\n\007succe" +
+      "ss\030\002 \001(\0132$.nervus.ipc.v1.AcquireControlS" +
+      "uccessH\000R\007success\0222\n\007failure\030\003 \001(\0132\026.ner" +
+      "vus.ipc.v1.FailureH\000R\007failureB\t\n\007outcome" +
+      "\"\245\001\n\025AcquireControlSuccess\022\031\n\010lease_id\030\001" +
+      " \001(\004R\007leaseId\022!\n\014motion_epoch\030\002 \001(\004R\013mot" +
+      "ionEpoch\022%\n\016deadline_nanos\030\003 \001(\003R\rdeadli" +
+      "neNanos\022\'\n\017resource_handle\030\004 \001(\tR\016resour" +
+      "ceHandle\"J\n\016ReleaseControl\022\035\n\nrequest_id" +
+      "\030\001 \001(\004R\trequestId\022\031\n\010lease_id\030\002 \001(\004R\007lea" +
+      "seId\"\250\001\n\024ReleaseControlResult\022\035\n\nrequest" +
+      "_id\030\001 \001(\004R\trequestId\0222\n\007success\030\002 \001(\0132\026." +
+      "nervus.ipc.v1.SuccessH\000R\007success\0222\n\007fail" +
+      "ure\030\003 \001(\0132\026.nervus.ipc.v1.FailureH\000R\007fai" +
+      "lureB\t\n\007outcome\"Y\n\027ControlLeaseErrorDeta" +
+      "il\022>\n\006reason\030\001 \001(\0162&.nervus.ipc.v1.Contr" +
+      "olLeaseErrorReasonR\006reason\"r\n\017LaunchComp" +
+      "onent\022\035\n\nrequest_id\030\001 \001(\004R\trequestId\022\035\n\n" +
+      "package_id\030\002 \001(\tR\tpackageId\022!\n\014component" +
+      "_id\030\003 \001(\tR\013componentId\"\270\001\n\025LaunchCompone" +
+      "ntResult\022\035\n\nrequest_id\030\001 \001(\004R\trequestId\022" +
+      "A\n\007success\030\002 \001(\0132%.nervus.ipc.v1.LaunchC" +
+      "omponentSuccessH\000R\007success\0222\n\007failure\030\003 " +
+      "\001(\0132\026.nervus.ipc.v1.FailureH\000R\007failureB\t" +
+      "\n\007outcome\"A\n\026LaunchComponentSuccess\022\'\n\017a" +
+      "lready_running\030\001 \001(\010R\016alreadyRunning\"Z\n\032" +
+      "LaunchComponentErrorDetail\022<\n\006reason\030\001 \001" +
+      "(\0162$.nervus.ipc.v1.LaunchComponentReason" +
+      "R\006reason*\346\001\n\022EndpointDiedReason\022$\n ENDPO" +
+      "INT_DIED_REASON_UNSPECIFIED\020\000\022%\n!ENDPOIN" +
+      "T_DIED_REASON_SERVICE_GONE\020\001\022.\n*ENDPOINT" +
+      "_DIED_REASON_SERVICE_SHUTTING_DOWN\020\002\022\'\n#" +
+      "ENDPOINT_DIED_REASON_RESOURCE_FAULT\020\003\022*\n" +
+      "&ENDPOINT_DIED_REASON_SERVICE_RESTARTED\020" +
+      "\004*\314\001\n\025EndpointRevokedReason\022\'\n#ENDPOINT_" +
+      "REVOKED_REASON_UNSPECIFIED\020\000\022.\n*ENDPOINT" +
+      "_REVOKED_REASON_PERMISSION_REVOKED\020\001\022,\n(" +
+      "ENDPOINT_REVOKED_REASON_PACKAGE_DISABLED" +
+      "\020\002\022,\n(ENDPOINT_REVOKED_REASON_POLICY_SUS" +
+      "PENDED\020\003*\200\001\n\rDeliveryClass\022\036\n\032DELIVERY_C" +
+      "LASS_UNSPECIFIED\020\000\022\033\n\027DELIVERY_CLASS_REL" +
+      "IABLE\020\001\022\030\n\024DELIVERY_CLASS_STATE\020\002\022\030\n\024DEL" +
+      "IVERY_CLASS_LOSSY\020\003*\202\002\n\030SubscriptionClos" +
+      "edReason\022*\n&SUBSCRIPTION_CLOSED_REASON_U" +
+      "NSPECIFIED\020\000\022,\n(SUBSCRIPTION_CLOSED_REAS" +
+      "ON_ENDPOINT_DIED\020\001\022/\n+SUBSCRIPTION_CLOSE" +
+      "D_REASON_ENDPOINT_REVOKED\020\002\022+\n\'SUBSCRIPT" +
+      "ION_CLOSED_REASON_BACKPRESSURE\020\003\022.\n*SUBS" +
+      "CRIPTION_CLOSED_REASON_SERVER_SHUTDOWN\020\004" +
+      "*|\n\014TrustProfile\022\035\n\031TRUST_PROFILE_UNSPEC" +
+      "IFIED\020\000\022\032\n\026TRUST_PROFILE_ORDINARY\020\001\022\025\n\021T" +
+      "RUST_PROFILE_OEM\020\002\022\032\n\026TRUST_PROFILE_PLAT" +
+      "FORM\020\003*\301\001\n\024CancelDispatchReason\022&\n\"CANCE" +
+      "L_DISPATCH_REASON_UNSPECIFIED\020\000\022+\n\'CANCE" +
+      "L_DISPATCH_REASON_CLIENT_CANCELLED\020\001\022,\n(" +
+      "CANCEL_DISPATCH_REASON_DEADLINE_EXCEEDED" +
+      "\020\002\022&\n\"CANCEL_DISPATCH_REASON_CLIENT_GONE" +
+      "\020\003*h\n\017ControllerClass\022 \n\034CONTROLLER_CLAS" +
+      "S_UNSPECIFIED\020\000\022\032\n\026CONTROLLER_CLASS_HUMA" +
+      "N\020\001\022\027\n\023CONTROLLER_CLASS_AI\020\002*\265\002\n\027Control" +
+      "LeaseErrorReason\022*\n&CONTROL_LEASE_ERROR_" +
+      "REASON_UNSPECIFIED\020\000\022,\n(CONTROL_LEASE_ER" +
+      "ROR_REASON_HELD_BY_HUMAN\020\001\022)\n%CONTROL_LE" +
+      "ASE_ERROR_REASON_HELD_BY_AI\020\002\0223\n/CONTROL" +
+      "_LEASE_ERROR_REASON_RESOURCE_UNAVAILABLE" +
+      "\020\003\022-\n)CONTROL_LEASE_ERROR_REASON_SAFETY_" +
+      "LATCHED\020\004\0221\n-CONTROL_LEASE_ERROR_REASON_" +
+      "INVALID_CONTROLLER\020\005*\250\002\n\025LaunchComponent" +
+      "Reason\022\'\n#LAUNCH_COMPONENT_REASON_UNSPEC" +
+      "IFIED\020\000\022-\n)LAUNCH_COMPONENT_REASON_PACKA" +
+      "GE_NOT_FOUND\020\001\022/\n+LAUNCH_COMPONENT_REASO" +
+      "N_COMPONENT_NOT_FOUND\020\002\022.\n*LAUNCH_COMPON" +
+      "ENT_REASON_COMPONENT_DISABLED\020\003\022,\n(LAUNC" +
+      "H_COMPONENT_REASON_COMPONENT_FAILED\020\004\022(\n" +
+      "$LAUNCH_COMPONENT_REASON_SPAWN_FAILED\020\005B" +
+      "e\n\031io.github.nervusos.ipc.v1B\rEnvelopePr" +
+      "otoP\001Z7github.com/nervus-os/nervus-ipc/g" +
+      "o/protocol/ipcv1;ipcv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -494,7 +537,7 @@ public final class EnvelopeProto {
     internal_static_nervus_ipc_v1_Envelope_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_Envelope_descriptor,
-        new java.lang.String[] { "ProtocolMajor", "ProtocolMinor", "Hello", "HelloAck", "ResolveEndpoint", "ResolveEndpointResult", "RegisterEndpoint", "RegisterEndpointResult", "EndpointDied", "EndpointRevoked", "UnregisterEndpoint", "UnregisterEndpointResult", "Request", "Response", "Cancel", "Subscribe", "SubscribeResult", "Unsubscribe", "Event", "UnsubscribeResult", "SubscriptionClosed", "Dispatch", "DispatchResult", "CancelDispatch", "Ping", "Pong", "AcquireControl", "AcquireControlResult", "ReleaseControl", "ReleaseControlResult", "Body", });
+        new java.lang.String[] { "ProtocolMajor", "ProtocolMinor", "Hello", "HelloAck", "ResolveEndpoint", "ResolveEndpointResult", "RegisterEndpoint", "RegisterEndpointResult", "EndpointDied", "EndpointRevoked", "UnregisterEndpoint", "UnregisterEndpointResult", "Request", "Response", "Cancel", "Subscribe", "SubscribeResult", "Unsubscribe", "Event", "UnsubscribeResult", "SubscriptionClosed", "Dispatch", "DispatchResult", "CancelDispatch", "Ping", "Pong", "AcquireControl", "AcquireControlResult", "ReleaseControl", "ReleaseControlResult", "LaunchComponent", "LaunchComponentResult", "Body", });
     internal_static_nervus_ipc_v1_Hello_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_nervus_ipc_v1_Hello_fieldAccessorTable = new
@@ -728,6 +771,30 @@ public final class EnvelopeProto {
     internal_static_nervus_ipc_v1_ControlLeaseErrorDetail_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_ControlLeaseErrorDetail_descriptor,
+        new java.lang.String[] { "Reason", });
+    internal_static_nervus_ipc_v1_LaunchComponent_descriptor =
+      getDescriptor().getMessageTypes().get(40);
+    internal_static_nervus_ipc_v1_LaunchComponent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_nervus_ipc_v1_LaunchComponent_descriptor,
+        new java.lang.String[] { "RequestId", "PackageId", "ComponentId", });
+    internal_static_nervus_ipc_v1_LaunchComponentResult_descriptor =
+      getDescriptor().getMessageTypes().get(41);
+    internal_static_nervus_ipc_v1_LaunchComponentResult_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_nervus_ipc_v1_LaunchComponentResult_descriptor,
+        new java.lang.String[] { "RequestId", "Success", "Failure", "Outcome", });
+    internal_static_nervus_ipc_v1_LaunchComponentSuccess_descriptor =
+      getDescriptor().getMessageTypes().get(42);
+    internal_static_nervus_ipc_v1_LaunchComponentSuccess_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_nervus_ipc_v1_LaunchComponentSuccess_descriptor,
+        new java.lang.String[] { "AlreadyRunning", });
+    internal_static_nervus_ipc_v1_LaunchComponentErrorDetail_descriptor =
+      getDescriptor().getMessageTypes().get(43);
+    internal_static_nervus_ipc_v1_LaunchComponentErrorDetail_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_nervus_ipc_v1_LaunchComponentErrorDetail_descriptor,
         new java.lang.String[] { "Reason", });
     descriptor.resolveAllFeaturesImmutable();
     io.github.nervusos.ipc.v1.StatusProto.getDescriptor();

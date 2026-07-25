@@ -641,5 +641,68 @@ public interface EnvelopeOrBuilder extends
    */
   io.github.nervusos.ipc.v1.ReleaseControlResultOrBuilder getReleaseControlResultOrBuilder();
 
+  /**
+   * <pre>
+   * --- 组件启动 ---
+   * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+   * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+   * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+   * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+   * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+   * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+   * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+   * @return Whether the launchComponent field is set.
+   */
+  boolean hasLaunchComponent();
+  /**
+   * <pre>
+   * --- 组件启动 ---
+   * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+   * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+   * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+   * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+   * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+   * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+   * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+   * @return The launchComponent.
+   */
+  io.github.nervusos.ipc.v1.LaunchComponent getLaunchComponent();
+  /**
+   * <pre>
+   * --- 组件启动 ---
+   * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+   * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+   * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+   * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+   * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+   * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+   * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+   */
+  io.github.nervusos.ipc.v1.LaunchComponentOrBuilder getLaunchComponentOrBuilder();
+
+  /**
+   * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+   * @return Whether the launchComponentResult field is set.
+   */
+  boolean hasLaunchComponentResult();
+  /**
+   * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+   * @return The launchComponentResult.
+   */
+  io.github.nervusos.ipc.v1.LaunchComponentResult getLaunchComponentResult();
+  /**
+   * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+   */
+  io.github.nervusos.ipc.v1.LaunchComponentResultOrBuilder getLaunchComponentResultOrBuilder();
+
   io.github.nervusos.ipc.v1.Envelope.BodyCase getBodyCase();
 }

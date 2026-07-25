@@ -125,6 +125,17 @@ message Envelope {
     AcquireControlResult acquire_control_result = 71;
     ReleaseControl release_control = 72;
     ReleaseControlResult release_control_result = 73;
+
+    // --- 组件启动 ---
+    // 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+    // 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+    // 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+    //   1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+    //   2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+    //   3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+    // 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+    LaunchComponent launch_component = 80;
+    LaunchComponentResult launch_component_result = 81;
   }
 }
 
@@ -866,4 +877,79 @@ enum ControlLeaseErrorReason {
   CONTROL_LEASE_ERROR_REASON_SAFETY_LATCHED = 4;
   // controller_class 非法（UNSPECIFIED，或客户端试图申请 NONE 语义）。
   CONTROL_LEASE_ERROR_REASON_INVALID_CONTROLLER = 5;
+}
+
+// =============================================================================
+// 组件启动
+// =============================================================================
+
+// LaunchComponent 请求 nervud 拉起一个已安装的组件。
+//
+// 这是 Launcher（桌面）点开一个 App 时发出的消息，也是会话服务在开机后把桌面
+// 唤起来的方式。
+//
+// ## 它【不】做的事
+//
+// 不返回任何指向被启动组件的句柄，也不建立任何调用关系。启动完成后调用方想跟
+// 它通信，仍要走正常的 ResolveEndpoint —— 「谁能调它」由那条路径上的权限与
+// 可见性裁决决定，不因为「是我把它启动的」而放松。
+//
+// ## 权限
+//
+// 需要 perm.system.launch。这不是普通应用该有的能力：能任意拉起别的组件
+// 意味着能绕过 on-demand 的节能语义、也能把一个刚被停用又被启用的组件立刻拉起。
+// v1 只给 Launcher 与会话服务。
+message LaunchComponent {
+  // 本连接作用域的请求 ID，语义同 Request.request_id（0 保留，首个为 1，不回绕）。
+  uint64 request_id = 1;
+
+  // 目标 Package。
+  string package_id = 2;
+
+  // 目标 Component。
+  //
+  // 【必填】。不做「留空表示该包唯一的 app 组件」这类推断：一个包完全可能有
+  // 多个 app 组件，而推断规则会在它从一个变成两个的那天悄悄改变行为——
+  // 调用方明确说出要启动谁，是唯一不会在将来变味的语义。
+  string component_id = 3;
+}
+
+message LaunchComponentResult {
+  uint64 request_id = 1;
+  oneof outcome {
+    LaunchComponentSuccess success = 2;
+    // error_detail 的类型固定为 LaunchComponentErrorDetail。
+    Failure failure = 3;
+  }
+}
+
+message LaunchComponentSuccess {
+  // 该组件在本次请求【之前】就已经在运行。
+  //
+  // 有它才能让「检查桌面在不在，不在就拉起来」写成一次调用而不是两次：
+  // 启动本身是幂等的，但调用方往往需要知道自己是不是那个真正把它拉起来的人
+  // （比如决定要不要记一条「桌面重启了」的日志）。
+  bool already_running = 1;
+}
+
+// LaunchComponentErrorDetail 是 LaunchComponent 失败时的固定 detail 类型。
+message LaunchComponentErrorDetail {
+  LaunchComponentReason reason = 1;
+}
+
+enum LaunchComponentReason {
+  LAUNCH_COMPONENT_REASON_UNSPECIFIED = 0;
+  // 没有这个 Package。
+  LAUNCH_COMPONENT_REASON_PACKAGE_NOT_FOUND = 1;
+  // Package 存在但没有这个 Component。
+  LAUNCH_COMPONENT_REASON_COMPONENT_NOT_FOUND = 2;
+  // 组件被停用（nervusctl disable / manifest disableable）。
+  //
+  // 与 NOT_FOUND 分开：前者是「装错了名字」，后者是「有意关掉的」，
+  // Launcher 对两者的展示完全不同——后者应当提示用户去设置里启用。
+  LAUNCH_COMPONENT_REASON_COMPONENT_DISABLED = 3;
+  // 组件已耗尽重启预算被熔断，暂不接受拉起。
+  LAUNCH_COMPONENT_REASON_COMPONENT_FAILED = 4;
+  // 起进程本身失败（systemd 不可用、沙箱属性被拒等）。
+  LAUNCH_COMPONENT_REASON_SPAWN_FAILED = 5;
 }

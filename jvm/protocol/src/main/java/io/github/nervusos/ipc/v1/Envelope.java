@@ -84,6 +84,8 @@ private static final long serialVersionUID = 0L;
     ACQUIRE_CONTROL_RESULT(71),
     RELEASE_CONTROL(72),
     RELEASE_CONTROL_RESULT(73),
+    LAUNCH_COMPONENT(80),
+    LAUNCH_COMPONENT_RESULT(81),
     BODY_NOT_SET(0);
     private final int value;
     private BodyCase(int value) {
@@ -129,6 +131,8 @@ private static final long serialVersionUID = 0L;
         case 71: return ACQUIRE_CONTROL_RESULT;
         case 72: return RELEASE_CONTROL;
         case 73: return RELEASE_CONTROL_RESULT;
+        case 80: return LAUNCH_COMPONENT;
+        case 81: return LAUNCH_COMPONENT_RESULT;
         case 0: return BODY_NOT_SET;
         default: return null;
       }
@@ -1234,6 +1238,101 @@ private static final long serialVersionUID = 0L;
     return io.github.nervusos.ipc.v1.ReleaseControlResult.getDefaultInstance();
   }
 
+  public static final int LAUNCH_COMPONENT_FIELD_NUMBER = 80;
+  /**
+   * <pre>
+   * --- 组件启动 ---
+   * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+   * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+   * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+   * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+   * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+   * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+   * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+   * @return Whether the launchComponent field is set.
+   */
+  @java.lang.Override
+  public boolean hasLaunchComponent() {
+    return bodyCase_ == 80;
+  }
+  /**
+   * <pre>
+   * --- 组件启动 ---
+   * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+   * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+   * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+   * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+   * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+   * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+   * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+   * @return The launchComponent.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.LaunchComponent getLaunchComponent() {
+    if (bodyCase_ == 80) {
+       return (io.github.nervusos.ipc.v1.LaunchComponent) body_;
+    }
+    return io.github.nervusos.ipc.v1.LaunchComponent.getDefaultInstance();
+  }
+  /**
+   * <pre>
+   * --- 组件启动 ---
+   * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+   * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+   * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+   * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+   * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+   * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+   * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.LaunchComponentOrBuilder getLaunchComponentOrBuilder() {
+    if (bodyCase_ == 80) {
+       return (io.github.nervusos.ipc.v1.LaunchComponent) body_;
+    }
+    return io.github.nervusos.ipc.v1.LaunchComponent.getDefaultInstance();
+  }
+
+  public static final int LAUNCH_COMPONENT_RESULT_FIELD_NUMBER = 81;
+  /**
+   * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+   * @return Whether the launchComponentResult field is set.
+   */
+  @java.lang.Override
+  public boolean hasLaunchComponentResult() {
+    return bodyCase_ == 81;
+  }
+  /**
+   * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+   * @return The launchComponentResult.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.LaunchComponentResult getLaunchComponentResult() {
+    if (bodyCase_ == 81) {
+       return (io.github.nervusos.ipc.v1.LaunchComponentResult) body_;
+    }
+    return io.github.nervusos.ipc.v1.LaunchComponentResult.getDefaultInstance();
+  }
+  /**
+   * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.LaunchComponentResultOrBuilder getLaunchComponentResultOrBuilder() {
+    if (bodyCase_ == 81) {
+       return (io.github.nervusos.ipc.v1.LaunchComponentResult) body_;
+    }
+    return io.github.nervusos.ipc.v1.LaunchComponentResult.getDefaultInstance();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1337,6 +1436,12 @@ private static final long serialVersionUID = 0L;
     }
     if (bodyCase_ == 73) {
       output.writeMessage(73, (io.github.nervusos.ipc.v1.ReleaseControlResult) body_);
+    }
+    if (bodyCase_ == 80) {
+      output.writeMessage(80, (io.github.nervusos.ipc.v1.LaunchComponent) body_);
+    }
+    if (bodyCase_ == 81) {
+      output.writeMessage(81, (io.github.nervusos.ipc.v1.LaunchComponentResult) body_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -1466,6 +1571,14 @@ private static final long serialVersionUID = 0L;
     if (bodyCase_ == 73) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(73, (io.github.nervusos.ipc.v1.ReleaseControlResult) body_);
+    }
+    if (bodyCase_ == 80) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(80, (io.github.nervusos.ipc.v1.LaunchComponent) body_);
+    }
+    if (bodyCase_ == 81) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(81, (io.github.nervusos.ipc.v1.LaunchComponentResult) body_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -1600,6 +1713,14 @@ private static final long serialVersionUID = 0L;
         if (!getReleaseControlResult()
             .equals(other.getReleaseControlResult())) return false;
         break;
+      case 80:
+        if (!getLaunchComponent()
+            .equals(other.getLaunchComponent())) return false;
+        break;
+      case 81:
+        if (!getLaunchComponentResult()
+            .equals(other.getLaunchComponentResult())) return false;
+        break;
       case 0:
       default:
     }
@@ -1730,6 +1851,14 @@ private static final long serialVersionUID = 0L;
       case 73:
         hash = (37 * hash) + RELEASE_CONTROL_RESULT_FIELD_NUMBER;
         hash = (53 * hash) + getReleaseControlResult().hashCode();
+        break;
+      case 80:
+        hash = (37 * hash) + LAUNCH_COMPONENT_FIELD_NUMBER;
+        hash = (53 * hash) + getLaunchComponent().hashCode();
+        break;
+      case 81:
+        hash = (37 * hash) + LAUNCH_COMPONENT_RESULT_FIELD_NUMBER;
+        hash = (53 * hash) + getLaunchComponentResult().hashCode();
         break;
       case 0:
       default:
@@ -1959,6 +2088,12 @@ private static final long serialVersionUID = 0L;
       if (releaseControlResultBuilder_ != null) {
         releaseControlResultBuilder_.clear();
       }
+      if (launchComponentBuilder_ != null) {
+        launchComponentBuilder_.clear();
+      }
+      if (launchComponentResultBuilder_ != null) {
+        launchComponentResultBuilder_.clear();
+      }
       bodyCase_ = 0;
       body_ = null;
       return this;
@@ -2118,6 +2253,14 @@ private static final long serialVersionUID = 0L;
           releaseControlResultBuilder_ != null) {
         result.body_ = releaseControlResultBuilder_.build();
       }
+      if (bodyCase_ == 80 &&
+          launchComponentBuilder_ != null) {
+        result.body_ = launchComponentBuilder_.build();
+      }
+      if (bodyCase_ == 81 &&
+          launchComponentResultBuilder_ != null) {
+        result.body_ = launchComponentResultBuilder_.build();
+      }
     }
 
     @java.lang.Override
@@ -2249,6 +2392,14 @@ private static final long serialVersionUID = 0L;
         }
         case RELEASE_CONTROL_RESULT: {
           mergeReleaseControlResult(other.getReleaseControlResult());
+          break;
+        }
+        case LAUNCH_COMPONENT: {
+          mergeLaunchComponent(other.getLaunchComponent());
+          break;
+        }
+        case LAUNCH_COMPONENT_RESULT: {
+          mergeLaunchComponentResult(other.getLaunchComponentResult());
           break;
         }
         case BODY_NOT_SET: {
@@ -2487,6 +2638,20 @@ private static final long serialVersionUID = 0L;
               bodyCase_ = 73;
               break;
             } // case 586
+            case 642: {
+              input.readMessage(
+                  getLaunchComponentFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bodyCase_ = 80;
+              break;
+            } // case 642
+            case 650: {
+              input.readMessage(
+                  getLaunchComponentResultFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bodyCase_ = 81;
+              break;
+            } // case 650
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -7157,6 +7322,389 @@ private static final long serialVersionUID = 0L;
       bodyCase_ = 73;
       onChanged();
       return releaseControlResultBuilder_;
+    }
+
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.LaunchComponent, io.github.nervusos.ipc.v1.LaunchComponent.Builder, io.github.nervusos.ipc.v1.LaunchComponentOrBuilder> launchComponentBuilder_;
+    /**
+     * <pre>
+     * --- 组件启动 ---
+     * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+     * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+     * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+     * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+     * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+     * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+     * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+     * @return Whether the launchComponent field is set.
+     */
+    @java.lang.Override
+    public boolean hasLaunchComponent() {
+      return bodyCase_ == 80;
+    }
+    /**
+     * <pre>
+     * --- 组件启动 ---
+     * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+     * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+     * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+     * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+     * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+     * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+     * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+     * @return The launchComponent.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.LaunchComponent getLaunchComponent() {
+      if (launchComponentBuilder_ == null) {
+        if (bodyCase_ == 80) {
+          return (io.github.nervusos.ipc.v1.LaunchComponent) body_;
+        }
+        return io.github.nervusos.ipc.v1.LaunchComponent.getDefaultInstance();
+      } else {
+        if (bodyCase_ == 80) {
+          return launchComponentBuilder_.getMessage();
+        }
+        return io.github.nervusos.ipc.v1.LaunchComponent.getDefaultInstance();
+      }
+    }
+    /**
+     * <pre>
+     * --- 组件启动 ---
+     * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+     * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+     * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+     * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+     * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+     * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+     * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+     */
+    public Builder setLaunchComponent(io.github.nervusos.ipc.v1.LaunchComponent value) {
+      if (launchComponentBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        body_ = value;
+        onChanged();
+      } else {
+        launchComponentBuilder_.setMessage(value);
+      }
+      bodyCase_ = 80;
+      return this;
+    }
+    /**
+     * <pre>
+     * --- 组件启动 ---
+     * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+     * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+     * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+     * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+     * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+     * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+     * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+     */
+    public Builder setLaunchComponent(
+        io.github.nervusos.ipc.v1.LaunchComponent.Builder builderForValue) {
+      if (launchComponentBuilder_ == null) {
+        body_ = builderForValue.build();
+        onChanged();
+      } else {
+        launchComponentBuilder_.setMessage(builderForValue.build());
+      }
+      bodyCase_ = 80;
+      return this;
+    }
+    /**
+     * <pre>
+     * --- 组件启动 ---
+     * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+     * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+     * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+     * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+     * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+     * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+     * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+     */
+    public Builder mergeLaunchComponent(io.github.nervusos.ipc.v1.LaunchComponent value) {
+      if (launchComponentBuilder_ == null) {
+        if (bodyCase_ == 80 &&
+            body_ != io.github.nervusos.ipc.v1.LaunchComponent.getDefaultInstance()) {
+          body_ = io.github.nervusos.ipc.v1.LaunchComponent.newBuilder((io.github.nervusos.ipc.v1.LaunchComponent) body_)
+              .mergeFrom(value).buildPartial();
+        } else {
+          body_ = value;
+        }
+        onChanged();
+      } else {
+        if (bodyCase_ == 80) {
+          launchComponentBuilder_.mergeFrom(value);
+        } else {
+          launchComponentBuilder_.setMessage(value);
+        }
+      }
+      bodyCase_ = 80;
+      return this;
+    }
+    /**
+     * <pre>
+     * --- 组件启动 ---
+     * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+     * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+     * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+     * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+     * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+     * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+     * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+     */
+    public Builder clearLaunchComponent() {
+      if (launchComponentBuilder_ == null) {
+        if (bodyCase_ == 80) {
+          bodyCase_ = 0;
+          body_ = null;
+          onChanged();
+        }
+      } else {
+        if (bodyCase_ == 80) {
+          bodyCase_ = 0;
+          body_ = null;
+        }
+        launchComponentBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * --- 组件启动 ---
+     * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+     * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+     * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+     * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+     * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+     * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+     * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+     */
+    public io.github.nervusos.ipc.v1.LaunchComponent.Builder getLaunchComponentBuilder() {
+      return getLaunchComponentFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * --- 组件启动 ---
+     * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+     * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+     * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+     * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+     * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+     * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+     * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.LaunchComponentOrBuilder getLaunchComponentOrBuilder() {
+      if ((bodyCase_ == 80) && (launchComponentBuilder_ != null)) {
+        return launchComponentBuilder_.getMessageOrBuilder();
+      } else {
+        if (bodyCase_ == 80) {
+          return (io.github.nervusos.ipc.v1.LaunchComponent) body_;
+        }
+        return io.github.nervusos.ipc.v1.LaunchComponent.getDefaultInstance();
+      }
+    }
+    /**
+     * <pre>
+     * --- 组件启动 ---
+     * 80/81 是本文件的扩展。原始消息集没有「启动一个组件」的通道，而内核里
+     * 唯一能拉起组件的路径是 endpoint.Resolve 拉起 on-demand 提供者——也就是说
+     * 「启动一个 App」只能靠对它导出的某个接口发一次 Resolve。那样做有三个坏处：
+     * 1. 每个可启动的 App 都被迫导出一个它并不需要的占位接口；
+     * 2. 「解析一个接口」与「启动一个应用」两件事共用一条消息，审计里分不开；
+     * 3. Launcher 想启动一个没有任何接口的 App 时无路可走。
+     * 所以把它做成独立消息。权限由 nervud 按 perm.system.launch 裁决。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.LaunchComponent launch_component = 80 [json_name = "launchComponent"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.LaunchComponent, io.github.nervusos.ipc.v1.LaunchComponent.Builder, io.github.nervusos.ipc.v1.LaunchComponentOrBuilder> 
+        getLaunchComponentFieldBuilder() {
+      if (launchComponentBuilder_ == null) {
+        if (!(bodyCase_ == 80)) {
+          body_ = io.github.nervusos.ipc.v1.LaunchComponent.getDefaultInstance();
+        }
+        launchComponentBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.LaunchComponent, io.github.nervusos.ipc.v1.LaunchComponent.Builder, io.github.nervusos.ipc.v1.LaunchComponentOrBuilder>(
+                (io.github.nervusos.ipc.v1.LaunchComponent) body_,
+                getParentForChildren(),
+                isClean());
+        body_ = null;
+      }
+      bodyCase_ = 80;
+      onChanged();
+      return launchComponentBuilder_;
+    }
+
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.LaunchComponentResult, io.github.nervusos.ipc.v1.LaunchComponentResult.Builder, io.github.nervusos.ipc.v1.LaunchComponentResultOrBuilder> launchComponentResultBuilder_;
+    /**
+     * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+     * @return Whether the launchComponentResult field is set.
+     */
+    @java.lang.Override
+    public boolean hasLaunchComponentResult() {
+      return bodyCase_ == 81;
+    }
+    /**
+     * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+     * @return The launchComponentResult.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.LaunchComponentResult getLaunchComponentResult() {
+      if (launchComponentResultBuilder_ == null) {
+        if (bodyCase_ == 81) {
+          return (io.github.nervusos.ipc.v1.LaunchComponentResult) body_;
+        }
+        return io.github.nervusos.ipc.v1.LaunchComponentResult.getDefaultInstance();
+      } else {
+        if (bodyCase_ == 81) {
+          return launchComponentResultBuilder_.getMessage();
+        }
+        return io.github.nervusos.ipc.v1.LaunchComponentResult.getDefaultInstance();
+      }
+    }
+    /**
+     * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+     */
+    public Builder setLaunchComponentResult(io.github.nervusos.ipc.v1.LaunchComponentResult value) {
+      if (launchComponentResultBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        body_ = value;
+        onChanged();
+      } else {
+        launchComponentResultBuilder_.setMessage(value);
+      }
+      bodyCase_ = 81;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+     */
+    public Builder setLaunchComponentResult(
+        io.github.nervusos.ipc.v1.LaunchComponentResult.Builder builderForValue) {
+      if (launchComponentResultBuilder_ == null) {
+        body_ = builderForValue.build();
+        onChanged();
+      } else {
+        launchComponentResultBuilder_.setMessage(builderForValue.build());
+      }
+      bodyCase_ = 81;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+     */
+    public Builder mergeLaunchComponentResult(io.github.nervusos.ipc.v1.LaunchComponentResult value) {
+      if (launchComponentResultBuilder_ == null) {
+        if (bodyCase_ == 81 &&
+            body_ != io.github.nervusos.ipc.v1.LaunchComponentResult.getDefaultInstance()) {
+          body_ = io.github.nervusos.ipc.v1.LaunchComponentResult.newBuilder((io.github.nervusos.ipc.v1.LaunchComponentResult) body_)
+              .mergeFrom(value).buildPartial();
+        } else {
+          body_ = value;
+        }
+        onChanged();
+      } else {
+        if (bodyCase_ == 81) {
+          launchComponentResultBuilder_.mergeFrom(value);
+        } else {
+          launchComponentResultBuilder_.setMessage(value);
+        }
+      }
+      bodyCase_ = 81;
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+     */
+    public Builder clearLaunchComponentResult() {
+      if (launchComponentResultBuilder_ == null) {
+        if (bodyCase_ == 81) {
+          bodyCase_ = 0;
+          body_ = null;
+          onChanged();
+        }
+      } else {
+        if (bodyCase_ == 81) {
+          bodyCase_ = 0;
+          body_ = null;
+        }
+        launchComponentResultBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+     */
+    public io.github.nervusos.ipc.v1.LaunchComponentResult.Builder getLaunchComponentResultBuilder() {
+      return getLaunchComponentResultFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.LaunchComponentResultOrBuilder getLaunchComponentResultOrBuilder() {
+      if ((bodyCase_ == 81) && (launchComponentResultBuilder_ != null)) {
+        return launchComponentResultBuilder_.getMessageOrBuilder();
+      } else {
+        if (bodyCase_ == 81) {
+          return (io.github.nervusos.ipc.v1.LaunchComponentResult) body_;
+        }
+        return io.github.nervusos.ipc.v1.LaunchComponentResult.getDefaultInstance();
+      }
+    }
+    /**
+     * <code>.nervus.ipc.v1.LaunchComponentResult launch_component_result = 81 [json_name = "launchComponentResult"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.LaunchComponentResult, io.github.nervusos.ipc.v1.LaunchComponentResult.Builder, io.github.nervusos.ipc.v1.LaunchComponentResultOrBuilder> 
+        getLaunchComponentResultFieldBuilder() {
+      if (launchComponentResultBuilder_ == null) {
+        if (!(bodyCase_ == 81)) {
+          body_ = io.github.nervusos.ipc.v1.LaunchComponentResult.getDefaultInstance();
+        }
+        launchComponentResultBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.LaunchComponentResult, io.github.nervusos.ipc.v1.LaunchComponentResult.Builder, io.github.nervusos.ipc.v1.LaunchComponentResultOrBuilder>(
+                (io.github.nervusos.ipc.v1.LaunchComponentResult) body_,
+                getParentForChildren(),
+                isClean());
+        body_ = null;
+      }
+      bodyCase_ = 81;
+      onChanged();
+      return launchComponentResultBuilder_;
     }
 
     // @@protoc_insertion_point(builder_scope:nervus.ipc.v1.Envelope)
