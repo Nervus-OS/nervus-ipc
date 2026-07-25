@@ -1,0 +1,200 @@
+// Nervus 标准接口 · SafetyControl@1  [REWRITE-v1 / experimental]
+//
+// interface_id = nervus.interface.safety.control ，major = 1，experimental。
+//   Permission = nervus.permission.safety.observe / .rearm
+//
+// # 它由内核自己实现，不是 Provider 提供的
+//
+// 这是【第一个内建接口】：实现者是 nervud 本身（endpoint.RegisterBuiltin），
+// 不是任何一个 Package。调用方用完全标准的 ResolveEndpoint → Request → Response
+// 访问，不知道也不需要知道对面是内核还是外部 Service。
+//
+// 为什么必须做成 Interface 而不是新的 Envelope body：envelope.proto 写着
+// 「想加一个新 body 之前先问：它是否属于上面那八件事之一；不是就应该做成某个
+// Interface 的 method」。re-arm 不属于建立连接、发现 endpoint、发起调用、
+// 返回结果、取消、订阅、推送事件、维持连接中的任何一件。
+//
+// # 机制在内核、策略在服务
+//
+// 内核在 Rearm 上只复核一条【不可绕过的硬前置】：停止进度必须已经落定——
+// 要么正常链已到 OUTPUT_DISABLED / STANDSTILL_CONFIRMED（输出确认关闭），
+// 要么已入 DELIVERY_FAULT / STANDSTILL_TIMEOUT 这类必须人工处置的终态旁支。
+// 停止还在途中就解开 latch，等于在还不知道输出有没有关掉的情况下重新放行运动。
+//
+// 「此刻该不该 re-arm」本身是策略，不在内核：由系统服务（nervus.safety.recovery）
+// 聚合设备状态、风险与用户策略后决定，再来调这个方法。
+//
+// # 这个接口不能做什么
+//
+// 【没有 Trip 方法】。软件急停由别的路径触发（Vital 组件熔断、deadman 超时、
+// Provider 上报故障），这个接口只负责观察与恢复。把「让机器停下来」做成一个
+// 可被任意 App 调的 RPC，会让一次误调用变成一次生产事故——而急停本来就该由
+// 物理按钮和内核监督链兜底，不该依赖一次网络往返。
+//
+// [REWRITE-v1] experimental：冻结前允许破坏性调整（NRCP §22.6）。
+
+syntax = "proto3";
+
+package nervus.interface.safety.v1;
+
+import "nervus/ipc/v1/method_registry.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/interface/safetyv1;safetyv1";
+
+// 连字符在 Java 包名里非法，理由见 status.proto。
+option java_package = "io.github.nervusos.iface.safety.v1";
+option java_multiple_files = true;
+option java_outer_classname = "SafetyControlProto";
+
+// =============================================================================
+// method_id 枚举 + Method Registry 元数据
+// =============================================================================
+
+enum SafetyControlMethod {
+  SAFETY_CONTROL_METHOD_UNSPECIFIED = 0;
+
+  // 读取当前安全态：顶层状态、motion epoch、停止相位。
+  //
+  // 只读且无副作用，但【不是】RISK_CLASS_NORMAL：安全态是判断机器此刻能不能
+  // 动的依据，它的可见性本身值得受控——一个能持续轮询安全态的进程，等于拿到
+  // 了机器运行状态的高保真侧信道。取 PRIVACY_SENSITIVE 而非 NORMAL。
+  SAFETY_CONTROL_METHOD_GET_STATE = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    required_permission: "nervus.permission.safety.observe"
+    risk_class: RISK_CLASS_PRIVACY_SENSITIVE
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    is_read_only: true
+    is_motion: false
+    request_type: "nervus.interface.safety.v1.GetSafetyStateRequest"
+    response_type: "nervus.interface.safety.v1.SafetyState"
+  }];
+
+  // 解开停机锁存，回到 NORMAL 并递增 motion epoch。
+  //
+  // 全系统风险最高的一个方法：它是【唯一】能让一台已经因安全原因停下来的机器
+  // 重新允许运动的入口。因此 CRITICAL_SAFETY + 必须系统确认框。
+  //
+  // is_motion = false 是准确的——它自己不驱动任何执行器，只是解除禁令。
+  // 但 needs_user_confirmation = true 的分量在这里比任何运动方法都重：
+  // 运动方法误调只让机器动一下，这个误调让整套安全防护失效。
+  //
+  // 【Agent 不能自行确认】。这一条在 Agent 文档 §4.3 是硬性的：确认框由系统
+  // 持有，Provider 与 Agent 都不能自报调低，也不能代替用户点确认。
+  SAFETY_CONTROL_METHOD_REARM = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    required_permission: "nervus.permission.safety.rearm"
+    risk_class: RISK_CLASS_CRITICAL_SAFETY
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: true
+    is_read_only: false
+    is_motion: false
+    request_type: "nervus.interface.safety.v1.RearmRequest"
+    response_type: ""
+  }];
+
+  // 请求进入 OEM 恢复阶段（SAFETY_LATCHED → OEM_RECOVERY）。
+  //
+  // 恢复阶段只允许经专用 Safety Gate 请求白名单动作，【不清除 latch】——
+  // 它是「让 OEM 的诊断/复位流程能跑」，不是「解除停机」。解除停机只有 Rearm。
+  SAFETY_CONTROL_METHOD_REQUEST_RECOVERY = 3 [(nervus.ipc.v1.method_meta) = {
+    method_id: 3
+    required_permission: "nervus.permission.safety.rearm"
+    risk_class: RISK_CLASS_CRITICAL_SAFETY
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: true
+    is_read_only: false
+    is_motion: false
+    request_type: "nervus.interface.safety.v1.RequestRecoveryRequest"
+    response_type: ""
+  }];
+}
+
+// =============================================================================
+// 消息
+// =============================================================================
+
+message GetSafetyStateRequest {}
+
+message RearmRequest {}
+
+message RequestRecoveryRequest {}
+
+// SafetyState 是安全态快照。
+//
+// (state, epoch, stop_phase) 三者【永远自洽】：相位只在它与当前 epoch 属于
+// 同一轮锁存时才报告，否则报 UNSPECIFIED。观察方因此不会看到「本轮已锁存、
+// 相位却是上一轮残留」这种自相矛盾的组合。
+message SafetyState {
+  TopState state = 1;
+
+  // motion epoch：执行器命令的撤销世代号。Provider 复核每条运动命令时用它
+  // 废止陈旧命令；恒非零。任何撤销边界（Safety 触发、抢占、Provider 重启、
+  // re-arm）都会递增它。
+  uint64 motion_epoch = 2;
+
+  StopPhase stop_phase = 3;
+}
+
+// TopState 是顶层安全状态。
+enum TopState {
+  TOP_STATE_UNSPECIFIED = 0;
+  // 正常：允许运动。
+  TOP_STATE_NORMAL = 1;
+  // 已锁存：停机决定已生效，运动 Gate 关闭。
+  TOP_STATE_SAFETY_LATCHED = 2;
+  // OEM 恢复阶段：只允许白名单诊断/复位动作，latch 仍在。
+  TOP_STATE_OEM_RECOVERY = 3;
+  // 必须经明确 re-arm 才能回 NORMAL。
+  TOP_STATE_REARM_REQUIRED = 4;
+}
+
+// StopPhase 是本轮停止的进度。
+//
+// 语义分两支：正常链（REQUESTED → SENT → PROVIDER_ACCEPTED → MCU_ACKED →
+// OUTPUT_DISABLED → STANDSTILL_CONFIRMED）与故障旁支（DELIVERY_FAULT /
+// STANDSTILL_TIMEOUT）。内核只在【落定】的相位上才允许 re-arm：
+// OUTPUT_DISABLED / STANDSTILL_CONFIRMED（输出确认关闭），或两个终态旁支
+// （已经必须人工处置）。停止还在途中就解开 latch，等于在还不知道输出有没有
+// 关掉的情况下重新放行运动。
+enum StopPhase {
+  // 本轮 Supervisor 尚未开始跟踪，或相位属于上一轮锁存。
+  STOP_PHASE_UNSPECIFIED = 0;
+  STOP_PHASE_REQUESTED = 1;
+  STOP_PHASE_SENT = 2;
+  STOP_PHASE_PROVIDER_ACCEPTED = 3;
+  STOP_PHASE_MCU_ACKED = 4;
+  STOP_PHASE_OUTPUT_DISABLED = 5;
+  STOP_PHASE_STANDSTILL_CONFIRMED = 6;
+  // 投递失败：命令没能送到 Provider/MCU。必须人工处置。
+  STOP_PHASE_DELIVERY_FAULT = 7;
+  // 超时未取得可信停稳证据。必须人工处置。
+  STOP_PHASE_STANDSTILL_TIMEOUT = 8;
+}
+
+// =============================================================================
+// 错误细因
+// =============================================================================
+
+// SafetyControlErrorDetail 是本接口失败时的固定 detail 类型。
+message SafetyControlErrorDetail {
+  SafetyControlReason reason = 1;
+}
+
+enum SafetyControlReason {
+  // fail closed。
+  SAFETY_CONTROL_REASON_UNSPECIFIED = 0;
+
+  // 当前状态不允许该迁移（例如未处于 REARM_REQUIRED 却请求 re-arm）。
+  SAFETY_CONTROL_REASON_WRONG_STATE = 1;
+
+  // 停止进度尚未落定：还在 REQUESTED/SENT/PROVIDER_ACCEPTED/MCU_ACKED 途中。
+  //
+  // 【这是最需要被区分出来的一个】。调用方看到它应当【等待并重试】，而看到
+  // WRONG_STATE 应当【停止尝试】。压成同一个码会让恢复 UI 要么无谓地放弃，
+  // 要么在一个永远不会成功的状态上死循环。
+  SAFETY_CONTROL_REASON_STOP_NOT_SETTLED = 2;
+}
