@@ -1,0 +1,244 @@
+// Nervus 标准接口 · PackageManager@1  [REWRITE-v1 / experimental]
+//
+// [KERNEL: PARTIALLY WIRED] nervud 支持本接口所需的全部机制（Request/Response、
+// Dispatch/DispatchResult、endpoint 注册与路由），因此调用链是通的。但接口级
+// 权限门槛尚未进 endpoint.DefaultInterfaceCatalog，method 级权限也未接线
+// （见 method_registry.proto 的 [KERNEL: NOT WIRED]）——目前 Resolve 不会因为
+// required_permission 而被拒。
+//
+// interface_id = nervus.interface.pkg.manager ，major = 1，experimental。
+//   实现者    = nervus.pkgmanagerd（系统服务，nervus-system-server 仓库）
+//   Permission = nervus.permission.package.install / .query
+//
+// # 它为什么必须是一个 Interface 而不是内核直接开的口
+//
+// 装包的权威通道是 nervud 的 root-only 管理通道（nervud-admin.sock）。App 不
+// 可能是 root，连不上那条 socket。于是需要一个跑在 App UID 段、被内核显式放行
+// 的系统服务替 App 转发——而 App 与那个服务之间的契约，就是本接口。
+//
+// 分工必须记清楚：本接口的实现者【不做任何安全判定】。多角色验签、digest 复核、
+// OEM 副署准入、Host ABI 匹配、升级裁决（防降级 + 签名血统连续性）、权限交集、
+// UID 分配、原子提交，全部在 nervud 的 pkgregistry 里。Provider 只是把请求
+// 投递过去、把结果读回来。
+//
+// # 风险级为什么不是 PHYSICAL_CONTROL
+//
+// 装包不驱动执行器，机器不会因此动起来，所以 is_motion = false、
+// risk_class 也不是 PHYSICAL_CONTROL。但它【绝不是】NORMAL：装一个包等于往
+// 系统里引入新的可执行代码与新的权限请求，后果的持久性远超一次运动指令。
+// 因此 Install/Uninstall 取 RISK_CLASS_CRITICAL_SAFETY 并要求用户确认——
+// 这是本接口与运动类接口在风险模型上的根本差异。
+//
+// [REWRITE-v1] experimental：冻结前允许破坏性调整（NRCP §22.6）。
+// 兼容规则（§10.12，冻结后生效）：已发布 method_id 与字段号永不复用；
+// 删除写 reserved；新增字段须有安全默认；枚举以 *_UNSPECIFIED = 0 起始并 fail closed。
+
+syntax = "proto3";
+
+package nervus.interface.pkgmanager.v1;
+
+import "nervus/ipc/v1/method_registry.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/interface/pkgmanagerv1;pkgmanagerv1";
+
+// 连字符在 Java 包名里非法，理由见 status.proto。
+option java_package = "io.github.nervusos.iface.pkgmanager.v1";
+option java_multiple_files = true;
+option java_outer_classname = "PackageManagerProto";
+
+// =============================================================================
+// method_id 枚举 + Method Registry 元数据
+// =============================================================================
+
+enum PackageManagerMethod {
+  PACKAGE_MANAGER_METHOD_UNSPECIFIED = 0;
+
+  // 安装一个 .nspkg。
+  //
+  // 【长任务】：解包 + 全量 digest 复核可能耗时可观（一个大包几十 MiB），
+  // 远超普通 request/response 的 deadline 预算。因此 returns_operation = true，
+  // 以 ACCEPTED + operation_id 应答，终态另行查询。
+  //
+  // needs_user_confirmation = true：往系统里装新的可执行代码，必须由【系统持有的】
+  // 确认框把关。Agent 只能请求，不能自行确认（Agent 文档 §4.3）。
+  PACKAGE_MANAGER_METHOD_INSTALL = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    required_permission: "nervus.permission.package.install"
+    risk_class: RISK_CLASS_CRITICAL_SAFETY
+    requires_control_lease: false
+    returns_operation: true
+    needs_user_confirmation: true
+    is_read_only: false
+    is_motion: false
+    request_type: "nervus.interface.pkgmanager.v1.InstallRequest"
+    response_type: "nervus.interface.pkgmanager.v1.InstallResult"
+  }];
+
+  // 卸载一个动态安装的 Package。
+  //
+  // 系统镜像包卸载不了——nervud 以 ErrSystemPackageImmutable 拒绝（它们跟随
+  // 整镜像 OTA）。Provider 不预判，直接转发，让拒绝原因由 nervud 给出。
+  //
+  // 不是 operation：卸载是停组件 + 删目录 + 撤权，在正常量级下很快。
+  PACKAGE_MANAGER_METHOD_UNINSTALL = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    required_permission: "nervus.permission.package.install"
+    risk_class: RISK_CLASS_CRITICAL_SAFETY
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: true
+    is_read_only: false
+    is_motion: false
+    request_type: "nervus.interface.pkgmanager.v1.UninstallRequest"
+    response_type: ""
+  }];
+
+  // 列出已装 Package。只读，不需要确认框。
+  PACKAGE_MANAGER_METHOD_LIST = 3 [(nervus.ipc.v1.method_meta) = {
+    method_id: 3
+    required_permission: "nervus.permission.package.query"
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    is_read_only: true
+    is_motion: false
+    request_type: "nervus.interface.pkgmanager.v1.ListRequest"
+    response_type: "nervus.interface.pkgmanager.v1.ListResult"
+  }];
+
+  // 停用/启用一个 Component。
+  //
+  // 保护名单里的组件（pkgmanagerd 自己、settings、permissionui、sessiond、
+  // safety.recovery）停不掉——那条底线在内核的编译期 switch 里，不由 Provider
+  // 判断。停用它们会让系统失去自我修复能力。
+  PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED = 4 [(nervus.ipc.v1.method_meta) = {
+    method_id: 4
+    required_permission: "nervus.permission.package.install"
+    risk_class: RISK_CLASS_CRITICAL_SAFETY
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: true
+    is_read_only: false
+    is_motion: false
+    request_type: "nervus.interface.pkgmanager.v1.SetComponentEnabledRequest"
+    response_type: ""
+  }];
+}
+
+// =============================================================================
+// 消息
+// =============================================================================
+
+// InstallRequest 请求安装一个 .nspkg。
+message InstallRequest {
+  // .nspkg 在调用方【私有数据目录】中的相对路径。
+  //
+  // 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
+  // Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
+  // 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
+  // "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+  //
+  // 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
+  string nspkg_relpath = 1;
+}
+
+// InstallResult 是安装成功的终态（operation 的 result）。
+message InstallResult {
+  PackageInfo package = 1;
+}
+
+// UninstallRequest 请求卸载。
+message UninstallRequest {
+  string package_id = 1;
+}
+
+// ListRequest 请求已装 Package 列表。
+//
+// 空消息而不是省略请求体：将来要加过滤条件（只看用户装的、只看某来源）时
+// 有地方放，不必新增一个 method_id。
+message ListRequest {}
+
+// ListResult 是已装 Package 的投影。
+message ListResult {
+  repeated PackageInfo packages = 1;
+}
+
+// SetComponentEnabledRequest 停用/启用一个 Component。
+message SetComponentEnabledRequest {
+  string package_id = 1;
+  string component_id = 2;
+  bool enabled = 3;
+}
+
+// PackageInfo 是一个已装 Package 的【对外投影】。
+//
+// 刻意不含：安装路径、UID、签名密钥、digest 清单。这些是内核的内部状态，
+// 泄漏出去除了帮助攻击者定位目标之外没有用处（对照 ResolveEndpointSuccess
+// 的 resource_handle：不含 Provider PID、设备节点、序列号）。
+message PackageInfo {
+  string package_id = 1;
+  string version = 2;
+  uint64 version_code = 3;
+
+  // 信任 profile 的字符串投影（ordinary / oem / platform）。
+  // 用字符串而不是复用 ipcv1.TrustProfile 枚举：这是给 UI 展示的，
+  // 不参与任何裁决，不值得为它在接口层引入对控制面枚举的依赖。
+  string trust = 4;
+
+  // 来源：system-image / dynamic-install。
+  string source = 5;
+
+  // 已授予的权限 ID 列表，供 UI 展示。是 nervud 裁决结果的只读投影。
+  repeated string granted_permissions = 6;
+
+  // 已停用的 Component ID 列表。
+  repeated string disabled_components = 7;
+}
+
+// =============================================================================
+// 错误细因
+// =============================================================================
+
+// PackageManagerErrorDetail 是本接口失败时的固定 detail 类型。
+//
+// 为什么需要它：装包失败的原因对用户【是有意义的】——签名不对、版本降级、
+// ABI 不匹配、包已存在，这四种的正确反应完全不同（换个包 / 别装旧版 /
+// 换个架构的包 / 先卸载）。笼统一个 FAILED_PRECONDITION 会让 UI 只能显示
+// 「安装失败」，把排查成本全推给用户。
+message PackageManagerErrorDetail {
+  PackageManagerReason reason = 1;
+}
+
+enum PackageManagerReason {
+  // fail closed：未知原因按最保守处理（不重试、提示联系发布者）。
+  PACKAGE_MANAGER_REASON_UNSPECIFIED = 0;
+
+  // 签名验证失败或缺少必需的签名角色（动态安装必须有 developer 签名）。
+  PACKAGE_MANAGER_REASON_SIGNATURE_INVALID = 1;
+
+  // digest 复核不通过：包内容与 manifest 声明不符（损坏或被篡改）。
+  PACKAGE_MANAGER_REASON_DIGEST_MISMATCH = 2;
+
+  // version_code 不高于已装版本，防降级裁决拒绝。
+  PACKAGE_MANAGER_REASON_DOWNGRADE = 3;
+
+  // 包的 supported_abis 与本机 ABI 无交集。
+  PACKAGE_MANAGER_REASON_ABI_MISMATCH = 4;
+
+  // manifest 结构不合法（schema 版本、必填字段、路径逃逸等）。
+  PACKAGE_MANAGER_REASON_MANIFEST_INVALID = 5;
+
+  // 目标 Package 不存在（卸载/停用时）。
+  PACKAGE_MANAGER_REASON_PACKAGE_NOT_FOUND = 6;
+
+  // 系统镜像包不可卸载，或该 Component 在保护名单里不可停用。
+  PACKAGE_MANAGER_REASON_IMMUTABLE = 7;
+
+  // 升级时签名血统不连续：新包不是同一开发者（或其授权继任密钥）签的。
+  // 这条挡的是「用同名包劫持已装应用身份」。
+  PACKAGE_MANAGER_REASON_LINEAGE_BROKEN = 8;
+
+  // 解包失败：压缩格式错误，或条目试图逃出目标目录（tar-slip）。
+  PACKAGE_MANAGER_REASON_ARCHIVE_INVALID = 9;
+}
