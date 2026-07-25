@@ -2,7 +2,7 @@
 //
 // interface_id = nervus.interface.motion.base ，major = 1，experimental。
 //   Feature     = nervus.feature.motion.base
-//   Permission  = nervus.permission.motion.control
+//   Permission  = perm.motion.control
 //   Resource    = nervus.resource.motion.base （role 如 main）
 //
 // 机械狗走这个标准接口：机体速度 → 步态（NRCP §17.2），26 号 demo 的移动主线。
@@ -613,11 +613,11 @@ const file_nervus_interface_basemotion_v1_basemotion_proto_rawDesc = "" +
 	"\x0fvelocity_limits\x18\x05 \x01(\v2..nervus.interface.basemotion.v1.VelocityLimitsR\x0evelocityLimits\x12.\n" +
 	"\x13active_motion_epoch\x18\x06 \x01(\x04R\x11activeMotionEpoch\"a\n" +
 	"\x15BaseMotionErrorDetail\x12H\n" +
-	"\x06reason\x18\x01 \x01(\x0e20.nervus.interface.basemotion.v1.BaseMotionReasonR\x06reason*\xec\x04\n" +
+	"\x06reason\x18\x01 \x01(\x0e20.nervus.interface.basemotion.v1.BaseMotionReasonR\x06reason*\xd1\x04\n" +
 	"\x10BaseMotionMethod\x12\"\n" +
-	"\x1eBASE_MOTION_METHOD_UNSPECIFIED\x10\x00\x12\x84\x01\n" +
-	"\x1fBASE_MOTION_METHOD_SET_VELOCITY\x10\x01\x1a_\x8a\xa6\x1d[\b\x01\x12 nervus.permission.motion.control\x18\x03 \x01:1nervus.interface.basemotion.v1.SetVelocityRequest\x12u\n" +
-	"\x17BASE_MOTION_METHOD_STOP\x10\x02\x1aX\x8a\xa6\x1dT\b\x02\x12 nervus.permission.motion.control\x18\x03 \x01:*nervus.interface.basemotion.v1.StopRequest\x12\x93\x01\n" +
+	"\x1eBASE_MOTION_METHOD_UNSPECIFIED\x10\x00\x12w\n" +
+	"\x1fBASE_MOTION_METHOD_SET_VELOCITY\x10\x01\x1aR\x8a\xa6\x1dN\b\x01\x12\x13perm.motion.control\x18\x03 \x01:1nervus.interface.basemotion.v1.SetVelocityRequest\x12h\n" +
+	"\x17BASE_MOTION_METHOD_STOP\x10\x02\x1aK\x8a\xa6\x1dG\b\x02\x12\x13perm.motion.control\x18\x03 \x01:*nervus.interface.basemotion.v1.StopRequest\x12\x93\x01\n" +
 	"#BASE_MOTION_METHOD_GET_MOTION_STATE\x10\x03\x1aj\x8a\xa6\x1df\b\x03\x18\x01:4nervus.interface.basemotion.v1.GetMotionStateRequestB*nervus.interface.basemotion.v1.MotionState\x12\x9f\x01\n" +
 	")BASE_MOTION_METHOD_SUBSCRIBE_MOTION_STATE\x10\x04\x1ap\x8a\xa6\x1dl\b\x04\x18\x01::nervus.interface.basemotion.v1.SubscribeMotionStateRequestB*nervus.interface.basemotion.v1.MotionState*\x86\x01\n" +
 	"\tReadiness\x12\x19\n" +

@@ -70,38 +70,36 @@ public final class SafetyControlProto {
       "s.interface.safety.v1.StopPhaseR\tstopPha" +
       "se\"c\n\030SafetyControlErrorDetail\022G\n\006reason" +
       "\030\001 \001(\0162/.nervus.interface.safety.v1.Safe" +
-      "tyControlReasonR\006reason*\356\003\n\023SafetyContro" +
+      "tyControlReasonR\006reason*\304\003\n\023SafetyContro" +
       "lMethod\022%\n!SAFETY_CONTROL_METHOD_UNSPECI" +
-      "FIED\020\000\022\255\001\n\037SAFETY_CONTROL_METHOD_GET_STA" +
-      "TE\020\001\032\207\001\212\246\035\202\001\010\001\022 nervus.permission.safety" +
-      ".observe\030\002:0nervus.interface.safety.v1.G" +
-      "etSafetyStateRequestB&nervus.interface.s" +
-      "afety.v1.SafetyStateH\001\022t\n\033SAFETY_CONTROL" +
-      "_METHOD_REARM\020\002\032S\212\246\035O\010\002\022\036nervus.permissi" +
-      "on.safety.rearm\030\0040\001:\'nervus.interface.sa" +
-      "fety.v1.RearmRequest\022\211\001\n&SAFETY_CONTROL_" +
-      "METHOD_REQUEST_RECOVERY\020\003\032]\212\246\035Y\010\003\022\036nervu" +
-      "s.permission.safety.rearm\030\0040\001:1nervus.in" +
-      "terface.safety.v1.RequestRecoveryRequest" +
-      "*\223\001\n\010TopState\022\031\n\025TOP_STATE_UNSPECIFIED\020\000" +
-      "\022\024\n\020TOP_STATE_NORMAL\020\001\022\034\n\030TOP_STATE_SAFE" +
-      "TY_LATCHED\020\002\022\032\n\026TOP_STATE_OEM_RECOVERY\020\003" +
-      "\022\034\n\030TOP_STATE_REARM_REQUIRED\020\004*\231\002\n\tStopP" +
-      "hase\022\032\n\026STOP_PHASE_UNSPECIFIED\020\000\022\030\n\024STOP" +
-      "_PHASE_REQUESTED\020\001\022\023\n\017STOP_PHASE_SENT\020\002\022" +
-      " \n\034STOP_PHASE_PROVIDER_ACCEPTED\020\003\022\030\n\024STO" +
-      "P_PHASE_MCU_ACKED\020\004\022\036\n\032STOP_PHASE_OUTPUT" +
-      "_DISABLED\020\005\022#\n\037STOP_PHASE_STANDSTILL_CON" +
-      "FIRMED\020\006\022\035\n\031STOP_PHASE_DELIVERY_FAULT\020\007\022" +
-      "!\n\035STOP_PHASE_STANDSTILL_TIMEOUT\020\010*\217\001\n\023S" +
-      "afetyControlReason\022%\n!SAFETY_CONTROL_REA" +
-      "SON_UNSPECIFIED\020\000\022%\n!SAFETY_CONTROL_REAS" +
-      "ON_WRONG_STATE\020\001\022*\n&SAFETY_CONTROL_REASO" +
-      "N_STOP_NOT_SETTLED\020\002B\203\001\n\"io.github.nervu" +
-      "sos.iface.safety.v1B\022SafetyControlProtoP" +
-      "\001ZGgithub.com/nervus-os/nervus-ipc/go/pr" +
-      "otocol/interface/safetyv1;safetyv1b\006prot" +
-      "o3"
+      "FIED\020\000\022\236\001\n\037SAFETY_CONTROL_METHOD_GET_STA" +
+      "TE\020\001\032y\212\246\035u\010\001\022\023perm.safety.observe\030\002:0ner" +
+      "vus.interface.safety.v1.GetSafetyStateRe" +
+      "questB&nervus.interface.safety.v1.Safety" +
+      "StateH\001\022g\n\033SAFETY_CONTROL_METHOD_REARM\020\002" +
+      "\032F\212\246\035B\010\002\022\021perm.safety.rearm\030\0040\001:\'nervus." +
+      "interface.safety.v1.RearmRequest\022|\n&SAFE" +
+      "TY_CONTROL_METHOD_REQUEST_RECOVERY\020\003\032P\212\246" +
+      "\035L\010\003\022\021perm.safety.rearm\030\0040\001:1nervus.inte" +
+      "rface.safety.v1.RequestRecoveryRequest*\223" +
+      "\001\n\010TopState\022\031\n\025TOP_STATE_UNSPECIFIED\020\000\022\024" +
+      "\n\020TOP_STATE_NORMAL\020\001\022\034\n\030TOP_STATE_SAFETY" +
+      "_LATCHED\020\002\022\032\n\026TOP_STATE_OEM_RECOVERY\020\003\022\034" +
+      "\n\030TOP_STATE_REARM_REQUIRED\020\004*\231\002\n\tStopPha" +
+      "se\022\032\n\026STOP_PHASE_UNSPECIFIED\020\000\022\030\n\024STOP_P" +
+      "HASE_REQUESTED\020\001\022\023\n\017STOP_PHASE_SENT\020\002\022 \n" +
+      "\034STOP_PHASE_PROVIDER_ACCEPTED\020\003\022\030\n\024STOP_" +
+      "PHASE_MCU_ACKED\020\004\022\036\n\032STOP_PHASE_OUTPUT_D" +
+      "ISABLED\020\005\022#\n\037STOP_PHASE_STANDSTILL_CONFI" +
+      "RMED\020\006\022\035\n\031STOP_PHASE_DELIVERY_FAULT\020\007\022!\n" +
+      "\035STOP_PHASE_STANDSTILL_TIMEOUT\020\010*\217\001\n\023Saf" +
+      "etyControlReason\022%\n!SAFETY_CONTROL_REASO" +
+      "N_UNSPECIFIED\020\000\022%\n!SAFETY_CONTROL_REASON" +
+      "_WRONG_STATE\020\001\022*\n&SAFETY_CONTROL_REASON_" +
+      "STOP_NOT_SETTLED\020\002B\203\001\n\"io.github.nervuso" +
+      "s.iface.safety.v1B\022SafetyControlProtoP\001Z" +
+      "Ggithub.com/nervus-os/nervus-ipc/go/prot" +
+      "ocol/interface/safetyv1;safetyv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

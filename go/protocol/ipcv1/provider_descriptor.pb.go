@@ -277,7 +277,7 @@ type ProvidedInterface struct {
 	SchemaHash []byte `protobuf:"bytes,3,opt,name=schema_hash,json=schemaHash,proto3" json:"schema_hash,omitempty"`
 	// 接口级权限门槛：Resolve 该接口所需权限 ID。
 	//
-	//	标准接口 → 指向平台内置权限（如 nervus.permission.motion.control）。
+	//	标准接口 → 指向平台内置权限（如 perm.motion.control）。
 	//	OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
 	//	              （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
 	//

@@ -8,7 +8,7 @@
 //
 // interface_id = nervus.interface.pkg.manager ，major = 1，experimental。
 //   实现者    = nervus.pkgmanagerd（系统服务，nervus-system-server 仓库）
-//   Permission = nervus.permission.package.install / .query
+//   Permission = perm.pkg.install / .query
 //
 // # 它为什么必须是一个 Interface 而不是内核直接开的口
 //
@@ -686,13 +686,13 @@ const file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc = "" +
 	"\x13granted_permissions\x18\x06 \x03(\tR\x12grantedPermissions\x12/\n" +
 	"\x13disabled_components\x18\a \x03(\tR\x12disabledComponents\"i\n" +
 	"\x19PackageManagerErrorDetail\x12L\n" +
-	"\x06reason\x18\x01 \x01(\x0e24.nervus.interface.pkgmanager.v1.PackageManagerReasonR\x06reason*\xbe\x05\n" +
+	"\x06reason\x18\x01 \x01(\x0e24.nervus.interface.pkgmanager.v1.PackageManagerReasonR\x06reason*\xf6\x04\n" +
 	"\x14PackageManagerMethod\x12&\n" +
-	"\"PACKAGE_MANAGER_METHOD_UNSPECIFIED\x10\x00\x12\xb2\x01\n" +
-	"\x1ePACKAGE_MANAGER_METHOD_INSTALL\x10\x01\x1a\x8d\x01\x8a\xa6\x1d\x88\x01\b\x01\x12!nervus.permission.package.install\x18\x04(\x010\x01:-nervus.interface.pkgmanager.v1.InstallRequestB,nervus.interface.pkgmanager.v1.InstallResult\x12\x84\x01\n" +
-	" PACKAGE_MANAGER_METHOD_UNINSTALL\x10\x02\x1a^\x8a\xa6\x1dZ\b\x02\x12!nervus.permission.package.install\x18\x040\x01:/nervus.interface.pkgmanager.v1.UninstallRequest\x12\xa4\x01\n" +
-	"\x1bPACKAGE_MANAGER_METHOD_LIST\x10\x03\x1a\x82\x01\x8a\xa6\x1d~\b\x03\x12\x1fnervus.permission.package.query\x18\x01:*nervus.interface.pkgmanager.v1.ListRequestB)nervus.interface.pkgmanager.v1.ListResultH\x01\x12\x9a\x01\n" +
-	",PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED\x10\x04\x1ah\x8a\xa6\x1dd\b\x04\x12!nervus.permission.package.install\x18\x040\x01:9nervus.interface.pkgmanager.v1.SetComponentEnabledRequest*\xbf\x03\n" +
+	"\"PACKAGE_MANAGER_METHOD_UNSPECIFIED\x10\x00\x12\x9f\x01\n" +
+	"\x1ePACKAGE_MANAGER_METHOD_INSTALL\x10\x01\x1a{\x8a\xa6\x1dw\b\x01\x12\x10perm.pkg.install\x18\x04(\x010\x01:-nervus.interface.pkgmanager.v1.InstallRequestB,nervus.interface.pkgmanager.v1.InstallResult\x12s\n" +
+	" PACKAGE_MANAGER_METHOD_UNINSTALL\x10\x02\x1aM\x8a\xa6\x1dI\b\x02\x12\x10perm.pkg.install\x18\x040\x01:/nervus.interface.pkgmanager.v1.UninstallRequest\x12\x92\x01\n" +
+	"\x1bPACKAGE_MANAGER_METHOD_LIST\x10\x03\x1aq\x8a\xa6\x1dm\b\x03\x12\x0eperm.pkg.query\x18\x01:*nervus.interface.pkgmanager.v1.ListRequestB)nervus.interface.pkgmanager.v1.ListResultH\x01\x12\x89\x01\n" +
+	",PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED\x10\x04\x1aW\x8a\xa6\x1dS\b\x04\x12\x10perm.pkg.install\x18\x040\x01:9nervus.interface.pkgmanager.v1.SetComponentEnabledRequest*\xbf\x03\n" +
 	"\x14PackageManagerReason\x12&\n" +
 	"\"PACKAGE_MANAGER_REASON_UNSPECIFIED\x10\x00\x12,\n" +
 	"(PACKAGE_MANAGER_REASON_SIGNATURE_INVALID\x10\x01\x12*\n" +

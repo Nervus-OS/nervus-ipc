@@ -78,7 +78,7 @@ private static final long serialVersionUID = 0L;
   private volatile java.lang.Object requiredPermission_ = "";
   /**
    * <pre>
-   * 调用该方法所需的 Permission id（如 nervus.permission.manipulator.control）。
+   * 调用该方法所需的 Permission id（如 perm.manipulator.control）。
    * 空 = 接口级 Resolve 已足够，method 级不再额外要权限（如只读状态查询）。
    *
    * 这是 method 级权限的【真相源】：B1 dispatch 据此在转发前做 method 级裁决。
@@ -102,7 +102,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 调用该方法所需的 Permission id（如 nervus.permission.manipulator.control）。
+   * 调用该方法所需的 Permission id（如 perm.manipulator.control）。
    * 空 = 接口级 Resolve 已足够，method 级不再额外要权限（如只读状态查询）。
    *
    * 这是 method 级权限的【真相源】：B1 dispatch 据此在转发前做 method 级裁决。
@@ -912,7 +912,7 @@ private static final long serialVersionUID = 0L;
     private java.lang.Object requiredPermission_ = "";
     /**
      * <pre>
-     * 调用该方法所需的 Permission id（如 nervus.permission.manipulator.control）。
+     * 调用该方法所需的 Permission id（如 perm.manipulator.control）。
      * 空 = 接口级 Resolve 已足够，method 级不再额外要权限（如只读状态查询）。
      *
      * 这是 method 级权限的【真相源】：B1 dispatch 据此在转发前做 method 级裁决。
@@ -935,7 +935,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 调用该方法所需的 Permission id（如 nervus.permission.manipulator.control）。
+     * 调用该方法所需的 Permission id（如 perm.manipulator.control）。
      * 空 = 接口级 Resolve 已足够，method 级不再额外要权限（如只读状态查询）。
      *
      * 这是 method 级权限的【真相源】：B1 dispatch 据此在转发前做 method 级裁决。
@@ -959,7 +959,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 调用该方法所需的 Permission id（如 nervus.permission.manipulator.control）。
+     * 调用该方法所需的 Permission id（如 perm.manipulator.control）。
      * 空 = 接口级 Resolve 已足够，method 级不再额外要权限（如只读状态查询）。
      *
      * 这是 method 级权限的【真相源】：B1 dispatch 据此在转发前做 method 级裁决。
@@ -979,7 +979,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 调用该方法所需的 Permission id（如 nervus.permission.manipulator.control）。
+     * 调用该方法所需的 Permission id（如 perm.manipulator.control）。
      * 空 = 接口级 Resolve 已足够，method 级不再额外要权限（如只读状态查询）。
      *
      * 这是 method 级权限的【真相源】：B1 dispatch 据此在转发前做 method 级裁决。
@@ -996,7 +996,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 调用该方法所需的 Permission id（如 nervus.permission.manipulator.control）。
+     * 调用该方法所需的 Permission id（如 perm.manipulator.control）。
      * 空 = 接口级 Resolve 已足够，method 级不再额外要权限（如只读状态查询）。
      *
      * 这是 method 级权限的【真相源】：B1 dispatch 据此在转发前做 method 级裁决。

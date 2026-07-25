@@ -1,7 +1,7 @@
 // Nervus 标准接口 · SafetyControl@1  [REWRITE-v1 / experimental]
 //
 // interface_id = nervus.interface.safety.control ，major = 1，experimental。
-//   Permission = nervus.permission.safety.observe / .rearm
+//   Permission = perm.safety.observe / .rearm
 //
 // # 它由内核自己实现，不是 Provider 提供的
 //
@@ -60,7 +60,7 @@ enum SafetyControlMethod {
   // 了机器运行状态的高保真侧信道。取 PRIVACY_SENSITIVE 而非 NORMAL。
   SAFETY_CONTROL_METHOD_GET_STATE = 1 [(nervus.ipc.v1.method_meta) = {
     method_id: 1
-    required_permission: "nervus.permission.safety.observe"
+    required_permission: "perm.safety.observe"
     risk_class: RISK_CLASS_PRIVACY_SENSITIVE
     requires_control_lease: false
     returns_operation: false
@@ -84,7 +84,7 @@ enum SafetyControlMethod {
   // 持有，Provider 与 Agent 都不能自报调低，也不能代替用户点确认。
   SAFETY_CONTROL_METHOD_REARM = 2 [(nervus.ipc.v1.method_meta) = {
     method_id: 2
-    required_permission: "nervus.permission.safety.rearm"
+    required_permission: "perm.safety.rearm"
     risk_class: RISK_CLASS_CRITICAL_SAFETY
     requires_control_lease: false
     returns_operation: false
@@ -101,7 +101,7 @@ enum SafetyControlMethod {
   // 它是「让 OEM 的诊断/复位流程能跑」，不是「解除停机」。解除停机只有 Rearm。
   SAFETY_CONTROL_METHOD_REQUEST_RECOVERY = 3 [(nervus.ipc.v1.method_meta) = {
     method_id: 3
-    required_permission: "nervus.permission.safety.rearm"
+    required_permission: "perm.safety.rearm"
     risk_class: RISK_CLASS_CRITICAL_SAFETY
     requires_control_lease: false
     returns_operation: false

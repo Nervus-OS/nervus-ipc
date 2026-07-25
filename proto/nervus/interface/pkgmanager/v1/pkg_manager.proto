@@ -8,7 +8,7 @@
 //
 // interface_id = nervus.interface.pkg.manager ，major = 1，experimental。
 //   实现者    = nervus.pkgmanagerd（系统服务，nervus-system-server 仓库）
-//   Permission = nervus.permission.package.install / .query
+//   Permission = perm.pkg.install / .query
 //
 // # 它为什么必须是一个 Interface 而不是内核直接开的口
 //
@@ -63,7 +63,7 @@ enum PackageManagerMethod {
   // 确认框把关。Agent 只能请求，不能自行确认（Agent 文档 §4.3）。
   PACKAGE_MANAGER_METHOD_INSTALL = 1 [(nervus.ipc.v1.method_meta) = {
     method_id: 1
-    required_permission: "nervus.permission.package.install"
+    required_permission: "perm.pkg.install"
     risk_class: RISK_CLASS_CRITICAL_SAFETY
     requires_control_lease: false
     returns_operation: true
@@ -82,7 +82,7 @@ enum PackageManagerMethod {
   // 不是 operation：卸载是停组件 + 删目录 + 撤权，在正常量级下很快。
   PACKAGE_MANAGER_METHOD_UNINSTALL = 2 [(nervus.ipc.v1.method_meta) = {
     method_id: 2
-    required_permission: "nervus.permission.package.install"
+    required_permission: "perm.pkg.install"
     risk_class: RISK_CLASS_CRITICAL_SAFETY
     requires_control_lease: false
     returns_operation: false
@@ -96,7 +96,7 @@ enum PackageManagerMethod {
   // 列出已装 Package。只读，不需要确认框。
   PACKAGE_MANAGER_METHOD_LIST = 3 [(nervus.ipc.v1.method_meta) = {
     method_id: 3
-    required_permission: "nervus.permission.package.query"
+    required_permission: "perm.pkg.query"
     risk_class: RISK_CLASS_NORMAL
     requires_control_lease: false
     returns_operation: false
@@ -114,7 +114,7 @@ enum PackageManagerMethod {
   // 判断。停用它们会让系统失去自我修复能力。
   PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED = 4 [(nervus.ipc.v1.method_meta) = {
     method_id: 4
-    required_permission: "nervus.permission.package.install"
+    required_permission: "perm.pkg.install"
     risk_class: RISK_CLASS_CRITICAL_SAFETY
     requires_control_lease: false
     returns_operation: false

@@ -134,7 +134,7 @@ public final class ManipulatorProto {
       "r.v1.PoseR\tfinalPose\"d\n\026ManipulatorError" +
       "Detail\022J\n\006reason\030\001 \001(\01622.nervus.interfac" +
       "e.manipulator.v1.ManipulatorReasonR\006reas" +
-      "on*\315\t\n\021ManipulatorMethod\022\"\n\036MANIPULATOR_" +
+      "on*\213\t\n\021ManipulatorMethod\022\"\n\036MANIPULATOR_" +
       "METHOD_UNSPECIFIED\020\000\022\214\001\n MANIPULATOR_MET" +
       "HOD_GET_ARM_STATE\020\001\032f\212\246\035b\010\001\030\001:2nervus.in" +
       "terface.manipulator.v1.GetArmStateReques" +
@@ -142,47 +142,46 @@ public final class ManipulatorProto {
       "ate\022\230\001\n&MANIPULATOR_METHOD_SUBSCRIBE_ARM" +
       "_STATE\020\002\032l\212\246\035h\010\002\030\001:8nervus.interface.man" +
       "ipulator.v1.SubscribeArmStateRequestB(ne" +
-      "rvus.interface.manipulator.v1.ArmState\022\306" +
-      "\001\n\037MANIPULATOR_METHOD_MOVE_TO_POSE\020\003\032\240\001\212" +
-      "\246\035\233\001\010\003\022%nervus.permission.manipulator.co" +
-      "ntrol\030\003 \001(\0010\001:1nervus.interface.manipula" +
-      "tor.v1.MoveToPoseRequestB5nervus.interfa" +
-      "ce.manipulator.v1.ManipulatorMoveResult\022" +
-      "\330\001\n(MANIPULATOR_METHOD_MOVE_JOINT_TRAJEC" +
-      "TORY\020\004\032\251\001\212\246\035\244\001\010\004\022%nervus.permission.mani" +
-      "pulator.control\030\003 \001(\0010\001::nervus.interfac" +
-      "e.manipulator.v1.MoveJointTrajectoryRequ" +
-      "estB5nervus.interface.manipulator.v1.Man" +
-      "ipulatorMoveResult\022\275\001\n\032MANIPULATOR_METHO" +
-      "D_GO_HOME\020\005\032\234\001\212\246\035\227\001\010\005\022%nervus.permission" +
-      ".manipulator.control\030\003 \001(\0010\001:-nervus.int" +
-      "erface.manipulator.v1.GoHomeRequestB5ner" +
-      "vus.interface.manipulator.v1.Manipulator" +
-      "MoveResult\022\210\001\n\036MANIPULATOR_METHOD_SET_GR" +
-      "IPPER\020\006\032d\212\246\035`\010\006\022%nervus.permission.manip" +
-      "ulator.control\030\003 \001:1nervus.interface.man" +
-      "ipulator.v1.SetGripperRequest\022{\n\027MANIPUL" +
-      "ATOR_METHOD_STOP\020\007\032^\212\246\035Z\010\007\022%nervus.permi" +
-      "ssion.manipulator.control\030\003 \001:+nervus.in" +
-      "terface.manipulator.v1.StopRequest*\235\001\n\014A" +
-      "rmReadiness\022\035\n\031ARM_READINESS_UNSPECIFIED" +
-      "\020\000\022\027\n\023ARM_READINESS_READY\020\001\022\033\n\027ARM_READI" +
-      "NESS_NOT_READY\020\002\022\037\n\033ARM_READINESS_TRANSI" +
-      "TIONING\020\003\022\027\n\023ARM_READINESS_FAULT\020\004*\220\003\n\021M" +
-      "anipulatorReason\022\"\n\036MANIPULATOR_REASON_U" +
-      "NSPECIFIED\020\000\022 \n\034MANIPULATOR_REASON_NOT_R" +
-      "EADY\020\001\022%\n!MANIPULATOR_REASON_SAFETY_LATC" +
-      "HED\020\002\022\"\n\036MANIPULATOR_REASON_STALE_EPOCH\020" +
-      "\003\022\'\n#MANIPULATOR_REASON_CONTROL_NOT_HELD" +
-      "\020\004\022\"\n\036MANIPULATOR_REASON_JOINT_LIMIT\020\005\022\'" +
-      "\n#MANIPULATOR_REASON_UNREACHABLE_POSE\020\006\022" +
-      " \n\034MANIPULATOR_REASON_COLLISION\020\007\022+\n\'MAN" +
-      "IPULATOR_REASON_RESOURCE_UNAVAILABLE\020\010\022%" +
-      "\n!MANIPULATOR_REASON_RESOURCE_FAULT\020\tB\220\001" +
-      "\n\'io.github.nervusos.iface.manipulator.v" +
-      "1B\020ManipulatorProtoP\001ZQgithub.com/nervus" +
-      "-os/nervus-ipc/go/protocol/interface/man" +
-      "ipulatorv1;manipulatorv1b\006proto3"
+      "rvus.interface.manipulator.v1.ArmState\022\271" +
+      "\001\n\037MANIPULATOR_METHOD_MOVE_TO_POSE\020\003\032\223\001\212" +
+      "\246\035\216\001\010\003\022\030perm.manipulator.control\030\003 \001(\0010\001" +
+      ":1nervus.interface.manipulator.v1.MoveTo" +
+      "PoseRequestB5nervus.interface.manipulato" +
+      "r.v1.ManipulatorMoveResult\022\313\001\n(MANIPULAT" +
+      "OR_METHOD_MOVE_JOINT_TRAJECTORY\020\004\032\234\001\212\246\035\227" +
+      "\001\010\004\022\030perm.manipulator.control\030\003 \001(\0010\001::n" +
+      "ervus.interface.manipulator.v1.MoveJoint" +
+      "TrajectoryRequestB5nervus.interface.mani" +
+      "pulator.v1.ManipulatorMoveResult\022\260\001\n\032MAN" +
+      "IPULATOR_METHOD_GO_HOME\020\005\032\217\001\212\246\035\212\001\010\005\022\030per" +
+      "m.manipulator.control\030\003 \001(\0010\001:-nervus.in" +
+      "terface.manipulator.v1.GoHomeRequestB5ne" +
+      "rvus.interface.manipulator.v1.Manipulato" +
+      "rMoveResult\022{\n\036MANIPULATOR_METHOD_SET_GR" +
+      "IPPER\020\006\032W\212\246\035S\010\006\022\030perm.manipulator.contro" +
+      "l\030\003 \001:1nervus.interface.manipulator.v1.S" +
+      "etGripperRequest\022n\n\027MANIPULATOR_METHOD_S" +
+      "TOP\020\007\032Q\212\246\035M\010\007\022\030perm.manipulator.control\030" +
+      "\003 \001:+nervus.interface.manipulator.v1.Sto" +
+      "pRequest*\235\001\n\014ArmReadiness\022\035\n\031ARM_READINE" +
+      "SS_UNSPECIFIED\020\000\022\027\n\023ARM_READINESS_READY\020" +
+      "\001\022\033\n\027ARM_READINESS_NOT_READY\020\002\022\037\n\033ARM_RE" +
+      "ADINESS_TRANSITIONING\020\003\022\027\n\023ARM_READINESS" +
+      "_FAULT\020\004*\220\003\n\021ManipulatorReason\022\"\n\036MANIPU" +
+      "LATOR_REASON_UNSPECIFIED\020\000\022 \n\034MANIPULATO" +
+      "R_REASON_NOT_READY\020\001\022%\n!MANIPULATOR_REAS" +
+      "ON_SAFETY_LATCHED\020\002\022\"\n\036MANIPULATOR_REASO" +
+      "N_STALE_EPOCH\020\003\022\'\n#MANIPULATOR_REASON_CO" +
+      "NTROL_NOT_HELD\020\004\022\"\n\036MANIPULATOR_REASON_J" +
+      "OINT_LIMIT\020\005\022\'\n#MANIPULATOR_REASON_UNREA" +
+      "CHABLE_POSE\020\006\022 \n\034MANIPULATOR_REASON_COLL" +
+      "ISION\020\007\022+\n\'MANIPULATOR_REASON_RESOURCE_U" +
+      "NAVAILABLE\020\010\022%\n!MANIPULATOR_REASON_RESOU" +
+      "RCE_FAULT\020\tB\220\001\n\'io.github.nervusos.iface" +
+      ".manipulator.v1B\020ManipulatorProtoP\001ZQgit" +
+      "hub.com/nervus-os/nervus-ipc/go/protocol" +
+      "/interface/manipulatorv1;manipulatorv1b\006" +
+      "proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

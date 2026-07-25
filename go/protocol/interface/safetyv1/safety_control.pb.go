@@ -1,7 +1,7 @@
 // Nervus 标准接口 · SafetyControl@1  [REWRITE-v1 / experimental]
 //
 // interface_id = nervus.interface.safety.control ，major = 1，experimental。
-//   Permission = nervus.permission.safety.observe / .rearm
+//   Permission = perm.safety.observe / .rearm
 //
 // # 它由内核自己实现，不是 Provider 提供的
 //
@@ -558,12 +558,12 @@ const file_nervus_interface_safety_v1_safety_control_proto_rawDesc = "" +
 	"\n" +
 	"stop_phase\x18\x03 \x01(\x0e2%.nervus.interface.safety.v1.StopPhaseR\tstopPhase\"c\n" +
 	"\x18SafetyControlErrorDetail\x12G\n" +
-	"\x06reason\x18\x01 \x01(\x0e2/.nervus.interface.safety.v1.SafetyControlReasonR\x06reason*\xee\x03\n" +
+	"\x06reason\x18\x01 \x01(\x0e2/.nervus.interface.safety.v1.SafetyControlReasonR\x06reason*\xc4\x03\n" +
 	"\x13SafetyControlMethod\x12%\n" +
-	"!SAFETY_CONTROL_METHOD_UNSPECIFIED\x10\x00\x12\xad\x01\n" +
-	"\x1fSAFETY_CONTROL_METHOD_GET_STATE\x10\x01\x1a\x87\x01\x8a\xa6\x1d\x82\x01\b\x01\x12 nervus.permission.safety.observe\x18\x02:0nervus.interface.safety.v1.GetSafetyStateRequestB&nervus.interface.safety.v1.SafetyStateH\x01\x12t\n" +
-	"\x1bSAFETY_CONTROL_METHOD_REARM\x10\x02\x1aS\x8a\xa6\x1dO\b\x02\x12\x1enervus.permission.safety.rearm\x18\x040\x01:'nervus.interface.safety.v1.RearmRequest\x12\x89\x01\n" +
-	"&SAFETY_CONTROL_METHOD_REQUEST_RECOVERY\x10\x03\x1a]\x8a\xa6\x1dY\b\x03\x12\x1enervus.permission.safety.rearm\x18\x040\x01:1nervus.interface.safety.v1.RequestRecoveryRequest*\x93\x01\n" +
+	"!SAFETY_CONTROL_METHOD_UNSPECIFIED\x10\x00\x12\x9e\x01\n" +
+	"\x1fSAFETY_CONTROL_METHOD_GET_STATE\x10\x01\x1ay\x8a\xa6\x1du\b\x01\x12\x13perm.safety.observe\x18\x02:0nervus.interface.safety.v1.GetSafetyStateRequestB&nervus.interface.safety.v1.SafetyStateH\x01\x12g\n" +
+	"\x1bSAFETY_CONTROL_METHOD_REARM\x10\x02\x1aF\x8a\xa6\x1dB\b\x02\x12\x11perm.safety.rearm\x18\x040\x01:'nervus.interface.safety.v1.RearmRequest\x12|\n" +
+	"&SAFETY_CONTROL_METHOD_REQUEST_RECOVERY\x10\x03\x1aP\x8a\xa6\x1dL\b\x03\x12\x11perm.safety.rearm\x18\x040\x01:1nervus.interface.safety.v1.RequestRecoveryRequest*\x93\x01\n" +
 	"\bTopState\x12\x19\n" +
 	"\x15TOP_STATE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10TOP_STATE_NORMAL\x10\x01\x12\x1c\n" +

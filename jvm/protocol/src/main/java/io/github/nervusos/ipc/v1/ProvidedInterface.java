@@ -168,7 +168,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * 接口级权限门槛：Resolve 该接口所需权限 ID。
-   * 标准接口 → 指向平台内置权限（如 nervus.permission.motion.control）。
+   * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
    * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
    * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
    * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -194,7 +194,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * 接口级权限门槛：Resolve 该接口所需权限 ID。
-   * 标准接口 → 指向平台内置权限（如 nervus.permission.motion.control）。
+   * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
    * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
    * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
    * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -944,7 +944,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 nervus.permission.motion.control）。
+     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -969,7 +969,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 nervus.permission.motion.control）。
+     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -995,7 +995,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 nervus.permission.motion.control）。
+     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -1017,7 +1017,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 nervus.permission.motion.control）。
+     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -1036,7 +1036,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 nervus.permission.motion.control）。
+     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**

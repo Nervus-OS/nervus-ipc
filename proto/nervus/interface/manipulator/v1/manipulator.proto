@@ -2,7 +2,7 @@
 //
 // interface_id = nervus.interface.manipulator.arm ，major = 1，experimental。
 //   Feature     = nervus.feature.manipulator.arm
-//   Permission  = nervus.permission.manipulator.control
+//   Permission  = perm.manipulator.control
 //   Resource    = nervus.resource.manipulator.arm （role 如 main/left/right）
 //
 // 语义边界（NRCP §17 / §13.2）：
@@ -75,7 +75,7 @@ enum ManipulatorMethod {
   // 末端移到笛卡尔位姿（含 frame）。长任务 → operation。
   MANIPULATOR_METHOD_MOVE_TO_POSE = 3 [(nervus.ipc.v1.method_meta) = {
     method_id: 3
-    required_permission: "nervus.permission.manipulator.control"
+    required_permission: "perm.manipulator.control"
     risk_class: RISK_CLASS_PHYSICAL_CONTROL
     requires_control_lease: true
     returns_operation: true
@@ -87,7 +87,7 @@ enum ManipulatorMethod {
   // 关节空间轨迹。长任务 → operation。
   MANIPULATOR_METHOD_MOVE_JOINT_TRAJECTORY = 4 [(nervus.ipc.v1.method_meta) = {
     method_id: 4
-    required_permission: "nervus.permission.manipulator.control"
+    required_permission: "perm.manipulator.control"
     risk_class: RISK_CLASS_PHYSICAL_CONTROL
     requires_control_lease: true
     returns_operation: true
@@ -99,7 +99,7 @@ enum ManipulatorMethod {
   // 回零 / 收拢位。长任务 → operation。
   MANIPULATOR_METHOD_GO_HOME = 5 [(nervus.ipc.v1.method_meta) = {
     method_id: 5
-    required_permission: "nervus.permission.manipulator.control"
+    required_permission: "perm.manipulator.control"
     risk_class: RISK_CLASS_PHYSICAL_CONTROL
     requires_control_lease: true
     returns_operation: true
@@ -111,7 +111,7 @@ enum ManipulatorMethod {
   // 夹爪开合（短命令，非 operation），但仍驱动执行器 → 需 lease。
   MANIPULATOR_METHOD_SET_GRIPPER = 6 [(nervus.ipc.v1.method_meta) = {
     method_id: 6
-    required_permission: "nervus.permission.manipulator.control"
+    required_permission: "perm.manipulator.control"
     risk_class: RISK_CLASS_PHYSICAL_CONTROL
     requires_control_lease: true
     returns_operation: false
@@ -123,7 +123,7 @@ enum ManipulatorMethod {
   // 普通受控停止（非 SafetyHalt）。需 lease，短命令。
   MANIPULATOR_METHOD_STOP = 7 [(nervus.ipc.v1.method_meta) = {
     method_id: 7
-    required_permission: "nervus.permission.manipulator.control"
+    required_permission: "perm.manipulator.control"
     risk_class: RISK_CLASS_PHYSICAL_CONTROL
     requires_control_lease: true
     returns_operation: false

@@ -2,7 +2,7 @@
 //
 // interface_id = nervus.interface.manipulator.arm ，major = 1，experimental。
 //   Feature     = nervus.feature.manipulator.arm
-//   Permission  = nervus.permission.manipulator.control
+//   Permission  = perm.manipulator.control
 //   Resource    = nervus.resource.manipulator.arm （role 如 main/left/right）
 //
 // 语义边界（NRCP §17 / §13.2）：
@@ -979,16 +979,16 @@ const file_nervus_interface_manipulator_v1_manipulator_proto_rawDesc = "" +
 	"\n" +
 	"final_pose\x18\x01 \x01(\v2%.nervus.interface.manipulator.v1.PoseR\tfinalPose\"d\n" +
 	"\x16ManipulatorErrorDetail\x12J\n" +
-	"\x06reason\x18\x01 \x01(\x0e22.nervus.interface.manipulator.v1.ManipulatorReasonR\x06reason*\xcd\t\n" +
+	"\x06reason\x18\x01 \x01(\x0e22.nervus.interface.manipulator.v1.ManipulatorReasonR\x06reason*\x8b\t\n" +
 	"\x11ManipulatorMethod\x12\"\n" +
 	"\x1eMANIPULATOR_METHOD_UNSPECIFIED\x10\x00\x12\x8c\x01\n" +
 	" MANIPULATOR_METHOD_GET_ARM_STATE\x10\x01\x1af\x8a\xa6\x1db\b\x01\x18\x01:2nervus.interface.manipulator.v1.GetArmStateRequestB(nervus.interface.manipulator.v1.ArmState\x12\x98\x01\n" +
-	"&MANIPULATOR_METHOD_SUBSCRIBE_ARM_STATE\x10\x02\x1al\x8a\xa6\x1dh\b\x02\x18\x01:8nervus.interface.manipulator.v1.SubscribeArmStateRequestB(nervus.interface.manipulator.v1.ArmState\x12\xc6\x01\n" +
-	"\x1fMANIPULATOR_METHOD_MOVE_TO_POSE\x10\x03\x1a\xa0\x01\x8a\xa6\x1d\x9b\x01\b\x03\x12%nervus.permission.manipulator.control\x18\x03 \x01(\x010\x01:1nervus.interface.manipulator.v1.MoveToPoseRequestB5nervus.interface.manipulator.v1.ManipulatorMoveResult\x12\xd8\x01\n" +
-	"(MANIPULATOR_METHOD_MOVE_JOINT_TRAJECTORY\x10\x04\x1a\xa9\x01\x8a\xa6\x1d\xa4\x01\b\x04\x12%nervus.permission.manipulator.control\x18\x03 \x01(\x010\x01::nervus.interface.manipulator.v1.MoveJointTrajectoryRequestB5nervus.interface.manipulator.v1.ManipulatorMoveResult\x12\xbd\x01\n" +
-	"\x1aMANIPULATOR_METHOD_GO_HOME\x10\x05\x1a\x9c\x01\x8a\xa6\x1d\x97\x01\b\x05\x12%nervus.permission.manipulator.control\x18\x03 \x01(\x010\x01:-nervus.interface.manipulator.v1.GoHomeRequestB5nervus.interface.manipulator.v1.ManipulatorMoveResult\x12\x88\x01\n" +
-	"\x1eMANIPULATOR_METHOD_SET_GRIPPER\x10\x06\x1ad\x8a\xa6\x1d`\b\x06\x12%nervus.permission.manipulator.control\x18\x03 \x01:1nervus.interface.manipulator.v1.SetGripperRequest\x12{\n" +
-	"\x17MANIPULATOR_METHOD_STOP\x10\a\x1a^\x8a\xa6\x1dZ\b\a\x12%nervus.permission.manipulator.control\x18\x03 \x01:+nervus.interface.manipulator.v1.StopRequest*\x9d\x01\n" +
+	"&MANIPULATOR_METHOD_SUBSCRIBE_ARM_STATE\x10\x02\x1al\x8a\xa6\x1dh\b\x02\x18\x01:8nervus.interface.manipulator.v1.SubscribeArmStateRequestB(nervus.interface.manipulator.v1.ArmState\x12\xb9\x01\n" +
+	"\x1fMANIPULATOR_METHOD_MOVE_TO_POSE\x10\x03\x1a\x93\x01\x8a\xa6\x1d\x8e\x01\b\x03\x12\x18perm.manipulator.control\x18\x03 \x01(\x010\x01:1nervus.interface.manipulator.v1.MoveToPoseRequestB5nervus.interface.manipulator.v1.ManipulatorMoveResult\x12\xcb\x01\n" +
+	"(MANIPULATOR_METHOD_MOVE_JOINT_TRAJECTORY\x10\x04\x1a\x9c\x01\x8a\xa6\x1d\x97\x01\b\x04\x12\x18perm.manipulator.control\x18\x03 \x01(\x010\x01::nervus.interface.manipulator.v1.MoveJointTrajectoryRequestB5nervus.interface.manipulator.v1.ManipulatorMoveResult\x12\xb0\x01\n" +
+	"\x1aMANIPULATOR_METHOD_GO_HOME\x10\x05\x1a\x8f\x01\x8a\xa6\x1d\x8a\x01\b\x05\x12\x18perm.manipulator.control\x18\x03 \x01(\x010\x01:-nervus.interface.manipulator.v1.GoHomeRequestB5nervus.interface.manipulator.v1.ManipulatorMoveResult\x12{\n" +
+	"\x1eMANIPULATOR_METHOD_SET_GRIPPER\x10\x06\x1aW\x8a\xa6\x1dS\b\x06\x12\x18perm.manipulator.control\x18\x03 \x01:1nervus.interface.manipulator.v1.SetGripperRequest\x12n\n" +
+	"\x17MANIPULATOR_METHOD_STOP\x10\a\x1aQ\x8a\xa6\x1dM\b\a\x12\x18perm.manipulator.control\x18\x03 \x01:+nervus.interface.manipulator.v1.StopRequest*\x9d\x01\n" +
 	"\fArmReadiness\x12\x1d\n" +
 	"\x19ARM_READINESS_UNSPECIFIED\x10\x00\x12\x17\n" +
 	"\x13ARM_READINESS_READY\x10\x01\x12\x1b\n" +

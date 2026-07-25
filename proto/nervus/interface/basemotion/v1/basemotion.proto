@@ -2,7 +2,7 @@
 //
 // interface_id = nervus.interface.motion.base ，major = 1，experimental。
 //   Feature     = nervus.feature.motion.base
-//   Permission  = nervus.permission.motion.control
+//   Permission  = perm.motion.control
 //   Resource    = nervus.resource.motion.base （role 如 main）
 //
 // 机械狗走这个标准接口：机体速度 → 步态（NRCP §17.2），26 号 demo 的移动主线。
@@ -53,7 +53,7 @@ enum BaseMotionMethod {
   // 成功以 ACCEPTED 空 success 应答（已可靠接收，非最终停稳）。
   BASE_MOTION_METHOD_SET_VELOCITY = 1 [(nervus.ipc.v1.method_meta) = {
     method_id: 1
-    required_permission: "nervus.permission.motion.control"
+    required_permission: "perm.motion.control"
     risk_class: RISK_CLASS_PHYSICAL_CONTROL
     requires_control_lease: true
     returns_operation: false
@@ -65,7 +65,7 @@ enum BaseMotionMethod {
   // 普通受控停止（非 SafetyHalt）。需 lease，短命令。
   BASE_MOTION_METHOD_STOP = 2 [(nervus.ipc.v1.method_meta) = {
     method_id: 2
-    required_permission: "nervus.permission.motion.control"
+    required_permission: "perm.motion.control"
     risk_class: RISK_CLASS_PHYSICAL_CONTROL
     requires_control_lease: true
     returns_operation: false
