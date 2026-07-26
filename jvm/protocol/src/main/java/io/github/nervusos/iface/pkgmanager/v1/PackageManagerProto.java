@@ -96,38 +96,44 @@ public final class PackageManagerProto {
       "nts\030\007 \003(\tR\022disabledComponents\"i\n\031Package" +
       "ManagerErrorDetail\022L\n\006reason\030\001 \001(\01624.ner" +
       "vus.interface.pkgmanager.v1.PackageManag" +
-      "erReasonR\006reason*\366\004\n\024PackageManagerMetho" +
+      "erReasonR\006reason*\353\006\n\024PackageManagerMetho" +
       "d\022&\n\"PACKAGE_MANAGER_METHOD_UNSPECIFIED\020" +
-      "\000\022\237\001\n\036PACKAGE_MANAGER_METHOD_INSTALL\020\001\032{" +
-      "\212\246\035w\010\001\022\020perm.pkg.install\030\004(\0010\001:-nervus.i" +
-      "nterface.pkgmanager.v1.InstallRequestB,n" +
-      "ervus.interface.pkgmanager.v1.InstallRes" +
-      "ult\022s\n PACKAGE_MANAGER_METHOD_UNINSTALL\020" +
-      "\002\032M\212\246\035I\010\002\022\020perm.pkg.install\030\0040\001:/nervus." +
-      "interface.pkgmanager.v1.UninstallRequest" +
-      "\022\222\001\n\033PACKAGE_MANAGER_METHOD_LIST\020\003\032q\212\246\035m" +
-      "\010\003\022\016perm.pkg.query\030\001:*nervus.interface.p" +
-      "kgmanager.v1.ListRequestB)nervus.interfa" +
-      "ce.pkgmanager.v1.ListResultH\001\022\211\001\n,PACKAG" +
-      "E_MANAGER_METHOD_SET_COMPONENT_ENABLED\020\004" +
-      "\032W\212\246\035S\010\004\022\020perm.pkg.install\030\0040\001:9nervus.i" +
-      "nterface.pkgmanager.v1.SetComponentEnabl" +
-      "edRequest*\277\003\n\024PackageManagerReason\022&\n\"PA" +
-      "CKAGE_MANAGER_REASON_UNSPECIFIED\020\000\022,\n(PA" +
-      "CKAGE_MANAGER_REASON_SIGNATURE_INVALID\020\001" +
-      "\022*\n&PACKAGE_MANAGER_REASON_DIGEST_MISMAT" +
-      "CH\020\002\022$\n PACKAGE_MANAGER_REASON_DOWNGRADE" +
-      "\020\003\022\'\n#PACKAGE_MANAGER_REASON_ABI_MISMATC" +
-      "H\020\004\022+\n\'PACKAGE_MANAGER_REASON_MANIFEST_I" +
-      "NVALID\020\005\022,\n(PACKAGE_MANAGER_REASON_PACKA" +
-      "GE_NOT_FOUND\020\006\022$\n PACKAGE_MANAGER_REASON" +
-      "_IMMUTABLE\020\007\022)\n%PACKAGE_MANAGER_REASON_L" +
-      "INEAGE_BROKEN\020\010\022*\n&PACKAGE_MANAGER_REASO" +
-      "N_ARCHIVE_INVALID\020\tB\220\001\n&io.github.nervus" +
-      "os.iface.pkgmanager.v1B\023PackageManagerPr" +
-      "otoP\001ZOgithub.com/nervus-os/nervus-ipc/g" +
-      "o/protocol/interface/pkgmanagerv1;pkgman" +
-      "agerv1b\006proto3"
+      "\000\022\334\001\n\036PACKAGE_MANAGER_METHOD_INSTALL\020\001\032\267" +
+      "\001\212\246\035\262\001\010\001\022\020perm.pkg.install\030\004(\0010\001:-nervus" +
+      ".interface.pkgmanager.v1.InstallRequestB" +
+      ",nervus.interface.pkgmanager.v1.InstallR" +
+      "esult\202\0018nervus.interface.pkgmanager.v1.P" +
+      "ackageManagerErrorDetail\022\260\001\n PACKAGE_MAN" +
+      "AGER_METHOD_UNINSTALL\020\002\032\211\001\212\246\035\204\001\010\002\022\020perm." +
+      "pkg.install\030\0040\001:/nervus.interface.pkgman" +
+      "ager.v1.UninstallRequest\202\0018nervus.interf" +
+      "ace.pkgmanager.v1.PackageManagerErrorDet" +
+      "ail\022\317\001\n\033PACKAGE_MANAGER_METHOD_LIST\020\003\032\255\001" +
+      "\212\246\035\250\001\010\003\022\016perm.pkg.query\030\001:*nervus.interf" +
+      "ace.pkgmanager.v1.ListRequestB)nervus.in" +
+      "terface.pkgmanager.v1.ListResultH\001\202\0018ner" +
+      "vus.interface.pkgmanager.v1.PackageManag" +
+      "erErrorDetail\022\306\001\n,PACKAGE_MANAGER_METHOD" +
+      "_SET_COMPONENT_ENABLED\020\004\032\223\001\212\246\035\216\001\010\004\022\020perm" +
+      ".pkg.install\030\0040\001:9nervus.interface.pkgma" +
+      "nager.v1.SetComponentEnabledRequest\202\0018ne" +
+      "rvus.interface.pkgmanager.v1.PackageMana" +
+      "gerErrorDetail*\277\003\n\024PackageManagerReason\022" +
+      "&\n\"PACKAGE_MANAGER_REASON_UNSPECIFIED\020\000\022" +
+      ",\n(PACKAGE_MANAGER_REASON_SIGNATURE_INVA" +
+      "LID\020\001\022*\n&PACKAGE_MANAGER_REASON_DIGEST_M" +
+      "ISMATCH\020\002\022$\n PACKAGE_MANAGER_REASON_DOWN" +
+      "GRADE\020\003\022\'\n#PACKAGE_MANAGER_REASON_ABI_MI" +
+      "SMATCH\020\004\022+\n\'PACKAGE_MANAGER_REASON_MANIF" +
+      "EST_INVALID\020\005\022,\n(PACKAGE_MANAGER_REASON_" +
+      "PACKAGE_NOT_FOUND\020\006\022$\n PACKAGE_MANAGER_R" +
+      "EASON_IMMUTABLE\020\007\022)\n%PACKAGE_MANAGER_REA" +
+      "SON_LINEAGE_BROKEN\020\010\022*\n&PACKAGE_MANAGER_" +
+      "REASON_ARCHIVE_INVALID\020\tB\215\001\n&io.github.n" +
+      "ervusos.iface.pkgmanager.v1B\023PackageMana" +
+      "gerProtoP\001ZLgithub.com/nervus-os/nervus-" +
+      "ipc/protocol/interface/pkgmanagerv1;pkgm" +
+      "anagerv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

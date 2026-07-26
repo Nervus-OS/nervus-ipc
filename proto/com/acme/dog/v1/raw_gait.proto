@@ -26,7 +26,7 @@ package com.acme.dog.v1;
 // OEM 不重新发明这套机制，只使用它——这正是「机制在内核/协议，语义在包」。
 import "nervus/ipc/v1/method_registry.proto";
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/oem/acme/dog/v1;dogv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/oem/acme/dog/v1;dogv1";
 
 option java_package = "com.acme.dog.v1";
 option java_multiple_files = true;
@@ -54,6 +54,7 @@ enum RawGaitMethod {
     is_motion: false
     request_type: "com.acme.dog.v1.GetGaitStateRequest"
     response_type: "com.acme.dog.v1.GaitState"
+    error_detail_type: "com.acme.dog.v1.RawGaitErrorDetail"
   }];
 
   // 物理控制：直接下发原始步态相位参数（越过标准 BaseMotion 的速度抽象）。
@@ -70,6 +71,7 @@ enum RawGaitMethod {
     is_motion: true
     request_type: "com.acme.dog.v1.SetRawGaitRequest"
     response_type: "com.acme.dog.v1.SetRawGaitResponse"
+    error_detail_type: "com.acme.dog.v1.RawGaitErrorDetail"
   }];
 }
 

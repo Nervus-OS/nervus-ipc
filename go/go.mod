@@ -1,7 +1,0 @@
-module github.com/nervus-os/nervus-ipc/go
-
-go 1.24.0
-
-tool google.golang.org/protobuf/cmd/protoc-gen-go
-
-require google.golang.org/protobuf v1.36.11

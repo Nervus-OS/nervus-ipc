@@ -74,10 +74,10 @@ public final class StatusProto {
       "(RESOLVE_ENDPOINT_REASON_VERSION_MISMATC" +
       "H\020\002\022.\n*RESOLVE_ENDPOINT_REASON_RESOURCE_" +
       "NOT_FOUND\020\003\022.\n*RESOLVE_ENDPOINT_REASON_R" +
-      "ESOURCE_AMBIGUOUS\020\004Bc\n\031io.github.nervuso" +
-      "s.ipc.v1B\013StatusProtoP\001Z7github.com/nerv" +
-      "us-os/nervus-ipc/go/protocol/ipcv1;ipcv1" +
-      "b\006proto3"
+      "ESOURCE_AMBIGUOUS\020\004B`\n\031io.github.nervuso" +
+      "s.ipc.v1B\013StatusProtoP\001Z4github.com/nerv" +
+      "us-os/nervus-ipc/protocol/ipcv1;ipcv1b\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

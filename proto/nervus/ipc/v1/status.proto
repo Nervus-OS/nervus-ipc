@@ -12,7 +12,7 @@ syntax = "proto3";
 
 package nervus.ipc.v1;
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/ipcv1;ipcv1";
 
 // GitHub 组织名是 nervus-os，但【连字符在 Java 包名里非法】——JLS §3.8 规定
 // 包名每段必须是合法标识符，只允许字母、数字、_ 和 $。因此这里去掉连字符。

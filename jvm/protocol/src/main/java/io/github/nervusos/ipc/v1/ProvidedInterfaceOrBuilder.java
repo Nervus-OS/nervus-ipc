@@ -76,7 +76,7 @@ public interface ProvidedInterfaceOrBuilder extends
   /**
    * <pre>
    * 接口级权限门槛：Resolve 该接口所需权限 ID。
-   * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
+   * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
    * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
    * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
    * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -90,7 +90,7 @@ public interface ProvidedInterfaceOrBuilder extends
   /**
    * <pre>
    * 接口级权限门槛：Resolve 该接口所需权限 ID。
-   * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
+   * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
    * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
    * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
    * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -125,4 +125,139 @@ public interface ProvidedInterfaceOrBuilder extends
    * @return The resourceRiskFloor.
    */
   io.github.nervusos.ipc.v1.RiskClass getResourceRiskFloor();
+
+  /**
+   * <pre>
+   * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+   * RegisterEndpoint.resource_handle 必须为空。
+   * </pre>
+   *
+   * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+   * @return A list containing the compatibleResourceTypes.
+   */
+  java.util.List<java.lang.String>
+      getCompatibleResourceTypesList();
+  /**
+   * <pre>
+   * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+   * RegisterEndpoint.resource_handle 必须为空。
+   * </pre>
+   *
+   * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+   * @return The count of compatibleResourceTypes.
+   */
+  int getCompatibleResourceTypesCount();
+  /**
+   * <pre>
+   * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+   * RegisterEndpoint.resource_handle 必须为空。
+   * </pre>
+   *
+   * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+   * @param index The index of the element to return.
+   * @return The compatibleResourceTypes at the given index.
+   */
+  java.lang.String getCompatibleResourceTypes(int index);
+  /**
+   * <pre>
+   * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+   * RegisterEndpoint.resource_handle 必须为空。
+   * </pre>
+   *
+   * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the compatibleResourceTypes at the given index.
+   */
+  com.google.protobuf.ByteString
+      getCompatibleResourceTypesBytes(int index);
+
+  /**
+   * <pre>
+   * 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+   * compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+   * 不再由内核全局写死为 motion.base/main。
+   * </pre>
+   *
+   * <code>string default_resource_type = 7 [json_name = "defaultResourceType"];</code>
+   * @return The defaultResourceType.
+   */
+  java.lang.String getDefaultResourceType();
+  /**
+   * <pre>
+   * 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+   * compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+   * 不再由内核全局写死为 motion.base/main。
+   * </pre>
+   *
+   * <code>string default_resource_type = 7 [json_name = "defaultResourceType"];</code>
+   * @return The bytes for defaultResourceType.
+   */
+  com.google.protobuf.ByteString
+      getDefaultResourceTypeBytes();
+
+  /**
+   * <code>string default_resource_role = 8 [json_name = "defaultResourceRole"];</code>
+   * @return The defaultResourceRole.
+   */
+  java.lang.String getDefaultResourceRole();
+  /**
+   * <code>string default_resource_role = 8 [json_name = "defaultResourceRole"];</code>
+   * @return The bytes for defaultResourceRole.
+   */
+  com.google.protobuf.ByteString
+      getDefaultResourceRoleBytes();
+
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  java.util.List<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion> 
+      getInterfaceVersionsList();
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  io.github.nervusos.ipc.v1.ProvidedInterfaceVersion getInterfaceVersions(int index);
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  int getInterfaceVersionsCount();
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  java.util.List<? extends io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder> 
+      getInterfaceVersionsOrBuilderList();
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder getInterfaceVersionsOrBuilder(
+      int index);
 }

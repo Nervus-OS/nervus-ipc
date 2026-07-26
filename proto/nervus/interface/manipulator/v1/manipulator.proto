@@ -30,7 +30,7 @@ package nervus.interface.manipulator.v1;
 // method_meta 自定义 option + RiskClass 来自机制层。
 import "nervus/ipc/v1/method_registry.proto";
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/interface/manipulatorv1;manipulatorv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/manipulatorv1;manipulatorv1";
 
 // Java 包名不能含连字符，也不能用保留字 "interface"（JLS §3.9）——因此这里用
 // "iface" 段。proto package 用 "interface" 不受影响（那只是 wire/命名用途）。
@@ -59,6 +59,7 @@ enum ManipulatorMethod {
     needs_user_confirmation: false
     request_type: "nervus.interface.manipulator.v1.GetArmStateRequest"
     response_type: "nervus.interface.manipulator.v1.ArmState"
+    error_detail_type: "nervus.interface.manipulator.v1.ManipulatorErrorDetail"
   }];
 
   // 状态事件流（订阅，非 request/response）。响应类型即事件 payload 类型。
@@ -70,6 +71,7 @@ enum ManipulatorMethod {
     needs_user_confirmation: false
     request_type: "nervus.interface.manipulator.v1.SubscribeArmStateRequest"
     response_type: "nervus.interface.manipulator.v1.ArmState"
+    error_detail_type: "nervus.interface.manipulator.v1.ManipulatorErrorDetail"
   }];
 
   // 末端移到笛卡尔位姿（含 frame）。长任务 → operation。
@@ -82,6 +84,7 @@ enum ManipulatorMethod {
     needs_user_confirmation: true
     request_type: "nervus.interface.manipulator.v1.MoveToPoseRequest"
     response_type: "nervus.interface.manipulator.v1.ManipulatorMoveResult"
+    error_detail_type: "nervus.interface.manipulator.v1.ManipulatorErrorDetail"
   }];
 
   // 关节空间轨迹。长任务 → operation。
@@ -94,6 +97,7 @@ enum ManipulatorMethod {
     needs_user_confirmation: true
     request_type: "nervus.interface.manipulator.v1.MoveJointTrajectoryRequest"
     response_type: "nervus.interface.manipulator.v1.ManipulatorMoveResult"
+    error_detail_type: "nervus.interface.manipulator.v1.ManipulatorErrorDetail"
   }];
 
   // 回零 / 收拢位。长任务 → operation。
@@ -106,6 +110,7 @@ enum ManipulatorMethod {
     needs_user_confirmation: true
     request_type: "nervus.interface.manipulator.v1.GoHomeRequest"
     response_type: "nervus.interface.manipulator.v1.ManipulatorMoveResult"
+    error_detail_type: "nervus.interface.manipulator.v1.ManipulatorErrorDetail"
   }];
 
   // 夹爪开合（短命令，非 operation），但仍驱动执行器 → 需 lease。
@@ -118,6 +123,7 @@ enum ManipulatorMethod {
     needs_user_confirmation: false
     request_type: "nervus.interface.manipulator.v1.SetGripperRequest"
     response_type: ""
+    error_detail_type: "nervus.interface.manipulator.v1.ManipulatorErrorDetail"
   }];
 
   // 普通受控停止（非 SafetyHalt）。需 lease，短命令。
@@ -130,6 +136,7 @@ enum ManipulatorMethod {
     needs_user_confirmation: false
     request_type: "nervus.interface.manipulator.v1.StopRequest"
     response_type: ""
+    error_detail_type: "nervus.interface.manipulator.v1.ManipulatorErrorDetail"
   }];
 }
 

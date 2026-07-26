@@ -98,9 +98,9 @@ public final class SafetyProto {
       "N_ERROR_REASON_SAFETY_LATCHED\020\001\022(\n$BASE_" +
       "MOTION_ERROR_REASON_STALE_EPOCH\020\002\0221\n-BAS" +
       "E_MOTION_ERROR_REASON_LOCOMOTION_NOT_REA" +
-      "DY\020\003Bc\n\031io.github.nervusos.ipc.v1B\013Safet" +
-      "yProtoP\001Z7github.com/nervus-os/nervus-ip" +
-      "c/go/protocol/ipcv1;ipcv1b\006proto3"
+      "DY\020\003B`\n\031io.github.nervusos.ipc.v1B\013Safet" +
+      "yProtoP\001Z4github.com/nervus-os/nervus-ip" +
+      "c/protocol/ipcv1;ipcv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

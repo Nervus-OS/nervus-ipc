@@ -94,5 +94,17 @@
     "kind": "interface_schema_bundle_set",
     "file": "interface_schema_bundle_set.binpb",
     "doc": "一个 .nspkg 携带的多接口 bundle 集合"
+  },
+  {
+    "name": "transfer_handle_peer",
+    "kind": "transfer_handle",
+    "file": "transfer_handle_peer.binpb",
+    "doc": "双向 Transfer 的一次性 PEER handle"
+  },
+  {
+    "name": "attach_transfer_result_success",
+    "kind": "attach_transfer_result",
+    "file": "attach_transfer_result_success.binpb",
+    "doc": "Transfer 附着成功并返回收紧后的包大小与速率"
   }
 ]

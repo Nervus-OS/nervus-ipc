@@ -11,7 +11,10 @@
 # 其余一律 LF。生成物（.pb.go / .java）也在内，它们的 sha256 是
 # 「连续两次 buf generate 一致」这条门禁的依据，不能因平台而异。
 *.go        text eol=lf
-*.java      text eol=lf
+# protoc 29.3 的内置 Java generator 会在若干换行前稳定地产生一个空格。
+# 这些文件全部是生成物；保留原始字节以维持 buf generate 确定性，并只关闭
+# git diff --check 对该生成器格式的 blank-at-eol / blank-at-eof 告警。
+*.java      text eol=lf whitespace=-blank-at-eol,-blank-at-eof
 *.kt        text eol=lf
 *.kts       text eol=lf
 *.proto     text eol=lf
@@ -24,6 +27,8 @@ go.sum      text eol=lf
 gradlew     text eol=lf
 *.properties text eol=lf
 *.toml      text eol=lf
+.gitattributes text eol=lf
+.gitignore  text eol=lf
 
 # Windows 批处理必须 CRLF，否则 cmd.exe 解析异常
 *.bat text eol=crlf

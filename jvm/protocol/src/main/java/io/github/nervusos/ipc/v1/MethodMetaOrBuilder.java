@@ -174,4 +174,86 @@ public interface MethodMetaOrBuilder extends
    * @return The isMotion.
    */
   boolean getIsMotion();
+
+  /**
+   * <pre>
+   * 0 表示采用 nervud 的保守默认值，不表示无限。非 0 时仍会被连接级硬上限收紧。
+   * </pre>
+   *
+   * <code>uint32 default_timeout_ms = 11 [json_name = "defaultTimeoutMs"];</code>
+   * @return The defaultTimeoutMs.
+   */
+  int getDefaultTimeoutMs();
+
+  /**
+   * <code>uint32 max_timeout_ms = 12 [json_name = "maxTimeoutMs"];</code>
+   * @return The maxTimeoutMs.
+   */
+  int getMaxTimeoutMs();
+
+  /**
+   * <code>uint32 max_request_bytes = 13 [json_name = "maxRequestBytes"];</code>
+   * @return The maxRequestBytes.
+   */
+  int getMaxRequestBytes();
+
+  /**
+   * <code>uint32 max_response_bytes = 14 [json_name = "maxResponseBytes"];</code>
+   * @return The maxResponseBytes.
+   */
+  int getMaxResponseBytes();
+
+  /**
+   * <pre>
+   * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+   * 声明的方向、模式、流数量与速率预算。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+   * @return Whether the transfer field is set.
+   */
+  boolean hasTransfer();
+  /**
+   * <pre>
+   * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+   * 声明的方向、模式、流数量与速率预算。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+   * @return The transfer.
+   */
+  io.github.nervusos.ipc.v1.TransferPolicy getTransfer();
+  /**
+   * <pre>
+   * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+   * 声明的方向、模式、流数量与速率预算。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+   */
+  io.github.nervusos.ipc.v1.TransferPolicyOrBuilder getTransferOrBuilder();
+
+  /**
+   * <pre>
+   * Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+   * error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+   * 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+   * </pre>
+   *
+   * <code>string error_detail_type = 16 [json_name = "errorDetailType"];</code>
+   * @return The errorDetailType.
+   */
+  java.lang.String getErrorDetailType();
+  /**
+   * <pre>
+   * Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+   * error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+   * 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+   * </pre>
+   *
+   * <code>string error_detail_type = 16 [json_name = "errorDetailType"];</code>
+   * @return The bytes for errorDetailType.
+   */
+  com.google.protobuf.ByteString
+      getErrorDetailTypeBytes();
 }

@@ -188,7 +188,7 @@ public enum GrantMode
   }
   public static final com.google.protobuf.Descriptors.EnumDescriptor
       getDescriptor() {
-    return io.github.nervusos.ipc.v1.ProviderDescriptorProto.getDescriptor().getEnumTypes().get(1);
+    return io.github.nervusos.ipc.v1.ProviderDescriptorProto.getDescriptor().getEnumTypes().get(2);
   }
 
   private static final GrantMode[] VALUES = values();

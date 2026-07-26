@@ -7,10 +7,11 @@ package io.github.nervusos.ipc.v1;
 
 /**
  * <pre>
- * DefinedPermission 是 Provider 在自己命名空间下定义的一个权限（NRCP §9.2）。
- * 只是**声明**：这个权限存在、叫什么、多危险、怎么授。是否接受、能不能用
- * 某个 grant_mode，由 nervud 裁决——OEM 不能把系统危险权限调低、不能自封
- * system_only 来绕过用户同意（红线 #2）。
+ * DefinedPermission 是 Provider 携带的一条权限定义（NRCP §9.2）。OEM 使用自己
+ * 的 package 命名空间；平台 Provider 可以使用 perm.*。它只是**声明**：这个权限
+ * 存在、叫什么、多危险、怎么授。是否接受、定义者是否有权占用该命名空间、能不能
+ * 使用某个 grant_mode，全部由 nervud 根据签名与平台底线裁决——普通 Provider
+ * 不能靠写一个 perm.* 就获得平台权限，也不能把系统危险权限调低。
  * </pre>
  *
  * Protobuf type {@code nervus.ipc.v1.DefinedPermission}
@@ -37,6 +38,9 @@ private static final long serialVersionUID = 0L;
     id_ = "";
     grantMode_ = 0;
     riskClass_ = 0;
+    minimumTrust_ = 0;
+    requiredSignerRole_ = "";
+    group_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -58,8 +62,9 @@ private static final long serialVersionUID = 0L;
   private volatile java.lang.Object id_ = "";
   /**
    * <pre>
-   * 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-   * nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+   * 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+   * （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+   * 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
    * </pre>
    *
    * <code>string id = 1 [json_name = "id"];</code>
@@ -80,8 +85,9 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-   * nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+   * 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+   * （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+   * 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
    * </pre>
    *
    * <code>string id = 1 [json_name = "id"];</code>
@@ -232,6 +238,130 @@ private static final long serialVersionUID = 0L;
     return description_ == null ? io.github.nervusos.ipc.v1.LocalizedText.getDefaultInstance() : description_;
   }
 
+  public static final int MINIMUM_TRUST_FIELD_NUMBER = 6;
+  private int minimumTrust_ = 0;
+  /**
+   * <pre>
+   * Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+   * 因此 Provider 只能收紧、不能降低权限强度。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.PermissionTrustFloor minimum_trust = 6 [json_name = "minimumTrust"];</code>
+   * @return The enum numeric value on the wire for minimumTrust.
+   */
+  @java.lang.Override public int getMinimumTrustValue() {
+    return minimumTrust_;
+  }
+  /**
+   * <pre>
+   * Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+   * 因此 Provider 只能收紧、不能降低权限强度。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.PermissionTrustFloor minimum_trust = 6 [json_name = "minimumTrust"];</code>
+   * @return The minimumTrust.
+   */
+  @java.lang.Override public io.github.nervusos.ipc.v1.PermissionTrustFloor getMinimumTrust() {
+    io.github.nervusos.ipc.v1.PermissionTrustFloor result = io.github.nervusos.ipc.v1.PermissionTrustFloor.forNumber(minimumTrust_);
+    return result == null ? io.github.nervusos.ipc.v1.PermissionTrustFloor.UNRECOGNIZED : result;
+  }
+
+  public static final int REQUIRED_SIGNER_ROLE_FIELD_NUMBER = 7;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object requiredSignerRole_ = "";
+  /**
+   * <pre>
+   * 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+   * 不是 manifest 或 Provider 运行时自报。
+   * </pre>
+   *
+   * <code>string required_signer_role = 7 [json_name = "requiredSignerRole"];</code>
+   * @return The requiredSignerRole.
+   */
+  @java.lang.Override
+  public java.lang.String getRequiredSignerRole() {
+    java.lang.Object ref = requiredSignerRole_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      requiredSignerRole_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+   * 不是 manifest 或 Provider 运行时自报。
+   * </pre>
+   *
+   * <code>string required_signer_role = 7 [json_name = "requiredSignerRole"];</code>
+   * @return The bytes for requiredSignerRole.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getRequiredSignerRoleBytes() {
+    java.lang.Object ref = requiredSignerRole_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      requiredSignerRole_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int GROUP_FIELD_NUMBER = 8;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object group_ = "";
+  /**
+   * <pre>
+   * 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+   * </pre>
+   *
+   * <code>string group = 8 [json_name = "group"];</code>
+   * @return The group.
+   */
+  @java.lang.Override
+  public java.lang.String getGroup() {
+    java.lang.Object ref = group_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      group_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+   * </pre>
+   *
+   * <code>string group = 8 [json_name = "group"];</code>
+   * @return The bytes for group.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getGroupBytes() {
+    java.lang.Object ref = group_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      group_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -261,6 +391,15 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000002) != 0)) {
       output.writeMessage(5, getDescription());
     }
+    if (minimumTrust_ != io.github.nervusos.ipc.v1.PermissionTrustFloor.PERMISSION_TRUST_FLOOR_UNSPECIFIED.getNumber()) {
+      output.writeEnum(6, minimumTrust_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(requiredSignerRole_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 7, requiredSignerRole_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(group_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 8, group_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -288,6 +427,16 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000002) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(5, getDescription());
+    }
+    if (minimumTrust_ != io.github.nervusos.ipc.v1.PermissionTrustFloor.PERMISSION_TRUST_FLOOR_UNSPECIFIED.getNumber()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeEnumSize(6, minimumTrust_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(requiredSignerRole_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(7, requiredSignerRole_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(group_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(8, group_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -318,6 +467,11 @@ private static final long serialVersionUID = 0L;
       if (!getDescription()
           .equals(other.getDescription())) return false;
     }
+    if (minimumTrust_ != other.minimumTrust_) return false;
+    if (!getRequiredSignerRole()
+        .equals(other.getRequiredSignerRole())) return false;
+    if (!getGroup()
+        .equals(other.getGroup())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -343,6 +497,12 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
       hash = (53 * hash) + getDescription().hashCode();
     }
+    hash = (37 * hash) + MINIMUM_TRUST_FIELD_NUMBER;
+    hash = (53 * hash) + minimumTrust_;
+    hash = (37 * hash) + REQUIRED_SIGNER_ROLE_FIELD_NUMBER;
+    hash = (53 * hash) + getRequiredSignerRole().hashCode();
+    hash = (37 * hash) + GROUP_FIELD_NUMBER;
+    hash = (53 * hash) + getGroup().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -442,10 +602,11 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * DefinedPermission 是 Provider 在自己命名空间下定义的一个权限（NRCP §9.2）。
-   * 只是**声明**：这个权限存在、叫什么、多危险、怎么授。是否接受、能不能用
-   * 某个 grant_mode，由 nervud 裁决——OEM 不能把系统危险权限调低、不能自封
-   * system_only 来绕过用户同意（红线 #2）。
+   * DefinedPermission 是 Provider 携带的一条权限定义（NRCP §9.2）。OEM 使用自己
+   * 的 package 命名空间；平台 Provider 可以使用 perm.*。它只是**声明**：这个权限
+   * 存在、叫什么、多危险、怎么授。是否接受、定义者是否有权占用该命名空间、能不能
+   * 使用某个 grant_mode，全部由 nervud 根据签名与平台底线裁决——普通 Provider
+   * 不能靠写一个 perm.* 就获得平台权限，也不能把系统危险权限调低。
    * </pre>
    *
    * Protobuf type {@code nervus.ipc.v1.DefinedPermission}
@@ -501,6 +662,9 @@ private static final long serialVersionUID = 0L;
         descriptionBuilder_.dispose();
         descriptionBuilder_ = null;
       }
+      minimumTrust_ = 0;
+      requiredSignerRole_ = "";
+      group_ = "";
       return this;
     }
 
@@ -556,6 +720,15 @@ private static final long serialVersionUID = 0L;
             : descriptionBuilder_.build();
         to_bitField0_ |= 0x00000002;
       }
+      if (((from_bitField0_ & 0x00000020) != 0)) {
+        result.minimumTrust_ = minimumTrust_;
+      }
+      if (((from_bitField0_ & 0x00000040) != 0)) {
+        result.requiredSignerRole_ = requiredSignerRole_;
+      }
+      if (((from_bitField0_ & 0x00000080) != 0)) {
+        result.group_ = group_;
+      }
       result.bitField0_ |= to_bitField0_;
     }
 
@@ -587,6 +760,19 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasDescription()) {
         mergeDescription(other.getDescription());
+      }
+      if (other.minimumTrust_ != 0) {
+        setMinimumTrustValue(other.getMinimumTrustValue());
+      }
+      if (!other.getRequiredSignerRole().isEmpty()) {
+        requiredSignerRole_ = other.requiredSignerRole_;
+        bitField0_ |= 0x00000040;
+        onChanged();
+      }
+      if (!other.getGroup().isEmpty()) {
+        group_ = other.group_;
+        bitField0_ |= 0x00000080;
+        onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -643,6 +829,21 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000010;
               break;
             } // case 42
+            case 48: {
+              minimumTrust_ = input.readEnum();
+              bitField0_ |= 0x00000020;
+              break;
+            } // case 48
+            case 58: {
+              requiredSignerRole_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000040;
+              break;
+            } // case 58
+            case 66: {
+              group_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000080;
+              break;
+            } // case 66
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -663,8 +864,9 @@ private static final long serialVersionUID = 0L;
     private java.lang.Object id_ = "";
     /**
      * <pre>
-     * 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-     * nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+     * 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+     * （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+     * 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
      * </pre>
      *
      * <code>string id = 1 [json_name = "id"];</code>
@@ -684,8 +886,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-     * nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+     * 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+     * （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+     * 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
      * </pre>
      *
      * <code>string id = 1 [json_name = "id"];</code>
@@ -706,8 +909,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-     * nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+     * 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+     * （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+     * 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
      * </pre>
      *
      * <code>string id = 1 [json_name = "id"];</code>
@@ -724,8 +928,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-     * nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+     * 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+     * （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+     * 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
      * </pre>
      *
      * <code>string id = 1 [json_name = "id"];</code>
@@ -739,8 +944,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-     * nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+     * 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+     * （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+     * 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
      * </pre>
      *
      * <code>string id = 1 [json_name = "id"];</code>
@@ -1220,6 +1426,273 @@ private static final long serialVersionUID = 0L;
         description_ = null;
       }
       return descriptionBuilder_;
+    }
+
+    private int minimumTrust_ = 0;
+    /**
+     * <pre>
+     * Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+     * 因此 Provider 只能收紧、不能降低权限强度。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PermissionTrustFloor minimum_trust = 6 [json_name = "minimumTrust"];</code>
+     * @return The enum numeric value on the wire for minimumTrust.
+     */
+    @java.lang.Override public int getMinimumTrustValue() {
+      return minimumTrust_;
+    }
+    /**
+     * <pre>
+     * Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+     * 因此 Provider 只能收紧、不能降低权限强度。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PermissionTrustFloor minimum_trust = 6 [json_name = "minimumTrust"];</code>
+     * @param value The enum numeric value on the wire for minimumTrust to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMinimumTrustValue(int value) {
+      minimumTrust_ = value;
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+     * 因此 Provider 只能收紧、不能降低权限强度。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PermissionTrustFloor minimum_trust = 6 [json_name = "minimumTrust"];</code>
+     * @return The minimumTrust.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.PermissionTrustFloor getMinimumTrust() {
+      io.github.nervusos.ipc.v1.PermissionTrustFloor result = io.github.nervusos.ipc.v1.PermissionTrustFloor.forNumber(minimumTrust_);
+      return result == null ? io.github.nervusos.ipc.v1.PermissionTrustFloor.UNRECOGNIZED : result;
+    }
+    /**
+     * <pre>
+     * Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+     * 因此 Provider 只能收紧、不能降低权限强度。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PermissionTrustFloor minimum_trust = 6 [json_name = "minimumTrust"];</code>
+     * @param value The minimumTrust to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMinimumTrust(io.github.nervusos.ipc.v1.PermissionTrustFloor value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      bitField0_ |= 0x00000020;
+      minimumTrust_ = value.getNumber();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+     * 因此 Provider 只能收紧、不能降低权限强度。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PermissionTrustFloor minimum_trust = 6 [json_name = "minimumTrust"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMinimumTrust() {
+      bitField0_ = (bitField0_ & ~0x00000020);
+      minimumTrust_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object requiredSignerRole_ = "";
+    /**
+     * <pre>
+     * 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+     * 不是 manifest 或 Provider 运行时自报。
+     * </pre>
+     *
+     * <code>string required_signer_role = 7 [json_name = "requiredSignerRole"];</code>
+     * @return The requiredSignerRole.
+     */
+    public java.lang.String getRequiredSignerRole() {
+      java.lang.Object ref = requiredSignerRole_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        requiredSignerRole_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+     * 不是 manifest 或 Provider 运行时自报。
+     * </pre>
+     *
+     * <code>string required_signer_role = 7 [json_name = "requiredSignerRole"];</code>
+     * @return The bytes for requiredSignerRole.
+     */
+    public com.google.protobuf.ByteString
+        getRequiredSignerRoleBytes() {
+      java.lang.Object ref = requiredSignerRole_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        requiredSignerRole_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+     * 不是 manifest 或 Provider 运行时自报。
+     * </pre>
+     *
+     * <code>string required_signer_role = 7 [json_name = "requiredSignerRole"];</code>
+     * @param value The requiredSignerRole to set.
+     * @return This builder for chaining.
+     */
+    public Builder setRequiredSignerRole(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      requiredSignerRole_ = value;
+      bitField0_ |= 0x00000040;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+     * 不是 manifest 或 Provider 运行时自报。
+     * </pre>
+     *
+     * <code>string required_signer_role = 7 [json_name = "requiredSignerRole"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearRequiredSignerRole() {
+      requiredSignerRole_ = getDefaultInstance().getRequiredSignerRole();
+      bitField0_ = (bitField0_ & ~0x00000040);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+     * 不是 manifest 或 Provider 运行时自报。
+     * </pre>
+     *
+     * <code>string required_signer_role = 7 [json_name = "requiredSignerRole"];</code>
+     * @param value The bytes for requiredSignerRole to set.
+     * @return This builder for chaining.
+     */
+    public Builder setRequiredSignerRoleBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      requiredSignerRole_ = value;
+      bitField0_ |= 0x00000040;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object group_ = "";
+    /**
+     * <pre>
+     * 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+     * </pre>
+     *
+     * <code>string group = 8 [json_name = "group"];</code>
+     * @return The group.
+     */
+    public java.lang.String getGroup() {
+      java.lang.Object ref = group_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        group_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+     * </pre>
+     *
+     * <code>string group = 8 [json_name = "group"];</code>
+     * @return The bytes for group.
+     */
+    public com.google.protobuf.ByteString
+        getGroupBytes() {
+      java.lang.Object ref = group_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        group_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+     * </pre>
+     *
+     * <code>string group = 8 [json_name = "group"];</code>
+     * @param value The group to set.
+     * @return This builder for chaining.
+     */
+    public Builder setGroup(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      group_ = value;
+      bitField0_ |= 0x00000080;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+     * </pre>
+     *
+     * <code>string group = 8 [json_name = "group"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearGroup() {
+      group_ = getDefaultInstance().getGroup();
+      bitField0_ = (bitField0_ & ~0x00000080);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+     * </pre>
+     *
+     * <code>string group = 8 [json_name = "group"];</code>
+     * @param value The bytes for group to set.
+     * @return This builder for chaining.
+     */
+    public Builder setGroupBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      group_ = value;
+      bitField0_ |= 0x00000080;
+      onChanged();
+      return this;
     }
 
     // @@protoc_insertion_point(builder_scope:nervus.ipc.v1.DefinedPermission)

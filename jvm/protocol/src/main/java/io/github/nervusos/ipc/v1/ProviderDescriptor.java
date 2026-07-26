@@ -233,8 +233,9 @@ private static final long serialVersionUID = 0L;
   private java.util.List<io.github.nervusos.ipc.v1.DefinedPermission> permissions_;
   /**
    * <pre>
-   * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-   * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+   * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+   * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+   * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -245,8 +246,9 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-   * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+   * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+   * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+   * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -258,8 +260,9 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-   * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+   * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+   * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+   * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -270,8 +273,9 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-   * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+   * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+   * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+   * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -282,8 +286,9 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-   * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+   * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+   * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+   * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1545,8 +1550,9 @@ private static final long serialVersionUID = 0L;
 
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1560,8 +1566,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1575,8 +1582,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1590,8 +1598,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1612,8 +1621,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1631,8 +1641,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1652,8 +1663,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1674,8 +1686,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1693,8 +1706,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1712,8 +1726,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1732,8 +1747,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1750,8 +1766,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1768,8 +1785,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1780,8 +1798,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1795,8 +1814,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1811,8 +1831,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1823,8 +1844,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>
@@ -1836,8 +1858,9 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-     * （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+     * 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+     * 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+     * 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.DefinedPermission permissions = 4 [json_name = "permissions"];</code>

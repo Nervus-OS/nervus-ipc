@@ -39,7 +39,7 @@ package nervus.interface.pkgmanager.v1;
 
 import "nervus/ipc/v1/method_registry.proto";
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/interface/pkgmanagerv1;pkgmanagerv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/pkgmanagerv1;pkgmanagerv1";
 
 // 连字符在 Java 包名里非法，理由见 status.proto。
 option java_package = "io.github.nervusos.iface.pkgmanager.v1";
@@ -72,6 +72,7 @@ enum PackageManagerMethod {
     is_motion: false
     request_type: "nervus.interface.pkgmanager.v1.InstallRequest"
     response_type: "nervus.interface.pkgmanager.v1.InstallResult"
+    error_detail_type: "nervus.interface.pkgmanager.v1.PackageManagerErrorDetail"
   }];
 
   // 卸载一个动态安装的 Package。
@@ -91,6 +92,7 @@ enum PackageManagerMethod {
     is_motion: false
     request_type: "nervus.interface.pkgmanager.v1.UninstallRequest"
     response_type: ""
+    error_detail_type: "nervus.interface.pkgmanager.v1.PackageManagerErrorDetail"
   }];
 
   // 列出已装 Package。只读，不需要确认框。
@@ -105,6 +107,7 @@ enum PackageManagerMethod {
     is_motion: false
     request_type: "nervus.interface.pkgmanager.v1.ListRequest"
     response_type: "nervus.interface.pkgmanager.v1.ListResult"
+    error_detail_type: "nervus.interface.pkgmanager.v1.PackageManagerErrorDetail"
   }];
 
   // 停用/启用一个 Component。
@@ -123,6 +126,7 @@ enum PackageManagerMethod {
     is_motion: false
     request_type: "nervus.interface.pkgmanager.v1.SetComponentEnabledRequest"
     response_type: ""
+    error_detail_type: "nervus.interface.pkgmanager.v1.PackageManagerErrorDetail"
   }];
 }
 

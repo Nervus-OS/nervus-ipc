@@ -73,4 +73,28 @@ public interface InterfaceSchemaBundleOrBuilder extends
    * @return The fileDescriptorSet.
    */
   com.google.protobuf.ByteString getFileDescriptorSet();
+
+  /**
+   * <pre>
+   * 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+   * 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+   * 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+   * </pre>
+   *
+   * <code>string method_enum_type = 5 [json_name = "methodEnumType"];</code>
+   * @return The methodEnumType.
+   */
+  java.lang.String getMethodEnumType();
+  /**
+   * <pre>
+   * 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+   * 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+   * 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+   * </pre>
+   *
+   * <code>string method_enum_type = 5 [json_name = "methodEnumType"];</code>
+   * @return The bytes for methodEnumType.
+   */
+  com.google.protobuf.ByteString
+      getMethodEnumTypeBytes();
 }

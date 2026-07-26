@@ -1,0 +1,78 @@
+# 标准 Provider Descriptor 样例（平台镜像内置，A4 §2）
+#
+# 这份声明由平台镜像随标准 Provider 分发，喂给 nervud 的接口→权限/风险/资源
+# 就来自这里，而不是 endpoint.DefaultInterfaceCatalog() 的硬编码 Go 常量表。
+# 标准接口的 required_permission 指向 perm.*。平台签名 Provider 可以在同一份
+# Descriptor 里声明这些平台权限；nervud 必须先验证定义者具备 Platform trust /
+# 允许的 signer role，再把定义投进全局权限目录。
+#
+# 文本格式对应 nervus.ipc.v1.ProviderDescriptor。schema_hash 此处用 32-byte 占位值，
+# 真实值由 A5 的 descriptor bundle 计算并与 RegisterEndpoint / RobotCatalog 对齐。
+
+package_id: "nervus.platform.motion"
+
+interfaces {
+  interface_id: "nervus.interface.motion.base"
+  interface_versions {
+    major: 1
+    schema_hash: "0123456789abcdef0123456789abcdef"
+  }
+  required_permission: "perm.motion.control"
+  resource_risk_floor: RISK_CLASS_PHYSICAL_CONTROL
+  compatible_resource_types: "nervus.resource.motion.base"
+  default_resource_type: "nervus.resource.motion.base"
+  default_resource_role: "base.main"
+}
+
+interfaces {
+  interface_id: "nervus.interface.manipulator.arm"
+  interface_versions {
+    major: 1
+    schema_hash: "abcdef0123456789abcdef0123456789"
+  }
+  required_permission: "perm.manipulator.control"
+  resource_risk_floor: RISK_CLASS_PHYSICAL_CONTROL
+  compatible_resource_types: "nervus.resource.manipulator.arm"
+  default_resource_type: "nervus.resource.manipulator.arm"
+  default_resource_role: "arm.main"
+}
+
+resources {
+  stable_role: "base.main"
+  resource_type: "nervus.resource.motion.base"
+  access_mode: RESOURCE_ACCESS_MODE_EXCLUSIVE_CONTROL
+  risk_class: RISK_CLASS_PHYSICAL_CONTROL
+}
+
+resources {
+  stable_role: "arm.main"
+  resource_type: "nervus.resource.manipulator.arm"
+  access_mode: RESOURCE_ACCESS_MODE_EXCLUSIVE_CONTROL
+  risk_class: RISK_CLASS_PHYSICAL_CONTROL
+}
+
+permissions {
+  id: "perm.motion.control"
+  grant_mode: GRANT_MODE_USER_CONSENT
+  risk_class: RISK_CLASS_PHYSICAL_CONTROL
+  minimum_trust: PERMISSION_TRUST_FLOOR_ORDINARY
+  group: "motion"
+  display_name { zh_cn: "移动控制" en: "Motion control" }
+  description {
+    zh_cn: "允许控制机器人底盘移动。"
+    en: "Allows controlling robot base motion."
+  }
+}
+
+permissions {
+  id: "perm.manipulator.control"
+  grant_mode: GRANT_MODE_USER_CONSENT
+  risk_class: RISK_CLASS_PHYSICAL_CONTROL
+  minimum_trust: PERMISSION_TRUST_FLOOR_ORDINARY
+  group: "motion"
+  display_name { zh_cn: "机械臂控制" en: "Manipulator control" }
+  description {
+    zh_cn: "允许控制机器人机械臂。"
+    en: "Allows controlling the robot manipulator."
+  }
+}

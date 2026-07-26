@@ -14,7 +14,7 @@ import java.io.File
  *
  * 每个向量在 Kotlin 里【独立构造】出与 Go 侧相同的消息，`toByteArray()` 后
  * 必须逐字节等于 committed 的 testdata/golden/<name>.binpb —— 那份文件由 Go 侧
- * 的 `go test -run TestGoldenUpdate -update` 生成。两侧都断言"自己序列化的字节
+ * 的 `go test ./golden -run TestGoldenUpdate -update` 生成。两侧都断言"自己序列化的字节
  * == 同一份 committed 文件"，于是 Go 与 JVM 传递地逐字节一致。
  *
  * committed .binpb 是唯一真源；本测试【不】写盘。若两侧对不上，就是 schema 或
@@ -192,6 +192,7 @@ class GoldenVectorsTest {
                 .setVersion(1)
                 .setSchemaHash(bytesOf(0xDE, 0xAD, 0xBE, 0xEF))
                 .setFileDescriptorSet(bytesOf(0x0A, 0x03, 'a'.code, 'b'.code, 'c'.code))
+                .setMethodEnumType("com.acme.gripper.v1.GripperMethod")
                 .build().toByteArray()
 
         "interface_schema_bundle_set" ->
@@ -202,6 +203,7 @@ class GoldenVectorsTest {
                         .setVersion(1)
                         .setSchemaHash(bytesOf(0x01, 0x02, 0x03, 0x04))
                         .setFileDescriptorSet(bytesOf(0x0A, 0x01, 'x'.code))
+                        .setMethodEnumType("nervus.interface.motion.v1.BaseMotionMethod")
                 )
                 .addBundles(
                     InterfaceSchemaBundle.newBuilder()
@@ -209,6 +211,27 @@ class GoldenVectorsTest {
                         .setVersion(2)
                         .setSchemaHash(bytesOf(0xDE, 0xAD, 0xBE, 0xEF))
                         .setFileDescriptorSet(bytesOf(0x0A, 0x01, 'y'.code))
+                        .setMethodEnumType("com.acme.gripper.v2.GripperMethod")
+                )
+                .build().toByteArray()
+
+        "transfer_handle_peer" ->
+            TransferHandle.newBuilder()
+                .setTransferId(bytesOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15))
+                .setAttachTicket(ByteString.copyFromUtf8("0123456789abcdef0123456789abcdef"))
+                .setRole(TransferRole.TRANSFER_ROLE_PEER)
+                .setMode(TransferMode.TRANSFER_MODE_FRAMED_RELAY)
+                .setExpiresAtMonotonicNanos(9_876_543_210)
+                .setDataPlaneEndpoint("/run/nervus/nervud-transfer.sock")
+                .build().toByteArray()
+
+        "attach_transfer_result_success" ->
+            AttachTransferResult.newBuilder()
+                .setSuccess(
+                    AttachTransferSuccess.newBuilder()
+                        .setMode(TransferMode.TRANSFER_MODE_FRAMED_RELAY)
+                        .setMaxPacketBytes(1_048_576)
+                        .setMaxBytesPerSecond(8_388_608)
                 )
                 .build().toByteArray()
 
@@ -277,5 +300,15 @@ class GoldenVectorsTest {
         val b = InterfaceSchemaBundle.parseFrom(File(goldenDir, "interface_schema_bundle.binpb").readBytes())
         assertEquals("com.acme.interface.gripper", b.interfaceId)
         assertEquals(1, b.version)
+        assertEquals("com.acme.gripper.v1.GripperMethod", b.methodEnumType)
+    }
+
+    @Test
+    fun `transfer handle preserves ticket role and mode`() {
+        val h = TransferHandle.parseFrom(File(goldenDir, "transfer_handle_peer.binpb").readBytes())
+        assertEquals(16, h.transferId.size())
+        assertEquals(32, h.attachTicket.size())
+        assertEquals(TransferRole.TRANSFER_ROLE_PEER, h.role)
+        assertEquals(TransferMode.TRANSFER_MODE_FRAMED_RELAY, h.mode)
     }
 }

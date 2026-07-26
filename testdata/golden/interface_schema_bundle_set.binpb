@@ -1,7 +1,7 @@
 
-+
+X
 nervus.interface.motion.base"
-x
-)
+x*+nervus.interface.motion.v1.BaseMotionMethod
+L
 com.acme.interface.gripperÞ­¾ï"
-y
+y*!com.acme.gripper.v2.GripperMethod

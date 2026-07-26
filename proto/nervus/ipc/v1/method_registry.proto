@@ -2,7 +2,7 @@
 //
 // [KERNEL: NOT WIRED] nervud 尚未从 descriptor 抽取 Method Registry——方法级
 // 权限判定还没接（internal/endpoint 目前只做到 interface 粒度，见其 catalog.go）。
-// 抽取代码本身已在 go/registry.ExtractMethodMetas 并有测试，缺的是内核侧接线。
+// 抽取代码本身已在 registry.ExtractMethodMetas 并有测试，缺的是内核侧接线。
 //
 // 本文件定义一套【与具体接口无关】的机制：把每个 method 的元数据
 // （权限 / 风险级 / 是否需 ControlLease / 是否 operation / 是否需用户确认 /
@@ -33,8 +33,9 @@ package nervus.ipc.v1;
 // 这是 protoc 的【内置】well-known 类型，buf / protoc 自带，无需第三方依赖，
 // 也不触碰任何在线服务（NRCP：不依赖 Google 在线服务的红线）。
 import "google/protobuf/descriptor.proto";
+import "nervus/ipc/v1/transfer.proto";
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/ipcv1;ipcv1";
 
 // 连字符在 Java 包名里非法，理由见 status.proto。
 option java_package = "io.github.nervusos.ipc.v1";
@@ -133,6 +134,21 @@ message MethodMeta {
   // 通常与 risk_class = RISK_CLASS_PHYSICAL_CONTROL 同现，但把它显式化避免消费者
   // 反推风险级。
   bool is_motion = 10;
+
+  // 0 表示采用 nervud 的保守默认值，不表示无限。非 0 时仍会被连接级硬上限收紧。
+  uint32 default_timeout_ms = 11;
+  uint32 max_timeout_ms = 12;
+  uint32 max_request_bytes = 13;
+  uint32 max_response_bytes = 14;
+
+  // 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+  // 声明的方向、模式、流数量与速率预算。
+  TransferPolicy transfer = 15;
+
+  // Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+  // error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+  // 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+  string error_detail_type = 16;
 }
 
 // method_meta 是挂在 EnumValueOptions 上的扩展 option。

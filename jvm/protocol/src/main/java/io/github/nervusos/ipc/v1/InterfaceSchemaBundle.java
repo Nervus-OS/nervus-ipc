@@ -38,6 +38,7 @@ private static final long serialVersionUID = 0L;
     interfaceId_ = "";
     schemaHash_ = com.google.protobuf.ByteString.EMPTY;
     fileDescriptorSet_ = com.google.protobuf.ByteString.EMPTY;
+    methodEnumType_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -160,6 +161,57 @@ private static final long serialVersionUID = 0L;
     return fileDescriptorSet_;
   }
 
+  public static final int METHOD_ENUM_TYPE_FIELD_NUMBER = 5;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object methodEnumType_ = "";
+  /**
+   * <pre>
+   * 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+   * 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+   * 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+   * </pre>
+   *
+   * <code>string method_enum_type = 5 [json_name = "methodEnumType"];</code>
+   * @return The methodEnumType.
+   */
+  @java.lang.Override
+  public java.lang.String getMethodEnumType() {
+    java.lang.Object ref = methodEnumType_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      methodEnumType_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+   * 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+   * 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+   * </pre>
+   *
+   * <code>string method_enum_type = 5 [json_name = "methodEnumType"];</code>
+   * @return The bytes for methodEnumType.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getMethodEnumTypeBytes() {
+    java.lang.Object ref = methodEnumType_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      methodEnumType_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -186,6 +238,9 @@ private static final long serialVersionUID = 0L;
     if (!fileDescriptorSet_.isEmpty()) {
       output.writeBytes(4, fileDescriptorSet_);
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(methodEnumType_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 5, methodEnumType_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -210,6 +265,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBytesSize(4, fileDescriptorSet_);
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(methodEnumType_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(5, methodEnumType_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -233,6 +291,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getSchemaHash())) return false;
     if (!getFileDescriptorSet()
         .equals(other.getFileDescriptorSet())) return false;
+    if (!getMethodEnumType()
+        .equals(other.getMethodEnumType())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -252,6 +312,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getSchemaHash().hashCode();
     hash = (37 * hash) + FILE_DESCRIPTOR_SET_FIELD_NUMBER;
     hash = (53 * hash) + getFileDescriptorSet().hashCode();
+    hash = (37 * hash) + METHOD_ENUM_TYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getMethodEnumType().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -395,6 +457,7 @@ private static final long serialVersionUID = 0L;
       version_ = 0;
       schemaHash_ = com.google.protobuf.ByteString.EMPTY;
       fileDescriptorSet_ = com.google.protobuf.ByteString.EMPTY;
+      methodEnumType_ = "";
       return this;
     }
 
@@ -440,6 +503,9 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000008) != 0)) {
         result.fileDescriptorSet_ = fileDescriptorSet_;
       }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.methodEnumType_ = methodEnumType_;
+      }
     }
 
     @java.lang.Override
@@ -467,6 +533,11 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getFileDescriptorSet() != com.google.protobuf.ByteString.EMPTY) {
         setFileDescriptorSet(other.getFileDescriptorSet());
+      }
+      if (!other.getMethodEnumType().isEmpty()) {
+        methodEnumType_ = other.methodEnumType_;
+        bitField0_ |= 0x00000010;
+        onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -514,6 +585,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000008;
               break;
             } // case 34
+            case 42: {
+              methodEnumType_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000010;
+              break;
+            } // case 42
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -795,6 +871,108 @@ private static final long serialVersionUID = 0L;
     public Builder clearFileDescriptorSet() {
       bitField0_ = (bitField0_ & ~0x00000008);
       fileDescriptorSet_ = getDefaultInstance().getFileDescriptorSet();
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object methodEnumType_ = "";
+    /**
+     * <pre>
+     * 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+     * 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+     * 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+     * </pre>
+     *
+     * <code>string method_enum_type = 5 [json_name = "methodEnumType"];</code>
+     * @return The methodEnumType.
+     */
+    public java.lang.String getMethodEnumType() {
+      java.lang.Object ref = methodEnumType_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        methodEnumType_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+     * 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+     * 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+     * </pre>
+     *
+     * <code>string method_enum_type = 5 [json_name = "methodEnumType"];</code>
+     * @return The bytes for methodEnumType.
+     */
+    public com.google.protobuf.ByteString
+        getMethodEnumTypeBytes() {
+      java.lang.Object ref = methodEnumType_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        methodEnumType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+     * 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+     * 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+     * </pre>
+     *
+     * <code>string method_enum_type = 5 [json_name = "methodEnumType"];</code>
+     * @param value The methodEnumType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMethodEnumType(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      methodEnumType_ = value;
+      bitField0_ |= 0x00000010;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+     * 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+     * 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+     * </pre>
+     *
+     * <code>string method_enum_type = 5 [json_name = "methodEnumType"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMethodEnumType() {
+      methodEnumType_ = getDefaultInstance().getMethodEnumType();
+      bitField0_ = (bitField0_ & ~0x00000010);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+     * 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+     * 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+     * </pre>
+     *
+     * <code>string method_enum_type = 5 [json_name = "methodEnumType"];</code>
+     * @param value The bytes for methodEnumType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMethodEnumTypeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      methodEnumType_ = value;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }

@@ -32,7 +32,7 @@ package nervus.interface.basemotion.v1;
 
 import "nervus/ipc/v1/method_registry.proto";
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/interface/basemotionv1;basemotionv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/basemotionv1;basemotionv1";
 
 // Java 包名不能含连字符，也不能用保留字 "interface" —— 用 "iface" 段（见
 // manipulator.proto 同款说明）。
@@ -60,6 +60,7 @@ enum BaseMotionMethod {
     needs_user_confirmation: false
     request_type: "nervus.interface.basemotion.v1.SetVelocityRequest"
     response_type: ""
+    error_detail_type: "nervus.interface.basemotion.v1.BaseMotionErrorDetail"
   }];
 
   // 普通受控停止（非 SafetyHalt）。需 lease，短命令。
@@ -72,6 +73,7 @@ enum BaseMotionMethod {
     needs_user_confirmation: false
     request_type: "nervus.interface.basemotion.v1.StopRequest"
     response_type: ""
+    error_detail_type: "nervus.interface.basemotion.v1.BaseMotionErrorDetail"
   }];
 
   // 只读运动状态。
@@ -83,6 +85,7 @@ enum BaseMotionMethod {
     needs_user_confirmation: false
     request_type: "nervus.interface.basemotion.v1.GetMotionStateRequest"
     response_type: "nervus.interface.basemotion.v1.MotionState"
+    error_detail_type: "nervus.interface.basemotion.v1.BaseMotionErrorDetail"
   }];
 
   // 运动状态事件流（订阅）。
@@ -94,6 +97,7 @@ enum BaseMotionMethod {
     needs_user_confirmation: false
     request_type: "nervus.interface.basemotion.v1.SubscribeMotionStateRequest"
     response_type: "nervus.interface.basemotion.v1.MotionState"
+    error_detail_type: "nervus.interface.basemotion.v1.BaseMotionErrorDetail"
   }];
 }
 

@@ -29,7 +29,7 @@ syntax = "proto3";
 
 package nervus.ipc.v1;
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/ipcv1;ipcv1";
 
 // 连字符在 Java 包名里非法，理由见 status.proto。
 option java_package = "io.github.nervusos.ipc.v1";
@@ -71,6 +71,11 @@ message InterfaceSchemaBundle {
   // 真正需要反射解码的一侧（SDK / Agent）再自行 parse 成 FileDescriptorSet。
   // 这也让 schema_hash 的计算对象是一段明确的字节串，跨语言无歧义。
   bytes file_descriptor_set = 4;
+
+  // 挂载 method_meta 的 method_id 枚举全名。显式记录而不是扫描 bundle 中的
+  // 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
+  // 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
+  string method_enum_type = 5;
 }
 
 // InterfaceSchemaBundleSet 是一个 .nspkg 携带的【全部】接口 bundle 的集合。

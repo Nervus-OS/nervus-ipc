@@ -523,9 +523,9 @@ public final class EnvelopeProto {
       "ENT_REASON_COMPONENT_DISABLED\020\003\022,\n(LAUNC" +
       "H_COMPONENT_REASON_COMPONENT_FAILED\020\004\022(\n" +
       "$LAUNCH_COMPONENT_REASON_SPAWN_FAILED\020\005B" +
-      "e\n\031io.github.nervusos.ipc.v1B\rEnvelopePr" +
-      "otoP\001Z7github.com/nervus-os/nervus-ipc/g" +
-      "o/protocol/ipcv1;ipcv1b\006proto3"
+      "b\n\031io.github.nervusos.ipc.v1B\rEnvelopePr" +
+      "otoP\001Z4github.com/nervus-os/nervus-ipc/p" +
+      "rotocol/ipcv1;ipcv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

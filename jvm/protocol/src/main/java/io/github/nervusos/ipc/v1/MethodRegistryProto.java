@@ -53,42 +53,52 @@ public final class MethodRegistryProto {
     java.lang.String[] descriptorData = {
       "\n#nervus/ipc/v1/method_registry.proto\022\rn" +
       "ervus.ipc.v1\032 google/protobuf/descriptor" +
-      ".proto\"\265\003\n\nMethodMeta\022\033\n\tmethod_id\030\001 \001(\r" +
-      "R\010methodId\022/\n\023required_permission\030\002 \001(\tR" +
-      "\022requiredPermission\0227\n\nrisk_class\030\003 \001(\0162" +
-      "\030.nervus.ipc.v1.RiskClassR\triskClass\0224\n\026" +
-      "requires_control_lease\030\004 \001(\010R\024requiresCo" +
-      "ntrolLease\022+\n\021returns_operation\030\005 \001(\010R\020r" +
-      "eturnsOperation\0226\n\027needs_user_confirmati" +
-      "on\030\006 \001(\010R\025needsUserConfirmation\022!\n\014reque" +
-      "st_type\030\007 \001(\tR\013requestType\022#\n\rresponse_t" +
-      "ype\030\010 \001(\tR\014responseType\022 \n\014is_read_only\030" +
-      "\t \001(\010R\nisReadOnly\022\033\n\tis_motion\030\n \001(\010R\010is" +
-      "Motion*\241\001\n\tRiskClass\022\032\n\026RISK_CLASS_UNSPE" +
-      "CIFIED\020\000\022\025\n\021RISK_CLASS_NORMAL\020\001\022 \n\034RISK_" +
-      "CLASS_PRIVACY_SENSITIVE\020\002\022\037\n\033RISK_CLASS_" +
-      "PHYSICAL_CONTROL\020\003\022\036\n\032RISK_CLASS_CRITICA" +
-      "L_SAFETY\020\004:_\n\013method_meta\022!.google.proto" +
-      "buf.EnumValueOptions\030\341\324\003 \001(\0132\031.nervus.ip" +
-      "c.v1.MethodMetaR\nmethodMetaBk\n\031io.github" +
-      ".nervusos.ipc.v1B\023MethodRegistryProtoP\001Z" +
-      "7github.com/nervus-os/nervus-ipc/go/prot" +
-      "ocol/ipcv1;ipcv1b\006proto3"
+      ".proto\032\034nervus/ipc/v1/transfer.proto\"\312\005\n" +
+      "\nMethodMeta\022\033\n\tmethod_id\030\001 \001(\rR\010methodId" +
+      "\022/\n\023required_permission\030\002 \001(\tR\022requiredP" +
+      "ermission\0227\n\nrisk_class\030\003 \001(\0162\030.nervus.i" +
+      "pc.v1.RiskClassR\triskClass\0224\n\026requires_c" +
+      "ontrol_lease\030\004 \001(\010R\024requiresControlLease" +
+      "\022+\n\021returns_operation\030\005 \001(\010R\020returnsOper" +
+      "ation\0226\n\027needs_user_confirmation\030\006 \001(\010R\025" +
+      "needsUserConfirmation\022!\n\014request_type\030\007 " +
+      "\001(\tR\013requestType\022#\n\rresponse_type\030\010 \001(\tR" +
+      "\014responseType\022 \n\014is_read_only\030\t \001(\010R\nisR" +
+      "eadOnly\022\033\n\tis_motion\030\n \001(\010R\010isMotion\022,\n\022" +
+      "default_timeout_ms\030\013 \001(\rR\020defaultTimeout" +
+      "Ms\022$\n\016max_timeout_ms\030\014 \001(\rR\014maxTimeoutMs" +
+      "\022*\n\021max_request_bytes\030\r \001(\rR\017maxRequestB" +
+      "ytes\022,\n\022max_response_bytes\030\016 \001(\rR\020maxRes" +
+      "ponseBytes\0229\n\010transfer\030\017 \001(\0132\035.nervus.ip" +
+      "c.v1.TransferPolicyR\010transfer\022*\n\021error_d" +
+      "etail_type\030\020 \001(\tR\017errorDetailType*\241\001\n\tRi" +
+      "skClass\022\032\n\026RISK_CLASS_UNSPECIFIED\020\000\022\025\n\021R" +
+      "ISK_CLASS_NORMAL\020\001\022 \n\034RISK_CLASS_PRIVACY" +
+      "_SENSITIVE\020\002\022\037\n\033RISK_CLASS_PHYSICAL_CONT" +
+      "ROL\020\003\022\036\n\032RISK_CLASS_CRITICAL_SAFETY\020\004:_\n" +
+      "\013method_meta\022!.google.protobuf.EnumValue" +
+      "Options\030\341\324\003 \001(\0132\031.nervus.ipc.v1.MethodMe" +
+      "taR\nmethodMetaBh\n\031io.github.nervusos.ipc" +
+      ".v1B\023MethodRegistryProtoP\001Z4github.com/n" +
+      "ervus-os/nervus-ipc/protocol/ipcv1;ipcv1" +
+      "b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.google.protobuf.DescriptorProtos.getDescriptor(),
+          io.github.nervusos.ipc.v1.TransferProto.getDescriptor(),
         });
     internal_static_nervus_ipc_v1_MethodMeta_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_nervus_ipc_v1_MethodMeta_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_MethodMeta_descriptor,
-        new java.lang.String[] { "MethodId", "RequiredPermission", "RiskClass", "RequiresControlLease", "ReturnsOperation", "NeedsUserConfirmation", "RequestType", "ResponseType", "IsReadOnly", "IsMotion", });
+        new java.lang.String[] { "MethodId", "RequiredPermission", "RiskClass", "RequiresControlLease", "ReturnsOperation", "NeedsUserConfirmation", "RequestType", "ResponseType", "IsReadOnly", "IsMotion", "DefaultTimeoutMs", "MaxTimeoutMs", "MaxRequestBytes", "MaxResponseBytes", "Transfer", "ErrorDetailType", });
     methodMeta.internalInit(descriptor.getExtensions().get(0));
     descriptor.resolveAllFeaturesImmutable();
     com.google.protobuf.DescriptorProtos.getDescriptor();
+    io.github.nervusos.ipc.v1.TransferProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

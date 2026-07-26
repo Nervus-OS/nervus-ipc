@@ -89,37 +89,43 @@ public final class BaseMotionProto {
       "tyLimits\022.\n\023active_motion_epoch\030\006 \001(\004R\021a" +
       "ctiveMotionEpoch\"a\n\025BaseMotionErrorDetai" +
       "l\022H\n\006reason\030\001 \001(\01620.nervus.interface.bas" +
-      "emotion.v1.BaseMotionReasonR\006reason*\321\004\n\020" +
+      "emotion.v1.BaseMotionReasonR\006reason*\266\006\n\020" +
       "BaseMotionMethod\022\"\n\036BASE_MOTION_METHOD_U" +
-      "NSPECIFIED\020\000\022w\n\037BASE_MOTION_METHOD_SET_V" +
-      "ELOCITY\020\001\032R\212\246\035N\010\001\022\023perm.motion.control\030\003" +
-      " \001:1nervus.interface.basemotion.v1.SetVe" +
-      "locityRequest\022h\n\027BASE_MOTION_METHOD_STOP" +
-      "\020\002\032K\212\246\035G\010\002\022\023perm.motion.control\030\003 \001:*ner" +
-      "vus.interface.basemotion.v1.StopRequest\022" +
-      "\223\001\n#BASE_MOTION_METHOD_GET_MOTION_STATE\020" +
-      "\003\032j\212\246\035f\010\003\030\001:4nervus.interface.basemotion" +
-      ".v1.GetMotionStateRequestB*nervus.interf" +
-      "ace.basemotion.v1.MotionState\022\237\001\n)BASE_M" +
-      "OTION_METHOD_SUBSCRIBE_MOTION_STATE\020\004\032p\212" +
-      "\246\035l\010\004\030\001::nervus.interface.basemotion.v1." +
-      "SubscribeMotionStateRequestB*nervus.inte" +
-      "rface.basemotion.v1.MotionState*\206\001\n\tRead" +
-      "iness\022\031\n\025READINESS_UNSPECIFIED\020\000\022\023\n\017READ" +
-      "INESS_READY\020\001\022\027\n\023READINESS_NOT_READY\020\002\022\033" +
-      "\n\027READINESS_TRANSITIONING\020\003\022\023\n\017READINESS" +
-      "_FAULT\020\004*\253\002\n\020BaseMotionReason\022\"\n\036BASE_MO" +
-      "TION_REASON_UNSPECIFIED\020\000\022+\n\'BASE_MOTION" +
-      "_REASON_LOCOMOTION_NOT_READY\020\001\022%\n!BASE_M" +
-      "OTION_REASON_SAFETY_LATCHED\020\002\022\"\n\036BASE_MO" +
-      "TION_REASON_STALE_EPOCH\020\003\022\'\n#BASE_MOTION" +
-      "_REASON_CONTROL_NOT_HELD\020\004\022+\n\'BASE_MOTIO" +
-      "N_REASON_RESOURCE_UNAVAILABLE\020\005\022%\n!BASE_" +
-      "MOTION_REASON_RESOURCE_FAULT\020\006B\214\001\n&io.gi" +
-      "thub.nervusos.iface.basemotion.v1B\017BaseM" +
-      "otionProtoP\001ZOgithub.com/nervus-os/nervu" +
-      "s-ipc/go/protocol/interface/basemotionv1" +
-      ";basemotionv1b\006proto3"
+      "NSPECIFIED\020\000\022\260\001\n\037BASE_MOTION_METHOD_SET_" +
+      "VELOCITY\020\001\032\212\001\212\246\035\205\001\010\001\022\023perm.motion.contro" +
+      "l\030\003 \001:1nervus.interface.basemotion.v1.Se" +
+      "tVelocityRequest\202\0014nervus.interface.base" +
+      "motion.v1.BaseMotionErrorDetail\022\240\001\n\027BASE" +
+      "_MOTION_METHOD_STOP\020\002\032\202\001\212\246\035~\010\002\022\023perm.mot" +
+      "ion.control\030\003 \001:*nervus.interface.basemo" +
+      "tion.v1.StopRequest\202\0014nervus.interface.b" +
+      "asemotion.v1.BaseMotionErrorDetail\022\314\001\n#B" +
+      "ASE_MOTION_METHOD_GET_MOTION_STATE\020\003\032\242\001\212" +
+      "\246\035\235\001\010\003\030\001:4nervus.interface.basemotion.v1" +
+      ".GetMotionStateRequestB*nervus.interface" +
+      ".basemotion.v1.MotionState\202\0014nervus.inte" +
+      "rface.basemotion.v1.BaseMotionErrorDetai" +
+      "l\022\330\001\n)BASE_MOTION_METHOD_SUBSCRIBE_MOTIO" +
+      "N_STATE\020\004\032\250\001\212\246\035\243\001\010\004\030\001::nervus.interface." +
+      "basemotion.v1.SubscribeMotionStateReques" +
+      "tB*nervus.interface.basemotion.v1.Motion" +
+      "State\202\0014nervus.interface.basemotion.v1.B" +
+      "aseMotionErrorDetail*\206\001\n\tReadiness\022\031\n\025RE" +
+      "ADINESS_UNSPECIFIED\020\000\022\023\n\017READINESS_READY" +
+      "\020\001\022\027\n\023READINESS_NOT_READY\020\002\022\033\n\027READINESS" +
+      "_TRANSITIONING\020\003\022\023\n\017READINESS_FAULT\020\004*\253\002" +
+      "\n\020BaseMotionReason\022\"\n\036BASE_MOTION_REASON" +
+      "_UNSPECIFIED\020\000\022+\n\'BASE_MOTION_REASON_LOC" +
+      "OMOTION_NOT_READY\020\001\022%\n!BASE_MOTION_REASO" +
+      "N_SAFETY_LATCHED\020\002\022\"\n\036BASE_MOTION_REASON" +
+      "_STALE_EPOCH\020\003\022\'\n#BASE_MOTION_REASON_CON" +
+      "TROL_NOT_HELD\020\004\022+\n\'BASE_MOTION_REASON_RE" +
+      "SOURCE_UNAVAILABLE\020\005\022%\n!BASE_MOTION_REAS" +
+      "ON_RESOURCE_FAULT\020\006B\211\001\n&io.github.nervus" +
+      "os.iface.basemotion.v1B\017BaseMotionProtoP" +
+      "\001ZLgithub.com/nervus-os/nervus-ipc/proto" +
+      "col/interface/basemotionv1;basemotionv1b" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

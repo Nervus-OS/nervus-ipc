@@ -72,25 +72,27 @@ public final class RawGaitProto {
       "offset_rad\030\003 \001(\001R\016phaseOffsetRad\"\024\n\022SetR" +
       "awGaitResponse\"L\n\022RawGaitErrorDetail\0226\n\006" +
       "reason\030\001 \001(\0162\036.com.acme.dog.v1.RawGaitRe" +
-      "asonR\006reason*\274\002\n\rRawGaitMethod\022\037\n\033RAW_GA" +
-      "IT_METHOD_UNSPECIFIED\020\000\022n\n\036RAW_GAIT_METH" +
-      "OD_GET_GAIT_STATE\020\001\032J\212\246\035F\010\001\030\001:#com.acme." +
-      "dog.v1.GetGaitStateRequestB\031com.acme.dog" +
-      ".v1.GaitStateH\001\022\231\001\n\034RAW_GAIT_METHOD_SET_" +
-      "RAW_GAIT\020\002\032w\212\246\035s\010\002\022 com.acme.dog.permiss" +
+      "asonR\006reason*\211\003\n\rRawGaitMethod\022\037\n\033RAW_GA" +
+      "IT_METHOD_UNSPECIFIED\020\000\022\223\001\n\036RAW_GAIT_MET" +
+      "HOD_GET_GAIT_STATE\020\001\032o\212\246\035k\010\001\030\001:#com.acme" +
+      ".dog.v1.GetGaitStateRequestB\031com.acme.do" +
+      "g.v1.GaitStateH\001\202\001\"com.acme.dog.v1.RawGa" +
+      "itErrorDetail\022\300\001\n\034RAW_GAIT_METHOD_SET_RA" +
+      "W_GAIT\020\002\032\235\001\212\246\035\230\001\010\002\022 com.acme.dog.permiss" +
       "ion.raw_gait\030\003 \0010\001:!com.acme.dog.v1.SetR" +
       "awGaitRequestB\"com.acme.dog.v1.SetRawGai" +
-      "tResponseP\001*b\n\010GaitType\022\031\n\025GAIT_TYPE_UNS" +
-      "PECIFIED\020\000\022\022\n\016GAIT_TYPE_TROT\020\001\022\022\n\016GAIT_T" +
-      "YPE_WALK\020\002\022\023\n\017GAIT_TYPE_BOUND\020\003*\310\001\n\rRawG" +
-      "aitReason\022\037\n\033RAW_GAIT_REASON_UNSPECIFIED" +
-      "\020\000\022\"\n\036RAW_GAIT_REASON_SAFETY_LATCHED\020\001\022$" +
-      "\n RAW_GAIT_REASON_CONTROL_NOT_HELD\020\002\022$\n " +
-      "RAW_GAIT_REASON_UNSUPPORTED_GAIT\020\003\022&\n\"RA" +
-      "W_GAIT_REASON_PHASE_OUT_OF_RANGE\020\004Bd\n\017co" +
-      "m.acme.dog.v1B\014RawGaitProtoP\001ZAgithub.co" +
-      "m/nervus-os/nervus-ipc/go/protocol/oem/a" +
-      "cme/dog/v1;dogv1b\006proto3"
+      "tResponseP\001\202\001\"com.acme.dog.v1.RawGaitErr" +
+      "orDetail*b\n\010GaitType\022\031\n\025GAIT_TYPE_UNSPEC" +
+      "IFIED\020\000\022\022\n\016GAIT_TYPE_TROT\020\001\022\022\n\016GAIT_TYPE" +
+      "_WALK\020\002\022\023\n\017GAIT_TYPE_BOUND\020\003*\310\001\n\rRawGait" +
+      "Reason\022\037\n\033RAW_GAIT_REASON_UNSPECIFIED\020\000\022" +
+      "\"\n\036RAW_GAIT_REASON_SAFETY_LATCHED\020\001\022$\n R" +
+      "AW_GAIT_REASON_CONTROL_NOT_HELD\020\002\022$\n RAW" +
+      "_GAIT_REASON_UNSUPPORTED_GAIT\020\003\022&\n\"RAW_G" +
+      "AIT_REASON_PHASE_OUT_OF_RANGE\020\004Ba\n\017com.a" +
+      "cme.dog.v1B\014RawGaitProtoP\001Z>github.com/n" +
+      "ervus-os/nervus-ipc/protocol/oem/acme/do" +
+      "g/v1;dogv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

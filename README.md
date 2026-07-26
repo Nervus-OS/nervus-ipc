@@ -13,8 +13,8 @@ Go 系统 Service、OEM Provider、Kotlin/Java App 都从同一份 schema 生成
 依赖方向（§10.10）：
 
 ```text
-nervud                         → nervus-ipc/go/protocol
-Go 系统 Service / OEM Service  → nervus-ipc/go/sdk        （待落地）
+nervud                         → nervus-ipc/protocol + registry
+Go 系统 Service / OEM Service  → nervus-ipc/sdk
 Kotlin/Java App 及其 Service   → nervus-app-sdk           （已落地，在另一个仓库）
 ```
 
@@ -39,13 +39,14 @@ JVM 侧的手写 SDK **不在本仓库**，在 `nervus-app-sdk`（`com.nervus.sd
 | EndpointDied / EndpointRevoked | 24-25 | ✅ | nervud → 对端 |
 | UnregisterEndpoint / Result | 26-27 | ✅ | |
 | Request / Response | 30-31 | ✅ | **主调用链，短命令走这条** |
-| Cancel | 32 | ❌ | 收到即关连接 |
+| Cancel | 32 | ❌ | 调用方发来仍会关连接 |
 | Subscribe / Unsubscribe | 40, 42 | ❌ | 收到即关连接 |
 | SubscribeResult / UnsubscribeResult / Event / SubscriptionClosed | 41, 43-45 | ❌ | nervud 不会发出 |
 | Dispatch / DispatchResult | 50-51 | ✅ | nervud ↔ Service |
-| CancelDispatch | 52 | ❌ | nervud 不会发出（无触发源） |
+| CancelDispatch | 52 | ⚠️ | deadline / 调用方断线会发；显式 Cancel 尚未接线。Go ServiceHost 已支持 |
 | Ping / Pong | 60-61 | ✅ | |
-| AcquireControl / ReleaseControl + Result | 70-73 | ❌ | 内核 `internal/control` 已完整实现，缺 wire 接线 |
+| AcquireControl / ReleaseControl + Result | 70-73 | ✅ | 已接到 `internal/control` |
+| LaunchComponent / Result | 80-81 | ✅ | |
 
 非 Envelope 的 proto：
 
@@ -53,9 +54,10 @@ JVM 侧的手写 SDK **不在本仓库**，在 `nervus-app-sdk`（`com.nervus.sd
 |---|:---:|---|
 | `status.proto` | ✅ | |
 | `safety.proto` | ⚠️ 未接线 | 类型能编译，但投递端是 `NopPath`、上报端是 `NopReports` |
-| `schema.proto` | ⚠️ 未接线 | 装包期 bundle 验证未落地 |
-| `method_registry.proto` | ⚠️ 未接线 | 抽取代码在 `go/registry`，内核未消费 |
+| `schema.proto` | ⚠️ 未接线 | `registry` 已能构建、验 hash、动态解析 bundle；内核装包链未消费 |
+| `method_registry.proto` | ⚠️ 未接线 | `registry` 已能动态抽取并校验；内核 dispatch 未消费 |
 | `provider_descriptor.proto` | ⚠️ 未接线 | 内核三张表仍是硬编码，本文件是替换它们的解药 |
+| `transfer.proto` + `transfer_control.proto` | ⚠️ 未接线 | 通用高速数据面契约已定义；内核 Transfer Manager / UDS 尚未实现 |
 
 **改动纪律**：内核每接通一项，同一个 PR 里更新本表 + 对应 `.proto` 的
 `[KERNEL: NOT IMPLEMENTED]` / `[KERNEL: NOT WIRED]` 标记。两处不同步就等于没标。
@@ -87,7 +89,7 @@ JVM 侧的手写 SDK **不在本仓库**，在 `nervus-app-sdk`（`com.nervus.sd
 > 各自实现同一套分帧握手」的漂移面，以及每次改 schema 都要多维护一侧 golden
 > vectors。恢复只需把 `buf.gen.yaml` 里两个 `protoc_builtin` 加回来重跑。
 
-将来若确有必要拆分，`git subtree split` 可以带着历史把 `go/` 或 `jvm/` 切出去——
+将来若确有必要拆分，`git subtree split` 可以带着历史把 Go package 或 `jvm/` 切出去——
 **这个方向是可逆的**，反过来（先拆再合）要难得多。
 
 ## 布局
@@ -96,6 +98,7 @@ JVM 侧的手写 SDK **不在本仓库**，在 `nervus-app-sdk`（`com.nervus.sd
 nervus-ipc/
 ├── buf.yaml                    lint + breaking 规则
 ├── buf.gen.yaml                一次生成 Go + Java 两份产物
+├── go.mod                      module github.com/nervus-os/nervus-ipc
 ├── proto/                      ← 真源，仓库的主体
 │   ├── nervus/ipc/v1/
 │   │   ├── envelope.proto            Envelope 与全部 body（§10.4）
@@ -103,16 +106,16 @@ nervus-ipc/
 │   │   ├── safety.proto              Safety 边界五条消息（§14.3）
 │   │   ├── schema.proto              Interface schema bundle 分发（§8.4）
 │   │   ├── method_registry.proto     method_meta option 机制（扩展号 60001）
-│   │   └── provider_descriptor.proto Provider 数据驱动契约（§7.2/§7.3）
+│   │   ├── provider_descriptor.proto Provider 数据驱动契约（§7.2/§7.3）
+│   │   └── transfer.proto            独立高速数据面通用契约
+│   ├── nervus/interface/transfer/v1/ Transfer Control 系统接口
 │   ├── nervus/interface/basemotion/v1/   标准接口 BaseMotion@1（机械狗移动主线）
 │   ├── nervus/interface/manipulator/v1/  标准接口 Manipulator@1（机械臂）
 │   └── com/acme/dog/v1/                  OEM 私有接口样例（可拓展性验收）
-├── go/
-│   ├── go.mod                  module github.com/nervus-os/nervus-ipc/go
-│   ├── protocol/               生成的 Go 类型（提交进仓库，见下）
-│   ├── registry/               从 descriptor 抽取 Method Registry + 命名空间校验
-│   ├── golden/                 Go↔JVM golden vectors 的唯一构造真源
-│   └── sdk/                    Go Client / ServiceHost（手写，待落地）
+├── protocol/                   生成的 Go 类型（提交进仓库，见下）
+├── registry/                   动态 schema bundle / Provider Descriptor 校验
+├── golden/                     Go↔JVM golden vectors 的唯一构造真源
+├── sdk/                        Go Client / endpoint-scoped ServiceHost
 ├── jvm/
 │   ├── settings.gradle.kts
 │   ├── gradle/libs.versions.toml
@@ -120,7 +123,7 @@ nervus-ipc/
 │       ├── build.gradle.kts
 │       ├── src/main/java/      生成的 Java 类型（提交进仓库）
 │       └── src/test/kotlin/    golden vectors 的 JVM 侧断言
-└── testdata/golden/            *.binpb + vectors.json（由 go/golden 生成并提交）
+└── testdata/golden/            *.binpb + vectors.json（由 golden 生成并提交）
 ```
 
 **没有 `jvm/sdk`**：JVM 侧手写 SDK 在 `nervus-app-sdk` 仓库。本仓库 `jvm/` 只放生成物。
@@ -129,20 +132,46 @@ nervus-ipc/
 （`nervus-app-sdk` 与 golden 测试一律走 Java `.newBuilder()`），已从
 `buf.gen.yaml` 移除。要用的话加回 `protoc_builtin: kotlin` 即可，不影响 wire。
 
-根目录不属于任何一种语言——`go.mod` 在 `go/` 下，Gradle 在 `jvm/` 下，
-谁也不占据仓库根。
+### Go 直接引入整个 IPC 仓库
 
-### Go 模块在子目录的后果
+根目录就是 Go module，路径为 `github.com/nervus-os/nervus-ipc`。消费者只需：
 
-`go.mod` 位于 `go/`，模块路径是 `github.com/nervus-os/nervus-ipc/go`，
-因此 import 路径是 `github.com/nervus-os/nervus-ipc/go/protocol/ipcv1`。
-
-**git tag 必须带子目录前缀**：
-
-```text
-✅ go/v0.1.0
-❌ v0.1.0        ← go get 只会报「找不到版本」，不会提示你 tag 写错了
+```sh
+go get github.com/nervus-os/nervus-ipc@v0.1.0
 ```
+
+再按职责 import `.../protocol/ipcv1`、`.../registry` 或 `.../sdk`。Go 只编译实际
+import 的 Go package；同仓库的 `proto/`、`jvm/` 不会被塞进 Go 二进制，也不需要
+复制半个仓库或维护第二个 Go module。
+
+根模块使用普通根 tag（如 `v0.1.0`），不再使用旧的 `go/v0.1.0` 子模块 tag。
+
+### Provider 权限不要求逐项改内核
+
+`ProviderDescriptor.permissions` 可声明两类权限：OEM 私有权限必须严格位于
+`package_id.*`；`perm.*` 平台权限可随平台签名 Provider 分发。`registry` 只校验
+命名、schema 与元数据形状，不把声明当授权；nervud 必须再用已验证的 trust /
+signer role 决定定义者能否占用平台命名空间，并用平台风险底线收紧声明值。
+因此新增标准摄像头、麦克风或传感器权限不需要往内核 Go 表里加一项，同时普通
+Provider 也不能靠自写 `perm.*` 提权。
+
+## 通用 Transfer：控制面与高速数据面分离
+
+IPC 仓库不定义 Camera/Microphone 专用 Envelope。能力接口自己的 `OpenStream`
+仍是普通 Request/Dispatch；只有方法的 `MethodMeta.transfer` 声明它有资格创建
+通用 Transfer：
+
+1. Provider handler 从 `CallContext.RouteID` 取得当前 route，并在**同一条**
+   `ServiceHost` 连接上调用 `nervus.interface.transfer.control@1`。
+2. nervud 按权威 MethodMeta、调用者权限、连接预算和 route 生命周期收紧方向、
+   模式、包大小与速率，返回 Provider/Caller 两张短期一次性 `TransferHandle`。
+3. 两端使用 handle 附着固定 Transfer UDS；握手仍是长度前缀 protobuf，成功后
+   切换为 `NVT1` 帧。Go SDK 已提供 `AttachTransfer`、`TransferConn` 和帧校验。
+4. 基线只实现 `FRAMED_RELAY`。`SHARED_MEMORY_RING` 的 memfd/eventfd ring ABI
+   必须另行冻结，SDK 会明确拒绝而不会自行猜格式。
+
+因此以后新增摄像头、麦克风、雷达或文件流，只新增各自的能力 schema/Provider
+声明；不会新增 IPC body，也不修改 IPC 分派器。
 
 ## 生成
 
@@ -152,7 +181,7 @@ buf lint
 buf generate
 ```
 
-- **Go** 只需要 `protoc-gen-go`，版本由 `go/go.mod` 的 `tool` 指令钉死，
+- **Go** 只需要 `protoc-gen-go`，版本由根 `go.mod` 的 `tool` 指令钉死，
   上面 `go install` 的版本号必须与之一致。
 - **Java** 走 protoc 的**内置**生成器（`protoc_builtin`），因此额外要求 PATH 上有
   `protoc` 本体。
@@ -165,18 +194,18 @@ buf generate
 `testdata/golden/` 不由 `buf generate` 产出，而是由 Go 侧构造：
 
 ```sh
-cd go && go test ./golden/ -run TestGoldenUpdate -update
+go test ./golden/ -run TestGoldenUpdate -update
 ```
 
-`go/golden/golden.go` 是向量的**唯一构造真源**。改了它必须重跑本命令并提交
+`golden/golden.go` 是向量的**唯一构造真源**。改了它必须重跑本命令并提交
 `testdata/golden/` 的变更，否则 Go / JVM 两侧断言会同时失败。
 
-> **注意 Windows**：生成的 Java 里有中文注释，Windows 默认 GBK 代码页会让
-> `gradlew` 报 `unmappable character` 编译失败。JVM 侧构建请在 Linux/WSL 上跑。
+> JVM 的 `JavaCompile` 已固定为 UTF-8；生成代码保留中文注释时，Windows 与
+> Linux 使用同一源码编码。
 
 ## 生成物提交进仓库
 
-`go/protocol/**/*.pb.go` 与 `jvm/protocol/src/main/**` **提交进 git**，不在构建时生成。
+`protocol/**/*.pb.go` 与 `jvm/protocol/src/main/**` **提交进 git**，不在构建时生成。
 三个理由：
 
 1. **消费者不需要工具链。** nervud、CI、开发机、车上的 RK3588 都只需要 `go build`
@@ -206,56 +235,58 @@ NRCP §22.6 明确允许 Rewrite v1 阶段做破坏性调整，提前开只会�
 | 用途 | 取值 | 说明 |
 |---|---|---|
 | proto package | `nervus.ipc.v1` | |
-| Go module | `github.com/nervus-os/nervus-ipc/go` | |
+| Go module | `github.com/nervus-os/nervus-ipc` | |
 | Java package | `io.github.nervusos.ipc.v1` | **连字符在 Java 包名里非法**（JLS §3.8），组织名 `nervus-os` 反写后必须去掉 |
 | Maven groupId | `io.github.nervus-os` | groupId 是 Maven 坐标不是 Java 包名，**允许**连字符，可与组织名完全一致 |
 
 ## 验证记录
 
-在 WSL Debian 上完整跑通（2026-07）。工具链版本：
+在 Windows 11 上完整跑通（2026-07-26；此前也在 WSL Debian 验证）。工具链版本：
 
 | 工具 | 版本 | 备注 |
 |---|---|---|
-| buf | 1.72.0 | 预编译二进制 |
+| buf | 1.47.2 | 预编译二进制 |
 | protoc | 29.3 | 与 protobuf-java 4.29.3 对齐 |
-| protoc-gen-go | v1.36.11 | 与 `go/go.mod` 的 `tool` 指令一致 |
+| protoc-gen-go | v1.36.11 | 与根 `go.mod` 的 `tool` 指令一致 |
 | Go | 1.26.0 | 模块声明下限 1.24.0 |
 | Gradle | 9.0.0 | 由 wrapper 钉死，含发行包 sha256 |
-| JDK（宿主） | 21.0.5-tem | 构建工具链由 foojay 自动 provision 17 |
+| JDK | 17.0.3 | Gradle toolchain 目标 17 |
 
 已验证通过（最近一次：精简为 Go + Java 双语言后）：
 
 - [x] `buf lint`（STANDARD 规则集）通过
-- [x] `buf generate` 产出 9 个 `.pb.go` + 一批 `.java`
+- [x] `buf generate` 产出 13 个 `.pb.go` + 272 个 `.java`
 - [x] **生成确定性**：连续两次 `buf generate` 产物 sha256 完全一致
       —— 这是「CI 重新生成后 `git diff --exit-code`」这条门禁能成立的前提
 - [x] Go 侧 `go build ./... && go test ./...` 全绿（`golden` + `registry`）
-- [x] **golden vectors 真正生效**：`testdata/golden/` 16 个 `.binpb` + `vectors.json`
-      已生成并提交；JVM 侧 `GoldenVectorsTest` **21 个用例 0 跳过 0 失败**
+- [x] **golden vectors 真正生效**：`testdata/golden/` 18 个 `.binpb` + `vectors.json`
+      已生成并提交，覆盖 TransferHandle / AttachTransferResult
       —— 此前测试代码虽在，但 testdata 从未生成，两侧都是空跑
-- [x] JVM 侧 `./gradlew :protocol:test` 成功（在 WSL 上；Windows 因 GBK 编码失败）
+- [x] JVM 侧 `gradlew :protocol:test --rerun-tasks` 在 Windows 成功
 - [x] `.gitignore` 有效，`.gradle/` 与 `build/` 未泄漏进 git status
 
-验证过程中修掉的三个真实缺陷（都不是理论风险）：
+验证过程中修掉的四个真实缺陷（都不是理论风险）：
 
-1. **`clean: true` 配合 `out: go` 会删掉 `go/go.mod` 和 `go/go.sum`。**
+1. **`clean: true` 配合 `out` 指向 module 根会删掉 `go.mod` 和 `go.sum`。**
    buf 的 clean 是整目录删除，`out` 必须指向只含生成物的目录。
-   已把 Go 的 out 收窄到 `go/protocol`，`module=` 同步加长一段，落盘位置不变。
+   Go module 已统一到仓库根，但生成 out 仍收窄到 `protocol/`。
 2. **`jvmToolchain(17)` 在只有 JDK 21 的机器上直接失败**，且默认没有配置
    工具链下载源。已在 `settings.gradle.kts` 加 foojay 解析器。
 3. **未声明 `repositories`**，依赖一个也解析不了。已在 `settings.gradle.kts` 用
    `dependencyResolutionManagement` 集中声明，并设 `FAIL_ON_PROJECT_REPOS`
    禁止子模块私自添加依赖源。
+4. **Windows javac 默认用 GBK 读取生成代码**，UTF-8 proto 注释会报
+   `unmappable character`。`JavaCompile.options.encoding` 已固定为 UTF-8。
 
 ### 待办
 
-- [ ] `go/sdk` 尚未落地（§10.10：Client + ServiceHost）。系统服务用 Go，
-      `nervus-system-server` 的每个服务都要它——这是当前最高优先级。
-      JVM 侧不在本仓库（见 `nervus-app-sdk`）
-- [x] ~~Go ↔ JVM golden vectors~~ 已落地并生效（16 向量，两侧断言同一份 `.binpb`）
+- [x] Go SDK 已落地（Client + endpoint-scoped ServiceHost）；同一连接上的多个
+      endpoint 按 `(endpoint_id, method_id)` 路由，并支持 `CancelDispatch`
+- [x] ~~Go ↔ JVM golden vectors~~ 已落地并生效（18 向量，两侧断言同一份 `.binpb`）
 - [ ] CI：`buf generate && git diff --exit-code` 的可复现性门禁
       （确定性已手工验证成立，缺的是自动化）
-- [ ] 内核接线：见上方「实现状态」表里全部 ❌ / ⚠️ 项
+- [ ] 内核接线：动态 Provider Catalog / Method Registry / Transfer Manager，
+      见上方「实现状态」表里的 ⚠️ 项
 
 **按 NRCP §25.2 属于「实现前仍需单独冻结」的内容**，本仓库目前只放了必然成立的部分：
 

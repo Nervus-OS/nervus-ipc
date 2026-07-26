@@ -1,0 +1,109 @@
+// Nervus IPC v1 -- 通用 Transfer 数据面契约。
+//
+// Transfer 不增加 Envelope body。创建、提交和中止都通过
+// nervus.interface.transfer.control 的普通 Request/Response 完成；真正的数据
+// 走独立 UDS。Camera、Microphone、文件导入和未来传感器流共用本协议。
+
+syntax = "proto3";
+
+package nervus.ipc.v1;
+
+import "nervus/ipc/v1/status.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/ipcv1;ipcv1";
+
+option java_package = "io.github.nervusos.ipc.v1";
+option java_multiple_files = true;
+option java_outer_classname = "TransferProto";
+
+enum TransferDirection {
+  TRANSFER_DIRECTION_UNSPECIFIED = 0;
+  TRANSFER_DIRECTION_PROVIDER_TO_CALLER = 1;
+  TRANSFER_DIRECTION_CALLER_TO_PROVIDER = 2;
+  TRANSFER_DIRECTION_BIDIRECTIONAL = 3;
+}
+
+enum TransferMode {
+  TRANSFER_MODE_UNSPECIFIED = 0;
+
+  // 基线模式。两端连接固定 Transfer UDS，由 nervud 做有界帧转发。
+  TRANSFER_MODE_FRAMED_RELAY = 1;
+
+  // Linux 高吞吐模式。nervud 经 SCM_RIGHTS 分发 memfd/eventfd；
+  // 具体 ring ABI 必须在实现前单独冻结。
+  TRANSFER_MODE_SHARED_MEMORY_RING = 2;
+}
+
+enum TransferRole {
+  TRANSFER_ROLE_UNSPECIFIED = 0;
+  TRANSFER_ROLE_PRODUCER = 1;
+  TRANSFER_ROLE_CONSUMER = 2;
+  // BIDIRECTIONAL Transfer 的两端都使用 PEER。
+  TRANSFER_ROLE_PEER = 3;
+}
+
+// TransferPolicy 是 MethodMeta 的可选字段。字段不存在表示该方法绝不允许创建
+// Transfer；Provider 不能在运行时自行把普通方法升级为流方法。
+message TransferPolicy {
+  TransferDirection direction = 1;
+  uint32 max_streams = 2;
+  uint32 max_packet_bytes = 3;
+  uint64 max_bytes_per_second = 4;
+
+  // 空集合表示只允许 FRAMED_RELAY，而不是允许任意未来模式。
+  repeated TransferMode allowed_modes = 5;
+}
+
+// TransferHandle 是某一端附着数据面的不透明凭证。它可以嵌入任意能力接口的
+// OpenStream 响应，因此新 Provider 不需要新增 IPC 机制。PREPARED 状态只允许
+// provider handle 附着；caller handle 必须等 Transfer Control Commit 成功。
+message TransferHandle {
+  // 128 bit 随机 ID。不得使用可预测的递增数字。
+  bytes transfer_id = 1;
+
+  // 至少 256 bit、一次性、短 TTL 的附着票据。
+  bytes attach_ticket = 2;
+
+  TransferRole role = 3;
+  TransferMode mode = 4;
+
+  // CLOCK_MONOTONIC 时间域；0 非法。
+  uint64 expires_at_monotonic_nanos = 5;
+
+  // 生产固定为 /run/nervus/nervud-transfer.sock；测试构建可以返回其它路径。
+  string data_plane_endpoint = 6;
+}
+
+// AttachTransfer 是独立数据 UDS 上的第一帧，不是 Envelope body。握手的
+// AttachTransfer 与 AttachTransferResult 都沿用控制面的 u32 big-endian 长度前缀
+// + protobuf payload；成功后才切换到下方 NVT1 数据帧。nervud 还必须用
+// SO_PEERCRED 复核进程身份；仅持有 ticket 不构成授权。
+message AttachTransfer {
+  bytes transfer_id = 1;
+  bytes attach_ticket = 2;
+  TransferRole role = 3;
+}
+
+message AttachTransferSuccess {
+  TransferMode mode = 1;
+  uint32 max_packet_bytes = 2;
+  uint64 max_bytes_per_second = 3;
+}
+
+message AttachTransferResult {
+  oneof outcome {
+    AttachTransferSuccess success = 1;
+    Failure failure = 2;
+  }
+}
+
+// FRAMED_RELAY 模式在 AttachTransferResult 成功后切换为固定二进制帧：
+//   magic[4] = "NVT1"
+//   flags uint32 big-endian
+//   sequence uint64 big-endian
+//   monotonic_timestamp_nanos uint64 big-endian
+//   payload_length uint32 big-endian
+//   payload[payload_length]
+//
+// payload_length 必须同时受 MethodMeta、TransferPolicy 与连接预算收紧；未知 flags
+// 必须拒绝，不能忽略后继续转发。

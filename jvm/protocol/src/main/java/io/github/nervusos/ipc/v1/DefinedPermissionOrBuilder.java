@@ -11,8 +11,9 @@ public interface DefinedPermissionOrBuilder extends
 
   /**
    * <pre>
-   * 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-   * nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+   * 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+   * （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+   * 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
    * </pre>
    *
    * <code>string id = 1 [json_name = "id"];</code>
@@ -21,8 +22,9 @@ public interface DefinedPermissionOrBuilder extends
   java.lang.String getId();
   /**
    * <pre>
-   * 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-   * nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+   * 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+   * （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+   * 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
    * </pre>
    *
    * <code>string id = 1 [json_name = "id"];</code>
@@ -124,4 +126,67 @@ public interface DefinedPermissionOrBuilder extends
    * <code>.nervus.ipc.v1.LocalizedText description = 5 [json_name = "description"];</code>
    */
   io.github.nervusos.ipc.v1.LocalizedTextOrBuilder getDescriptionOrBuilder();
+
+  /**
+   * <pre>
+   * Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+   * 因此 Provider 只能收紧、不能降低权限强度。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.PermissionTrustFloor minimum_trust = 6 [json_name = "minimumTrust"];</code>
+   * @return The enum numeric value on the wire for minimumTrust.
+   */
+  int getMinimumTrustValue();
+  /**
+   * <pre>
+   * Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+   * 因此 Provider 只能收紧、不能降低权限强度。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.PermissionTrustFloor minimum_trust = 6 [json_name = "minimumTrust"];</code>
+   * @return The minimumTrust.
+   */
+  io.github.nervusos.ipc.v1.PermissionTrustFloor getMinimumTrust();
+
+  /**
+   * <pre>
+   * 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+   * 不是 manifest 或 Provider 运行时自报。
+   * </pre>
+   *
+   * <code>string required_signer_role = 7 [json_name = "requiredSignerRole"];</code>
+   * @return The requiredSignerRole.
+   */
+  java.lang.String getRequiredSignerRole();
+  /**
+   * <pre>
+   * 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+   * 不是 manifest 或 Provider 运行时自报。
+   * </pre>
+   *
+   * <code>string required_signer_role = 7 [json_name = "requiredSignerRole"];</code>
+   * @return The bytes for requiredSignerRole.
+   */
+  com.google.protobuf.ByteString
+      getRequiredSignerRoleBytes();
+
+  /**
+   * <pre>
+   * 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+   * </pre>
+   *
+   * <code>string group = 8 [json_name = "group"];</code>
+   * @return The group.
+   */
+  java.lang.String getGroup();
+  /**
+   * <pre>
+   * 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+   * </pre>
+   *
+   * <code>string group = 8 [json_name = "group"];</code>
+   * @return The bytes for group.
+   */
+  com.google.protobuf.ByteString
+      getGroupBytes();
 }

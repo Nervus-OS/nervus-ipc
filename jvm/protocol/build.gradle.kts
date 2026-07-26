@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.compile.JavaCompile
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     `java-library`
@@ -5,6 +7,12 @@ plugins {
 
 kotlin {
     jvmToolchain(libs.versions.jvmTarget.get().toInt())
+}
+
+// 生成代码保留 proto 的 UTF-8 注释。javac 在 Windows 上默认读取系统代码页
+// （常见为 GBK），必须显式固定，否则同一提交只会在 Linux 编译成功。
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
 }
 
 // 刻意【不】使用 protobuf-gradle-plugin。

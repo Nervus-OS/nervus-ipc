@@ -39,6 +39,7 @@ private static final long serialVersionUID = 0L;
     riskClass_ = 0;
     requestType_ = "";
     responseType_ = "";
+    errorDetailType_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -54,6 +55,7 @@ private static final long serialVersionUID = 0L;
             io.github.nervusos.ipc.v1.MethodMeta.class, io.github.nervusos.ipc.v1.MethodMeta.Builder.class);
   }
 
+  private int bitField0_;
   public static final int METHOD_ID_FIELD_NUMBER = 1;
   private int methodId_ = 0;
   /**
@@ -338,6 +340,146 @@ private static final long serialVersionUID = 0L;
     return isMotion_;
   }
 
+  public static final int DEFAULT_TIMEOUT_MS_FIELD_NUMBER = 11;
+  private int defaultTimeoutMs_ = 0;
+  /**
+   * <pre>
+   * 0 表示采用 nervud 的保守默认值，不表示无限。非 0 时仍会被连接级硬上限收紧。
+   * </pre>
+   *
+   * <code>uint32 default_timeout_ms = 11 [json_name = "defaultTimeoutMs"];</code>
+   * @return The defaultTimeoutMs.
+   */
+  @java.lang.Override
+  public int getDefaultTimeoutMs() {
+    return defaultTimeoutMs_;
+  }
+
+  public static final int MAX_TIMEOUT_MS_FIELD_NUMBER = 12;
+  private int maxTimeoutMs_ = 0;
+  /**
+   * <code>uint32 max_timeout_ms = 12 [json_name = "maxTimeoutMs"];</code>
+   * @return The maxTimeoutMs.
+   */
+  @java.lang.Override
+  public int getMaxTimeoutMs() {
+    return maxTimeoutMs_;
+  }
+
+  public static final int MAX_REQUEST_BYTES_FIELD_NUMBER = 13;
+  private int maxRequestBytes_ = 0;
+  /**
+   * <code>uint32 max_request_bytes = 13 [json_name = "maxRequestBytes"];</code>
+   * @return The maxRequestBytes.
+   */
+  @java.lang.Override
+  public int getMaxRequestBytes() {
+    return maxRequestBytes_;
+  }
+
+  public static final int MAX_RESPONSE_BYTES_FIELD_NUMBER = 14;
+  private int maxResponseBytes_ = 0;
+  /**
+   * <code>uint32 max_response_bytes = 14 [json_name = "maxResponseBytes"];</code>
+   * @return The maxResponseBytes.
+   */
+  @java.lang.Override
+  public int getMaxResponseBytes() {
+    return maxResponseBytes_;
+  }
+
+  public static final int TRANSFER_FIELD_NUMBER = 15;
+  private io.github.nervusos.ipc.v1.TransferPolicy transfer_;
+  /**
+   * <pre>
+   * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+   * 声明的方向、模式、流数量与速率预算。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+   * @return Whether the transfer field is set.
+   */
+  @java.lang.Override
+  public boolean hasTransfer() {
+    return ((bitField0_ & 0x00000001) != 0);
+  }
+  /**
+   * <pre>
+   * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+   * 声明的方向、模式、流数量与速率预算。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+   * @return The transfer.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.TransferPolicy getTransfer() {
+    return transfer_ == null ? io.github.nervusos.ipc.v1.TransferPolicy.getDefaultInstance() : transfer_;
+  }
+  /**
+   * <pre>
+   * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+   * 声明的方向、模式、流数量与速率预算。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.TransferPolicyOrBuilder getTransferOrBuilder() {
+    return transfer_ == null ? io.github.nervusos.ipc.v1.TransferPolicy.getDefaultInstance() : transfer_;
+  }
+
+  public static final int ERROR_DETAIL_TYPE_FIELD_NUMBER = 16;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object errorDetailType_ = "";
+  /**
+   * <pre>
+   * Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+   * error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+   * 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+   * </pre>
+   *
+   * <code>string error_detail_type = 16 [json_name = "errorDetailType"];</code>
+   * @return The errorDetailType.
+   */
+  @java.lang.Override
+  public java.lang.String getErrorDetailType() {
+    java.lang.Object ref = errorDetailType_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      errorDetailType_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+   * error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+   * 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+   * </pre>
+   *
+   * <code>string error_detail_type = 16 [json_name = "errorDetailType"];</code>
+   * @return The bytes for errorDetailType.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getErrorDetailTypeBytes() {
+    java.lang.Object ref = errorDetailType_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      errorDetailType_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -381,6 +523,24 @@ private static final long serialVersionUID = 0L;
     }
     if (isMotion_ != false) {
       output.writeBool(10, isMotion_);
+    }
+    if (defaultTimeoutMs_ != 0) {
+      output.writeUInt32(11, defaultTimeoutMs_);
+    }
+    if (maxTimeoutMs_ != 0) {
+      output.writeUInt32(12, maxTimeoutMs_);
+    }
+    if (maxRequestBytes_ != 0) {
+      output.writeUInt32(13, maxRequestBytes_);
+    }
+    if (maxResponseBytes_ != 0) {
+      output.writeUInt32(14, maxResponseBytes_);
+    }
+    if (((bitField0_ & 0x00000001) != 0)) {
+      output.writeMessage(15, getTransfer());
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(errorDetailType_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 16, errorDetailType_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -428,6 +588,29 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(10, isMotion_);
     }
+    if (defaultTimeoutMs_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeUInt32Size(11, defaultTimeoutMs_);
+    }
+    if (maxTimeoutMs_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeUInt32Size(12, maxTimeoutMs_);
+    }
+    if (maxRequestBytes_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeUInt32Size(13, maxRequestBytes_);
+    }
+    if (maxResponseBytes_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeUInt32Size(14, maxResponseBytes_);
+    }
+    if (((bitField0_ & 0x00000001) != 0)) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(15, getTransfer());
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(errorDetailType_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(16, errorDetailType_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -462,6 +645,21 @@ private static final long serialVersionUID = 0L;
         != other.getIsReadOnly()) return false;
     if (getIsMotion()
         != other.getIsMotion()) return false;
+    if (getDefaultTimeoutMs()
+        != other.getDefaultTimeoutMs()) return false;
+    if (getMaxTimeoutMs()
+        != other.getMaxTimeoutMs()) return false;
+    if (getMaxRequestBytes()
+        != other.getMaxRequestBytes()) return false;
+    if (getMaxResponseBytes()
+        != other.getMaxResponseBytes()) return false;
+    if (hasTransfer() != other.hasTransfer()) return false;
+    if (hasTransfer()) {
+      if (!getTransfer()
+          .equals(other.getTransfer())) return false;
+    }
+    if (!getErrorDetailType()
+        .equals(other.getErrorDetailType())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -498,6 +696,20 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + IS_MOTION_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getIsMotion());
+    hash = (37 * hash) + DEFAULT_TIMEOUT_MS_FIELD_NUMBER;
+    hash = (53 * hash) + getDefaultTimeoutMs();
+    hash = (37 * hash) + MAX_TIMEOUT_MS_FIELD_NUMBER;
+    hash = (53 * hash) + getMaxTimeoutMs();
+    hash = (37 * hash) + MAX_REQUEST_BYTES_FIELD_NUMBER;
+    hash = (53 * hash) + getMaxRequestBytes();
+    hash = (37 * hash) + MAX_RESPONSE_BYTES_FIELD_NUMBER;
+    hash = (53 * hash) + getMaxResponseBytes();
+    if (hasTransfer()) {
+      hash = (37 * hash) + TRANSFER_FIELD_NUMBER;
+      hash = (53 * hash) + getTransfer().hashCode();
+    }
+    hash = (37 * hash) + ERROR_DETAIL_TYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getErrorDetailType().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -625,13 +837,19 @@ private static final long serialVersionUID = 0L;
 
     // Construct using io.github.nervusos.ipc.v1.MethodMeta.newBuilder()
     private Builder() {
-
+      maybeForceBuilderInitialization();
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       super(parent);
-
+      maybeForceBuilderInitialization();
+    }
+    private void maybeForceBuilderInitialization() {
+      if (com.google.protobuf.GeneratedMessage
+              .alwaysUseFieldBuilders) {
+        getTransferFieldBuilder();
+      }
     }
     @java.lang.Override
     public Builder clear() {
@@ -647,6 +865,16 @@ private static final long serialVersionUID = 0L;
       responseType_ = "";
       isReadOnly_ = false;
       isMotion_ = false;
+      defaultTimeoutMs_ = 0;
+      maxTimeoutMs_ = 0;
+      maxRequestBytes_ = 0;
+      maxResponseBytes_ = 0;
+      transfer_ = null;
+      if (transferBuilder_ != null) {
+        transferBuilder_.dispose();
+        transferBuilder_ = null;
+      }
+      errorDetailType_ = "";
       return this;
     }
 
@@ -710,6 +938,29 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000200) != 0)) {
         result.isMotion_ = isMotion_;
       }
+      if (((from_bitField0_ & 0x00000400) != 0)) {
+        result.defaultTimeoutMs_ = defaultTimeoutMs_;
+      }
+      if (((from_bitField0_ & 0x00000800) != 0)) {
+        result.maxTimeoutMs_ = maxTimeoutMs_;
+      }
+      if (((from_bitField0_ & 0x00001000) != 0)) {
+        result.maxRequestBytes_ = maxRequestBytes_;
+      }
+      if (((from_bitField0_ & 0x00002000) != 0)) {
+        result.maxResponseBytes_ = maxResponseBytes_;
+      }
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00004000) != 0)) {
+        result.transfer_ = transferBuilder_ == null
+            ? transfer_
+            : transferBuilder_.build();
+        to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00008000) != 0)) {
+        result.errorDetailType_ = errorDetailType_;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
 
     @java.lang.Override
@@ -759,6 +1010,26 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getIsMotion() != false) {
         setIsMotion(other.getIsMotion());
+      }
+      if (other.getDefaultTimeoutMs() != 0) {
+        setDefaultTimeoutMs(other.getDefaultTimeoutMs());
+      }
+      if (other.getMaxTimeoutMs() != 0) {
+        setMaxTimeoutMs(other.getMaxTimeoutMs());
+      }
+      if (other.getMaxRequestBytes() != 0) {
+        setMaxRequestBytes(other.getMaxRequestBytes());
+      }
+      if (other.getMaxResponseBytes() != 0) {
+        setMaxResponseBytes(other.getMaxResponseBytes());
+      }
+      if (other.hasTransfer()) {
+        mergeTransfer(other.getTransfer());
+      }
+      if (!other.getErrorDetailType().isEmpty()) {
+        errorDetailType_ = other.errorDetailType_;
+        bitField0_ |= 0x00008000;
+        onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -836,6 +1107,38 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000200;
               break;
             } // case 80
+            case 88: {
+              defaultTimeoutMs_ = input.readUInt32();
+              bitField0_ |= 0x00000400;
+              break;
+            } // case 88
+            case 96: {
+              maxTimeoutMs_ = input.readUInt32();
+              bitField0_ |= 0x00000800;
+              break;
+            } // case 96
+            case 104: {
+              maxRequestBytes_ = input.readUInt32();
+              bitField0_ |= 0x00001000;
+              break;
+            } // case 104
+            case 112: {
+              maxResponseBytes_ = input.readUInt32();
+              bitField0_ |= 0x00002000;
+              break;
+            } // case 112
+            case 122: {
+              input.readMessage(
+                  getTransferFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00004000;
+              break;
+            } // case 122
+            case 130: {
+              errorDetailType_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00008000;
+              break;
+            } // case 130
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1536,6 +1839,414 @@ private static final long serialVersionUID = 0L;
     public Builder clearIsMotion() {
       bitField0_ = (bitField0_ & ~0x00000200);
       isMotion_ = false;
+      onChanged();
+      return this;
+    }
+
+    private int defaultTimeoutMs_ ;
+    /**
+     * <pre>
+     * 0 表示采用 nervud 的保守默认值，不表示无限。非 0 时仍会被连接级硬上限收紧。
+     * </pre>
+     *
+     * <code>uint32 default_timeout_ms = 11 [json_name = "defaultTimeoutMs"];</code>
+     * @return The defaultTimeoutMs.
+     */
+    @java.lang.Override
+    public int getDefaultTimeoutMs() {
+      return defaultTimeoutMs_;
+    }
+    /**
+     * <pre>
+     * 0 表示采用 nervud 的保守默认值，不表示无限。非 0 时仍会被连接级硬上限收紧。
+     * </pre>
+     *
+     * <code>uint32 default_timeout_ms = 11 [json_name = "defaultTimeoutMs"];</code>
+     * @param value The defaultTimeoutMs to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDefaultTimeoutMs(int value) {
+
+      defaultTimeoutMs_ = value;
+      bitField0_ |= 0x00000400;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 0 表示采用 nervud 的保守默认值，不表示无限。非 0 时仍会被连接级硬上限收紧。
+     * </pre>
+     *
+     * <code>uint32 default_timeout_ms = 11 [json_name = "defaultTimeoutMs"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDefaultTimeoutMs() {
+      bitField0_ = (bitField0_ & ~0x00000400);
+      defaultTimeoutMs_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int maxTimeoutMs_ ;
+    /**
+     * <code>uint32 max_timeout_ms = 12 [json_name = "maxTimeoutMs"];</code>
+     * @return The maxTimeoutMs.
+     */
+    @java.lang.Override
+    public int getMaxTimeoutMs() {
+      return maxTimeoutMs_;
+    }
+    /**
+     * <code>uint32 max_timeout_ms = 12 [json_name = "maxTimeoutMs"];</code>
+     * @param value The maxTimeoutMs to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaxTimeoutMs(int value) {
+
+      maxTimeoutMs_ = value;
+      bitField0_ |= 0x00000800;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>uint32 max_timeout_ms = 12 [json_name = "maxTimeoutMs"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaxTimeoutMs() {
+      bitField0_ = (bitField0_ & ~0x00000800);
+      maxTimeoutMs_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int maxRequestBytes_ ;
+    /**
+     * <code>uint32 max_request_bytes = 13 [json_name = "maxRequestBytes"];</code>
+     * @return The maxRequestBytes.
+     */
+    @java.lang.Override
+    public int getMaxRequestBytes() {
+      return maxRequestBytes_;
+    }
+    /**
+     * <code>uint32 max_request_bytes = 13 [json_name = "maxRequestBytes"];</code>
+     * @param value The maxRequestBytes to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaxRequestBytes(int value) {
+
+      maxRequestBytes_ = value;
+      bitField0_ |= 0x00001000;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>uint32 max_request_bytes = 13 [json_name = "maxRequestBytes"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaxRequestBytes() {
+      bitField0_ = (bitField0_ & ~0x00001000);
+      maxRequestBytes_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int maxResponseBytes_ ;
+    /**
+     * <code>uint32 max_response_bytes = 14 [json_name = "maxResponseBytes"];</code>
+     * @return The maxResponseBytes.
+     */
+    @java.lang.Override
+    public int getMaxResponseBytes() {
+      return maxResponseBytes_;
+    }
+    /**
+     * <code>uint32 max_response_bytes = 14 [json_name = "maxResponseBytes"];</code>
+     * @param value The maxResponseBytes to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaxResponseBytes(int value) {
+
+      maxResponseBytes_ = value;
+      bitField0_ |= 0x00002000;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>uint32 max_response_bytes = 14 [json_name = "maxResponseBytes"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaxResponseBytes() {
+      bitField0_ = (bitField0_ & ~0x00002000);
+      maxResponseBytes_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private io.github.nervusos.ipc.v1.TransferPolicy transfer_;
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.TransferPolicy, io.github.nervusos.ipc.v1.TransferPolicy.Builder, io.github.nervusos.ipc.v1.TransferPolicyOrBuilder> transferBuilder_;
+    /**
+     * <pre>
+     * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+     * 声明的方向、模式、流数量与速率预算。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+     * @return Whether the transfer field is set.
+     */
+    public boolean hasTransfer() {
+      return ((bitField0_ & 0x00004000) != 0);
+    }
+    /**
+     * <pre>
+     * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+     * 声明的方向、模式、流数量与速率预算。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+     * @return The transfer.
+     */
+    public io.github.nervusos.ipc.v1.TransferPolicy getTransfer() {
+      if (transferBuilder_ == null) {
+        return transfer_ == null ? io.github.nervusos.ipc.v1.TransferPolicy.getDefaultInstance() : transfer_;
+      } else {
+        return transferBuilder_.getMessage();
+      }
+    }
+    /**
+     * <pre>
+     * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+     * 声明的方向、模式、流数量与速率预算。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+     */
+    public Builder setTransfer(io.github.nervusos.ipc.v1.TransferPolicy value) {
+      if (transferBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        transfer_ = value;
+      } else {
+        transferBuilder_.setMessage(value);
+      }
+      bitField0_ |= 0x00004000;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+     * 声明的方向、模式、流数量与速率预算。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+     */
+    public Builder setTransfer(
+        io.github.nervusos.ipc.v1.TransferPolicy.Builder builderForValue) {
+      if (transferBuilder_ == null) {
+        transfer_ = builderForValue.build();
+      } else {
+        transferBuilder_.setMessage(builderForValue.build());
+      }
+      bitField0_ |= 0x00004000;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+     * 声明的方向、模式、流数量与速率预算。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+     */
+    public Builder mergeTransfer(io.github.nervusos.ipc.v1.TransferPolicy value) {
+      if (transferBuilder_ == null) {
+        if (((bitField0_ & 0x00004000) != 0) &&
+          transfer_ != null &&
+          transfer_ != io.github.nervusos.ipc.v1.TransferPolicy.getDefaultInstance()) {
+          getTransferBuilder().mergeFrom(value);
+        } else {
+          transfer_ = value;
+        }
+      } else {
+        transferBuilder_.mergeFrom(value);
+      }
+      if (transfer_ != null) {
+        bitField0_ |= 0x00004000;
+        onChanged();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+     * 声明的方向、模式、流数量与速率预算。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+     */
+    public Builder clearTransfer() {
+      bitField0_ = (bitField0_ & ~0x00004000);
+      transfer_ = null;
+      if (transferBuilder_ != null) {
+        transferBuilder_.dispose();
+        transferBuilder_ = null;
+      }
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+     * 声明的方向、模式、流数量与速率预算。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+     */
+    public io.github.nervusos.ipc.v1.TransferPolicy.Builder getTransferBuilder() {
+      bitField0_ |= 0x00004000;
+      onChanged();
+      return getTransferFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+     * 声明的方向、模式、流数量与速率预算。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+     */
+    public io.github.nervusos.ipc.v1.TransferPolicyOrBuilder getTransferOrBuilder() {
+      if (transferBuilder_ != null) {
+        return transferBuilder_.getMessageOrBuilder();
+      } else {
+        return transfer_ == null ?
+            io.github.nervusos.ipc.v1.TransferPolicy.getDefaultInstance() : transfer_;
+      }
+    }
+    /**
+     * <pre>
+     * 未设置 = 该方法不能创建 Transfer。设置后，nervud 仍须把请求值收紧到这里
+     * 声明的方向、模式、流数量与速率预算。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferPolicy transfer = 15 [json_name = "transfer"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.TransferPolicy, io.github.nervusos.ipc.v1.TransferPolicy.Builder, io.github.nervusos.ipc.v1.TransferPolicyOrBuilder> 
+        getTransferFieldBuilder() {
+      if (transferBuilder_ == null) {
+        transferBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.TransferPolicy, io.github.nervusos.ipc.v1.TransferPolicy.Builder, io.github.nervusos.ipc.v1.TransferPolicyOrBuilder>(
+                getTransfer(),
+                getParentForChildren(),
+                isClean());
+        transfer_ = null;
+      }
+      return transferBuilder_;
+    }
+
+    private java.lang.Object errorDetailType_ = "";
+    /**
+     * <pre>
+     * Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+     * error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+     * 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+     * </pre>
+     *
+     * <code>string error_detail_type = 16 [json_name = "errorDetailType"];</code>
+     * @return The errorDetailType.
+     */
+    public java.lang.String getErrorDetailType() {
+      java.lang.Object ref = errorDetailType_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        errorDetailType_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+     * error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+     * 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+     * </pre>
+     *
+     * <code>string error_detail_type = 16 [json_name = "errorDetailType"];</code>
+     * @return The bytes for errorDetailType.
+     */
+    public com.google.protobuf.ByteString
+        getErrorDetailTypeBytes() {
+      java.lang.Object ref = errorDetailType_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        errorDetailType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+     * error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+     * 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+     * </pre>
+     *
+     * <code>string error_detail_type = 16 [json_name = "errorDetailType"];</code>
+     * @param value The errorDetailType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setErrorDetailType(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      errorDetailType_ = value;
+      bitField0_ |= 0x00008000;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+     * error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+     * 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+     * </pre>
+     *
+     * <code>string error_detail_type = 16 [json_name = "errorDetailType"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearErrorDetailType() {
+      errorDetailType_ = getDefaultInstance().getErrorDetailType();
+      bitField0_ = (bitField0_ & ~0x00008000);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Failure.error_detail 的 Protobuf 全名。空表示该方法不允许 Provider 提交
+     * error_detail；nervud 只能生成自身受审计的控制面 detail。非空时 nervud 必须
+     * 用权威 schema 解码、拒绝未知字段/非法枚举并重新编码，绝不能原样透传 bytes。
+     * </pre>
+     *
+     * <code>string error_detail_type = 16 [json_name = "errorDetailType"];</code>
+     * @param value The bytes for errorDetailType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setErrorDetailTypeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      errorDetailType_ = value;
+      bitField0_ |= 0x00008000;
       onChanged();
       return this;
     }

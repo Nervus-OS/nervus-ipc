@@ -39,7 +39,7 @@ package nervus.interface.safety.v1;
 
 import "nervus/ipc/v1/method_registry.proto";
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/interface/safetyv1;safetyv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/safetyv1;safetyv1";
 
 // 连字符在 Java 包名里非法，理由见 status.proto。
 option java_package = "io.github.nervusos.iface.safety.v1";
@@ -69,6 +69,7 @@ enum SafetyControlMethod {
     is_motion: false
     request_type: "nervus.interface.safety.v1.GetSafetyStateRequest"
     response_type: "nervus.interface.safety.v1.SafetyState"
+    error_detail_type: "nervus.interface.safety.v1.SafetyControlErrorDetail"
   }];
 
   // 解开停机锁存，回到 NORMAL 并递增 motion epoch。
@@ -93,6 +94,7 @@ enum SafetyControlMethod {
     is_motion: false
     request_type: "nervus.interface.safety.v1.RearmRequest"
     response_type: ""
+    error_detail_type: "nervus.interface.safety.v1.SafetyControlErrorDetail"
   }];
 
   // 请求进入 OEM 恢复阶段（SAFETY_LATCHED → OEM_RECOVERY）。
@@ -110,6 +112,7 @@ enum SafetyControlMethod {
     is_motion: false
     request_type: "nervus.interface.safety.v1.RequestRecoveryRequest"
     response_type: ""
+    error_detail_type: "nervus.interface.safety.v1.SafetyControlErrorDetail"
   }];
 }
 

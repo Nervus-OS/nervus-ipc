@@ -4,7 +4,7 @@
 // 三张表仍是编译期硬编码：endpoint.DefaultInterfaceCatalog（1 条）、
 // resource.DefaultRegistry（1 条）、permission.DefaultCatalog（7 条占位）。
 // 本文件正是替换它们的解药，接线后「加一款机器人 = 装一个签名 Provider 包」
-// 才真正成立。校验辅助已在 go/registry.ValidateOEMNamespace。
+// 才真正成立。校验辅助已在 registry.ValidateOEMNamespace。
 //
 // 本文件冻结 Provider 在其签名 Manifest 里声明「我实现/管理什么」的 wire 结构
 // （NRCP §7.2/§7.3 的 wire 形态），是 WP-A4 的主交付物。
@@ -40,7 +40,7 @@ package nervus.ipc.v1;
 // RiskClass 复用机制层文件（A3 的 method_registry.proto），三处风险分级一致。
 import "nervus/ipc/v1/method_registry.proto";
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/ipcv1;ipcv1";
 
 option java_package = "io.github.nervusos.ipc.v1";
 option java_multiple_files = true;
@@ -68,8 +68,9 @@ message ProviderDescriptor {
   // 本 Provider 管理的物理/逻辑资源。喂进 Resource 注册表（B2）。
   repeated ManagedResource resources = 3;
 
-  // 本 Provider 定义的自定义权限（OEM 私有权限）。标准 Provider 通常为空
-  // （直接引用平台内置权限）；OEM 在此定义 com.acme.* 权限。
+  // 本 Provider 定义的权限。OEM 私有权限必须位于自身 package 命名空间；
+  // 平台签名 Provider 也可声明 perm.* 平台权限，让新增标准能力不必改内核代码。
+  // 是否有权声明平台命名空间只能由 nervud 根据已验证 trust/signer 裁决。
   repeated DefinedPermission permissions = 4;
 }
 
@@ -95,7 +96,7 @@ message ProvidedInterface {
   bytes schema_hash = 3;
 
   // 接口级权限门槛：Resolve 该接口所需权限 ID。
-  //   标准接口 → 指向平台内置权限（如 perm.motion.control）。
+  //   标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
   //   OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
   //                 （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
   // **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -106,6 +107,26 @@ message ProvidedInterface {
   // 的 risk_class 不低于此值，防止把物理危险接口绑到一个自称无害的资源上
   // （NRCP §7.3 最低保护级校验的输入之一）。
   RiskClass resource_risk_floor = 5;
+
+  // 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+  // RegisterEndpoint.resource_handle 必须为空。
+  repeated string compatible_resource_types = 6;
+
+  // 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+  // compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+  // 不再由内核全局写死为 motion.base/main。
+  string default_resource_type = 7;
+  string default_resource_role = 8;
+
+  // 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+  // 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+  // 两种表达不得同时出现。
+  repeated ProvidedInterfaceVersion interface_versions = 9;
+}
+
+message ProvidedInterfaceVersion {
+  uint32 major = 1;
+  bytes schema_hash = 2;
 }
 
 // =============================================================================
@@ -144,16 +165,18 @@ enum ResourceAccessMode {
 }
 
 // =============================================================================
-// DefinedPermission：OEM 自定义权限
+// DefinedPermission：数据驱动权限定义
 // =============================================================================
 
-// DefinedPermission 是 Provider 在自己命名空间下定义的一个权限（NRCP §9.2）。
-// 只是**声明**：这个权限存在、叫什么、多危险、怎么授。是否接受、能不能用
-// 某个 grant_mode，由 nervud 裁决——OEM 不能把系统危险权限调低、不能自封
-// system_only 来绕过用户同意（红线 #2）。
+// DefinedPermission 是 Provider 携带的一条权限定义（NRCP §9.2）。OEM 使用自己
+// 的 package 命名空间；平台 Provider 可以使用 perm.*。它只是**声明**：这个权限
+// 存在、叫什么、多危险、怎么授。是否接受、定义者是否有权占用该命名空间、能不能
+// 使用某个 grant_mode，全部由 nervud 根据签名与平台底线裁决——普通 Provider
+// 不能靠写一个 perm.* 就获得平台权限，也不能把系统危险权限调低。
 message DefinedPermission {
-  // 权限 ID，**必须在定义者 package 命名空间下**（如 com.acme.dog.permission.raw_gait）。
-  // nervud 校验前缀归属并绑定定义者签名身份（NRCP §4.4）。
+  // 权限 ID。私有 ID 必须严格位于定义者 package 命名空间下
+  // （如 com.acme.dog.permission.raw_gait）；perm.* 保留给经 nervud 验证并授权
+  // 的平台签名 Provider。两类定义都绑定定义者签名身份（NRCP §4.4）。
   string id = 1;
 
   // 授予模式。做成枚举而非自由字符串：这是安全相关的**封闭平台词表**
@@ -168,6 +191,24 @@ message DefinedPermission {
 
   // 权限说明（授权 UI 用）。同样要求中英文。
   LocalizedText description = 5;
+
+  // Provider 声明的最低信任门槛。nervud 取 max(声明值, 风险级平台底线)，
+  // 因此 Provider 只能收紧、不能降低权限强度。
+  PermissionTrustFloor minimum_trust = 6;
+
+  // 可选的签名者角色门槛，如 platform-release。角色由 nervud 验签得出，
+  // 不是 manifest 或 Provider 运行时自报。
+  string required_signer_role = 7;
+
+  // 仅供授权 UI 分类与批量展示；不得作为内核撤权或安全策略的唯一输入。
+  string group = 8;
+}
+
+enum PermissionTrustFloor {
+  PERMISSION_TRUST_FLOOR_UNSPECIFIED = 0;
+  PERMISSION_TRUST_FLOOR_ORDINARY = 1;
+  PERMISSION_TRUST_FLOOR_OEM = 2;
+  PERMISSION_TRUST_FLOOR_PLATFORM = 3;
 }
 
 // GrantMode 是权限的授予方式（NRCP §9.2）。封闭平台词表，nervud 据此决定授权

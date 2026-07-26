@@ -28,7 +28,7 @@ package nervus.ipc.v1;
 
 import "nervus/ipc/v1/status.proto";
 
-option go_package = "github.com/nervus-os/nervus-ipc/go/protocol/ipcv1;ipcv1";
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/ipcv1;ipcv1";
 
 // 连字符在 Java 包名里非法，理由见 status.proto。
 option java_package = "io.github.nervusos.ipc.v1";

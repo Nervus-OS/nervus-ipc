@@ -38,6 +38,11 @@ private static final long serialVersionUID = 0L;
     schemaHash_ = com.google.protobuf.ByteString.EMPTY;
     requiredPermission_ = "";
     resourceRiskFloor_ = 0;
+    compatibleResourceTypes_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+    defaultResourceType_ = "";
+    defaultResourceRole_ = "";
+    interfaceVersions_ = java.util.Collections.emptyList();
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -168,7 +173,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * 接口级权限门槛：Resolve 该接口所需权限 ID。
-   * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
+   * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
    * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
    * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
    * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -194,7 +199,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * 接口级权限门槛：Resolve 该接口所需权限 ID。
-   * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
+   * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
    * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
    * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
    * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -249,6 +254,224 @@ private static final long serialVersionUID = 0L;
     return result == null ? io.github.nervusos.ipc.v1.RiskClass.UNRECOGNIZED : result;
   }
 
+  public static final int COMPATIBLE_RESOURCE_TYPES_FIELD_NUMBER = 6;
+  @SuppressWarnings("serial")
+  private com.google.protobuf.LazyStringArrayList compatibleResourceTypes_ =
+      com.google.protobuf.LazyStringArrayList.emptyList();
+  /**
+   * <pre>
+   * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+   * RegisterEndpoint.resource_handle 必须为空。
+   * </pre>
+   *
+   * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+   * @return A list containing the compatibleResourceTypes.
+   */
+  public com.google.protobuf.ProtocolStringList
+      getCompatibleResourceTypesList() {
+    return compatibleResourceTypes_;
+  }
+  /**
+   * <pre>
+   * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+   * RegisterEndpoint.resource_handle 必须为空。
+   * </pre>
+   *
+   * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+   * @return The count of compatibleResourceTypes.
+   */
+  public int getCompatibleResourceTypesCount() {
+    return compatibleResourceTypes_.size();
+  }
+  /**
+   * <pre>
+   * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+   * RegisterEndpoint.resource_handle 必须为空。
+   * </pre>
+   *
+   * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+   * @param index The index of the element to return.
+   * @return The compatibleResourceTypes at the given index.
+   */
+  public java.lang.String getCompatibleResourceTypes(int index) {
+    return compatibleResourceTypes_.get(index);
+  }
+  /**
+   * <pre>
+   * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+   * RegisterEndpoint.resource_handle 必须为空。
+   * </pre>
+   *
+   * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the compatibleResourceTypes at the given index.
+   */
+  public com.google.protobuf.ByteString
+      getCompatibleResourceTypesBytes(int index) {
+    return compatibleResourceTypes_.getByteString(index);
+  }
+
+  public static final int DEFAULT_RESOURCE_TYPE_FIELD_NUMBER = 7;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object defaultResourceType_ = "";
+  /**
+   * <pre>
+   * 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+   * compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+   * 不再由内核全局写死为 motion.base/main。
+   * </pre>
+   *
+   * <code>string default_resource_type = 7 [json_name = "defaultResourceType"];</code>
+   * @return The defaultResourceType.
+   */
+  @java.lang.Override
+  public java.lang.String getDefaultResourceType() {
+    java.lang.Object ref = defaultResourceType_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      defaultResourceType_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+   * compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+   * 不再由内核全局写死为 motion.base/main。
+   * </pre>
+   *
+   * <code>string default_resource_type = 7 [json_name = "defaultResourceType"];</code>
+   * @return The bytes for defaultResourceType.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getDefaultResourceTypeBytes() {
+    java.lang.Object ref = defaultResourceType_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      defaultResourceType_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int DEFAULT_RESOURCE_ROLE_FIELD_NUMBER = 8;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object defaultResourceRole_ = "";
+  /**
+   * <code>string default_resource_role = 8 [json_name = "defaultResourceRole"];</code>
+   * @return The defaultResourceRole.
+   */
+  @java.lang.Override
+  public java.lang.String getDefaultResourceRole() {
+    java.lang.Object ref = defaultResourceRole_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      defaultResourceRole_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string default_resource_role = 8 [json_name = "defaultResourceRole"];</code>
+   * @return The bytes for defaultResourceRole.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getDefaultResourceRoleBytes() {
+    java.lang.Object ref = defaultResourceRole_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      defaultResourceRole_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int INTERFACE_VERSIONS_FIELD_NUMBER = 9;
+  @SuppressWarnings("serial")
+  private java.util.List<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion> interfaceVersions_;
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  @java.lang.Override
+  public java.util.List<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion> getInterfaceVersionsList() {
+    return interfaceVersions_;
+  }
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder> 
+      getInterfaceVersionsOrBuilderList() {
+    return interfaceVersions_;
+  }
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  @java.lang.Override
+  public int getInterfaceVersionsCount() {
+    return interfaceVersions_.size();
+  }
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.ProvidedInterfaceVersion getInterfaceVersions(int index) {
+    return interfaceVersions_.get(index);
+  }
+  /**
+   * <pre>
+   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+   * 两种表达不得同时出现。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder getInterfaceVersionsOrBuilder(
+      int index) {
+    return interfaceVersions_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -282,6 +505,18 @@ private static final long serialVersionUID = 0L;
     }
     if (resourceRiskFloor_ != io.github.nervusos.ipc.v1.RiskClass.RISK_CLASS_UNSPECIFIED.getNumber()) {
       output.writeEnum(5, resourceRiskFloor_);
+    }
+    for (int i = 0; i < compatibleResourceTypes_.size(); i++) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 6, compatibleResourceTypes_.getRaw(i));
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(defaultResourceType_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 7, defaultResourceType_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(defaultResourceRole_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 8, defaultResourceRole_);
+    }
+    for (int i = 0; i < interfaceVersions_.size(); i++) {
+      output.writeMessage(9, interfaceVersions_.get(i));
     }
     getUnknownFields().writeTo(output);
   }
@@ -320,6 +555,24 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(5, resourceRiskFloor_);
     }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < compatibleResourceTypes_.size(); i++) {
+        dataSize += computeStringSizeNoTag(compatibleResourceTypes_.getRaw(i));
+      }
+      size += dataSize;
+      size += 1 * getCompatibleResourceTypesList().size();
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(defaultResourceType_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(7, defaultResourceType_);
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(defaultResourceRole_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(8, defaultResourceRole_);
+    }
+    for (int i = 0; i < interfaceVersions_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(9, interfaceVersions_.get(i));
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -344,6 +597,14 @@ private static final long serialVersionUID = 0L;
     if (!getRequiredPermission()
         .equals(other.getRequiredPermission())) return false;
     if (resourceRiskFloor_ != other.resourceRiskFloor_) return false;
+    if (!getCompatibleResourceTypesList()
+        .equals(other.getCompatibleResourceTypesList())) return false;
+    if (!getDefaultResourceType()
+        .equals(other.getDefaultResourceType())) return false;
+    if (!getDefaultResourceRole()
+        .equals(other.getDefaultResourceRole())) return false;
+    if (!getInterfaceVersionsList()
+        .equals(other.getInterfaceVersionsList())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -367,6 +628,18 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getRequiredPermission().hashCode();
     hash = (37 * hash) + RESOURCE_RISK_FLOOR_FIELD_NUMBER;
     hash = (53 * hash) + resourceRiskFloor_;
+    if (getCompatibleResourceTypesCount() > 0) {
+      hash = (37 * hash) + COMPATIBLE_RESOURCE_TYPES_FIELD_NUMBER;
+      hash = (53 * hash) + getCompatibleResourceTypesList().hashCode();
+    }
+    hash = (37 * hash) + DEFAULT_RESOURCE_TYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getDefaultResourceType().hashCode();
+    hash = (37 * hash) + DEFAULT_RESOURCE_ROLE_FIELD_NUMBER;
+    hash = (53 * hash) + getDefaultResourceRole().hashCode();
+    if (getInterfaceVersionsCount() > 0) {
+      hash = (37 * hash) + INTERFACE_VERSIONS_FIELD_NUMBER;
+      hash = (53 * hash) + getInterfaceVersionsList().hashCode();
+    }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -509,6 +782,17 @@ private static final long serialVersionUID = 0L;
       schemaHash_ = com.google.protobuf.ByteString.EMPTY;
       requiredPermission_ = "";
       resourceRiskFloor_ = 0;
+      compatibleResourceTypes_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+      defaultResourceType_ = "";
+      defaultResourceRole_ = "";
+      if (interfaceVersionsBuilder_ == null) {
+        interfaceVersions_ = java.util.Collections.emptyList();
+      } else {
+        interfaceVersions_ = null;
+        interfaceVersionsBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000100);
       return this;
     }
 
@@ -535,9 +819,22 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public io.github.nervusos.ipc.v1.ProvidedInterface buildPartial() {
       io.github.nervusos.ipc.v1.ProvidedInterface result = new io.github.nervusos.ipc.v1.ProvidedInterface(this);
+      buildPartialRepeatedFields(result);
       if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
+    }
+
+    private void buildPartialRepeatedFields(io.github.nervusos.ipc.v1.ProvidedInterface result) {
+      if (interfaceVersionsBuilder_ == null) {
+        if (((bitField0_ & 0x00000100) != 0)) {
+          interfaceVersions_ = java.util.Collections.unmodifiableList(interfaceVersions_);
+          bitField0_ = (bitField0_ & ~0x00000100);
+        }
+        result.interfaceVersions_ = interfaceVersions_;
+      } else {
+        result.interfaceVersions_ = interfaceVersionsBuilder_.build();
+      }
     }
 
     private void buildPartial0(io.github.nervusos.ipc.v1.ProvidedInterface result) {
@@ -557,6 +854,16 @@ private static final long serialVersionUID = 0L;
       }
       if (((from_bitField0_ & 0x00000010) != 0)) {
         result.resourceRiskFloor_ = resourceRiskFloor_;
+      }
+      if (((from_bitField0_ & 0x00000020) != 0)) {
+        compatibleResourceTypes_.makeImmutable();
+        result.compatibleResourceTypes_ = compatibleResourceTypes_;
+      }
+      if (((from_bitField0_ & 0x00000040) != 0)) {
+        result.defaultResourceType_ = defaultResourceType_;
+      }
+      if (((from_bitField0_ & 0x00000080) != 0)) {
+        result.defaultResourceRole_ = defaultResourceRole_;
       }
     }
 
@@ -598,6 +905,52 @@ private static final long serialVersionUID = 0L;
       }
       if (other.resourceRiskFloor_ != 0) {
         setResourceRiskFloorValue(other.getResourceRiskFloorValue());
+      }
+      if (!other.compatibleResourceTypes_.isEmpty()) {
+        if (compatibleResourceTypes_.isEmpty()) {
+          compatibleResourceTypes_ = other.compatibleResourceTypes_;
+          bitField0_ |= 0x00000020;
+        } else {
+          ensureCompatibleResourceTypesIsMutable();
+          compatibleResourceTypes_.addAll(other.compatibleResourceTypes_);
+        }
+        onChanged();
+      }
+      if (!other.getDefaultResourceType().isEmpty()) {
+        defaultResourceType_ = other.defaultResourceType_;
+        bitField0_ |= 0x00000040;
+        onChanged();
+      }
+      if (!other.getDefaultResourceRole().isEmpty()) {
+        defaultResourceRole_ = other.defaultResourceRole_;
+        bitField0_ |= 0x00000080;
+        onChanged();
+      }
+      if (interfaceVersionsBuilder_ == null) {
+        if (!other.interfaceVersions_.isEmpty()) {
+          if (interfaceVersions_.isEmpty()) {
+            interfaceVersions_ = other.interfaceVersions_;
+            bitField0_ = (bitField0_ & ~0x00000100);
+          } else {
+            ensureInterfaceVersionsIsMutable();
+            interfaceVersions_.addAll(other.interfaceVersions_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.interfaceVersions_.isEmpty()) {
+          if (interfaceVersionsBuilder_.isEmpty()) {
+            interfaceVersionsBuilder_.dispose();
+            interfaceVersionsBuilder_ = null;
+            interfaceVersions_ = other.interfaceVersions_;
+            bitField0_ = (bitField0_ & ~0x00000100);
+            interfaceVersionsBuilder_ = 
+              com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                 getInterfaceVersionsFieldBuilder() : null;
+          } else {
+            interfaceVersionsBuilder_.addAllMessages(other.interfaceVersions_);
+          }
+        }
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -661,6 +1014,35 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000010;
               break;
             } // case 40
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureCompatibleResourceTypesIsMutable();
+              compatibleResourceTypes_.add(s);
+              break;
+            } // case 50
+            case 58: {
+              defaultResourceType_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000040;
+              break;
+            } // case 58
+            case 66: {
+              defaultResourceRole_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000080;
+              break;
+            } // case 66
+            case 74: {
+              io.github.nervusos.ipc.v1.ProvidedInterfaceVersion m =
+                  input.readMessage(
+                      io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.parser(),
+                      extensionRegistry);
+              if (interfaceVersionsBuilder_ == null) {
+                ensureInterfaceVersionsIsMutable();
+                interfaceVersions_.add(m);
+              } else {
+                interfaceVersionsBuilder_.addMessage(m);
+              }
+              break;
+            } // case 74
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -944,7 +1326,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
+     * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -969,7 +1351,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
+     * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -995,7 +1377,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
+     * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -1017,7 +1399,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
+     * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -1036,7 +1418,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 接口级权限门槛：Resolve 该接口所需权限 ID。
-     * 标准接口 → 指向平台内置权限（如 perm.motion.control）。
+     * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
      * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
      * （如 com.acme.dog.permission.raw_gait），绑定定义者签名。
      * **这一项就是喂进 endpoint 目录、替换 DefaultInterfaceCatalog 硬编码的值。**
@@ -1138,6 +1520,684 @@ private static final long serialVersionUID = 0L;
       resourceRiskFloor_ = 0;
       onChanged();
       return this;
+    }
+
+    private com.google.protobuf.LazyStringArrayList compatibleResourceTypes_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+    private void ensureCompatibleResourceTypesIsMutable() {
+      if (!compatibleResourceTypes_.isModifiable()) {
+        compatibleResourceTypes_ = new com.google.protobuf.LazyStringArrayList(compatibleResourceTypes_);
+      }
+      bitField0_ |= 0x00000020;
+    }
+    /**
+     * <pre>
+     * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+     * RegisterEndpoint.resource_handle 必须为空。
+     * </pre>
+     *
+     * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+     * @return A list containing the compatibleResourceTypes.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getCompatibleResourceTypesList() {
+      compatibleResourceTypes_.makeImmutable();
+      return compatibleResourceTypes_;
+    }
+    /**
+     * <pre>
+     * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+     * RegisterEndpoint.resource_handle 必须为空。
+     * </pre>
+     *
+     * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+     * @return The count of compatibleResourceTypes.
+     */
+    public int getCompatibleResourceTypesCount() {
+      return compatibleResourceTypes_.size();
+    }
+    /**
+     * <pre>
+     * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+     * RegisterEndpoint.resource_handle 必须为空。
+     * </pre>
+     *
+     * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+     * @param index The index of the element to return.
+     * @return The compatibleResourceTypes at the given index.
+     */
+    public java.lang.String getCompatibleResourceTypes(int index) {
+      return compatibleResourceTypes_.get(index);
+    }
+    /**
+     * <pre>
+     * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+     * RegisterEndpoint.resource_handle 必须为空。
+     * </pre>
+     *
+     * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the compatibleResourceTypes at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getCompatibleResourceTypesBytes(int index) {
+      return compatibleResourceTypes_.getByteString(index);
+    }
+    /**
+     * <pre>
+     * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+     * RegisterEndpoint.resource_handle 必须为空。
+     * </pre>
+     *
+     * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+     * @param index The index to set the value at.
+     * @param value The compatibleResourceTypes to set.
+     * @return This builder for chaining.
+     */
+    public Builder setCompatibleResourceTypes(
+        int index, java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      ensureCompatibleResourceTypesIsMutable();
+      compatibleResourceTypes_.set(index, value);
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+     * RegisterEndpoint.resource_handle 必须为空。
+     * </pre>
+     *
+     * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+     * @param value The compatibleResourceTypes to add.
+     * @return This builder for chaining.
+     */
+    public Builder addCompatibleResourceTypes(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      ensureCompatibleResourceTypesIsMutable();
+      compatibleResourceTypes_.add(value);
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+     * RegisterEndpoint.resource_handle 必须为空。
+     * </pre>
+     *
+     * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+     * @param values The compatibleResourceTypes to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllCompatibleResourceTypes(
+        java.lang.Iterable<java.lang.String> values) {
+      ensureCompatibleResourceTypesIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, compatibleResourceTypes_);
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+     * RegisterEndpoint.resource_handle 必须为空。
+     * </pre>
+     *
+     * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearCompatibleResourceTypes() {
+      compatibleResourceTypes_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000020);;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 该接口允许绑定的 Resource 类型。空集合表示这是非 Resource 接口，
+     * RegisterEndpoint.resource_handle 必须为空。
+     * </pre>
+     *
+     * <code>repeated string compatible_resource_types = 6 [json_name = "compatibleResourceTypes"];</code>
+     * @param value The bytes of the compatibleResourceTypes to add.
+     * @return This builder for chaining.
+     */
+    public Builder addCompatibleResourceTypesBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      ensureCompatibleResourceTypesIsMutable();
+      compatibleResourceTypes_.add(value);
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object defaultResourceType_ = "";
+    /**
+     * <pre>
+     * 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+     * compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+     * 不再由内核全局写死为 motion.base/main。
+     * </pre>
+     *
+     * <code>string default_resource_type = 7 [json_name = "defaultResourceType"];</code>
+     * @return The defaultResourceType.
+     */
+    public java.lang.String getDefaultResourceType() {
+      java.lang.Object ref = defaultResourceType_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        defaultResourceType_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+     * compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+     * 不再由内核全局写死为 motion.base/main。
+     * </pre>
+     *
+     * <code>string default_resource_type = 7 [json_name = "defaultResourceType"];</code>
+     * @return The bytes for defaultResourceType.
+     */
+    public com.google.protobuf.ByteString
+        getDefaultResourceTypeBytes() {
+      java.lang.Object ref = defaultResourceType_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        defaultResourceType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+     * compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+     * 不再由内核全局写死为 motion.base/main。
+     * </pre>
+     *
+     * <code>string default_resource_type = 7 [json_name = "defaultResourceType"];</code>
+     * @param value The defaultResourceType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDefaultResourceType(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      defaultResourceType_ = value;
+      bitField0_ |= 0x00000040;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+     * compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+     * 不再由内核全局写死为 motion.base/main。
+     * </pre>
+     *
+     * <code>string default_resource_type = 7 [json_name = "defaultResourceType"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDefaultResourceType() {
+      defaultResourceType_ = getDefaultInstance().getDefaultResourceType();
+      bitField0_ = (bitField0_ & ~0x00000040);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 可选的接口级默认 Selector。二者必须同时为空或同时非空；非空 type 必须在
+     * compatible_resource_types 中。这样空 Selector 的语义由接口数据决定，
+     * 不再由内核全局写死为 motion.base/main。
+     * </pre>
+     *
+     * <code>string default_resource_type = 7 [json_name = "defaultResourceType"];</code>
+     * @param value The bytes for defaultResourceType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDefaultResourceTypeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      defaultResourceType_ = value;
+      bitField0_ |= 0x00000040;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object defaultResourceRole_ = "";
+    /**
+     * <code>string default_resource_role = 8 [json_name = "defaultResourceRole"];</code>
+     * @return The defaultResourceRole.
+     */
+    public java.lang.String getDefaultResourceRole() {
+      java.lang.Object ref = defaultResourceRole_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        defaultResourceRole_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string default_resource_role = 8 [json_name = "defaultResourceRole"];</code>
+     * @return The bytes for defaultResourceRole.
+     */
+    public com.google.protobuf.ByteString
+        getDefaultResourceRoleBytes() {
+      java.lang.Object ref = defaultResourceRole_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        defaultResourceRole_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string default_resource_role = 8 [json_name = "defaultResourceRole"];</code>
+     * @param value The defaultResourceRole to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDefaultResourceRole(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      defaultResourceRole_ = value;
+      bitField0_ |= 0x00000080;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string default_resource_role = 8 [json_name = "defaultResourceRole"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDefaultResourceRole() {
+      defaultResourceRole_ = getDefaultInstance().getDefaultResourceRole();
+      bitField0_ = (bitField0_ & ~0x00000080);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string default_resource_role = 8 [json_name = "defaultResourceRole"];</code>
+     * @param value The bytes for defaultResourceRole to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDefaultResourceRoleBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      defaultResourceRole_ = value;
+      bitField0_ |= 0x00000080;
+      onChanged();
+      return this;
+    }
+
+    private java.util.List<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion> interfaceVersions_ =
+      java.util.Collections.emptyList();
+    private void ensureInterfaceVersionsIsMutable() {
+      if (!((bitField0_ & 0x00000100) != 0)) {
+        interfaceVersions_ = new java.util.ArrayList<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion>(interfaceVersions_);
+        bitField0_ |= 0x00000100;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilder<
+        io.github.nervusos.ipc.v1.ProvidedInterfaceVersion, io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder, io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder> interfaceVersionsBuilder_;
+
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public java.util.List<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion> getInterfaceVersionsList() {
+      if (interfaceVersionsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(interfaceVersions_);
+      } else {
+        return interfaceVersionsBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public int getInterfaceVersionsCount() {
+      if (interfaceVersionsBuilder_ == null) {
+        return interfaceVersions_.size();
+      } else {
+        return interfaceVersionsBuilder_.getCount();
+      }
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public io.github.nervusos.ipc.v1.ProvidedInterfaceVersion getInterfaceVersions(int index) {
+      if (interfaceVersionsBuilder_ == null) {
+        return interfaceVersions_.get(index);
+      } else {
+        return interfaceVersionsBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public Builder setInterfaceVersions(
+        int index, io.github.nervusos.ipc.v1.ProvidedInterfaceVersion value) {
+      if (interfaceVersionsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureInterfaceVersionsIsMutable();
+        interfaceVersions_.set(index, value);
+        onChanged();
+      } else {
+        interfaceVersionsBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public Builder setInterfaceVersions(
+        int index, io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder builderForValue) {
+      if (interfaceVersionsBuilder_ == null) {
+        ensureInterfaceVersionsIsMutable();
+        interfaceVersions_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        interfaceVersionsBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public Builder addInterfaceVersions(io.github.nervusos.ipc.v1.ProvidedInterfaceVersion value) {
+      if (interfaceVersionsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureInterfaceVersionsIsMutable();
+        interfaceVersions_.add(value);
+        onChanged();
+      } else {
+        interfaceVersionsBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public Builder addInterfaceVersions(
+        int index, io.github.nervusos.ipc.v1.ProvidedInterfaceVersion value) {
+      if (interfaceVersionsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureInterfaceVersionsIsMutable();
+        interfaceVersions_.add(index, value);
+        onChanged();
+      } else {
+        interfaceVersionsBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public Builder addInterfaceVersions(
+        io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder builderForValue) {
+      if (interfaceVersionsBuilder_ == null) {
+        ensureInterfaceVersionsIsMutable();
+        interfaceVersions_.add(builderForValue.build());
+        onChanged();
+      } else {
+        interfaceVersionsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public Builder addInterfaceVersions(
+        int index, io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder builderForValue) {
+      if (interfaceVersionsBuilder_ == null) {
+        ensureInterfaceVersionsIsMutable();
+        interfaceVersions_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        interfaceVersionsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public Builder addAllInterfaceVersions(
+        java.lang.Iterable<? extends io.github.nervusos.ipc.v1.ProvidedInterfaceVersion> values) {
+      if (interfaceVersionsBuilder_ == null) {
+        ensureInterfaceVersionsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, interfaceVersions_);
+        onChanged();
+      } else {
+        interfaceVersionsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public Builder clearInterfaceVersions() {
+      if (interfaceVersionsBuilder_ == null) {
+        interfaceVersions_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000100);
+        onChanged();
+      } else {
+        interfaceVersionsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public Builder removeInterfaceVersions(int index) {
+      if (interfaceVersionsBuilder_ == null) {
+        ensureInterfaceVersionsIsMutable();
+        interfaceVersions_.remove(index);
+        onChanged();
+      } else {
+        interfaceVersionsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder getInterfaceVersionsBuilder(
+        int index) {
+      return getInterfaceVersionsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder getInterfaceVersionsOrBuilder(
+        int index) {
+      if (interfaceVersionsBuilder_ == null) {
+        return interfaceVersions_.get(index);  } else {
+        return interfaceVersionsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public java.util.List<? extends io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder> 
+         getInterfaceVersionsOrBuilderList() {
+      if (interfaceVersionsBuilder_ != null) {
+        return interfaceVersionsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(interfaceVersions_);
+      }
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder addInterfaceVersionsBuilder() {
+      return getInterfaceVersionsFieldBuilder().addBuilder(
+          io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder addInterfaceVersionsBuilder(
+        int index) {
+      return getInterfaceVersionsFieldBuilder().addBuilder(
+          index, io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
+     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
+     * 两种表达不得同时出现。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
+     */
+    public java.util.List<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder> 
+         getInterfaceVersionsBuilderList() {
+      return getInterfaceVersionsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilder<
+        io.github.nervusos.ipc.v1.ProvidedInterfaceVersion, io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder, io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder> 
+        getInterfaceVersionsFieldBuilder() {
+      if (interfaceVersionsBuilder_ == null) {
+        interfaceVersionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+            io.github.nervusos.ipc.v1.ProvidedInterfaceVersion, io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder, io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder>(
+                interfaceVersions_,
+                ((bitField0_ & 0x00000100) != 0),
+                getParentForChildren(),
+                isClean());
+        interfaceVersions_ = null;
+      }
+      return interfaceVersionsBuilder_;
     }
 
     // @@protoc_insertion_point(builder_scope:nervus.ipc.v1.ProvidedInterface)
