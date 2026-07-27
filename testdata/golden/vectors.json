@@ -84,6 +84,12 @@
     "doc": "ReleaseControlResult 成功，code=OK"
   },
   {
+    "name": "dispatch_control_execution_context",
+    "kind": "envelope",
+    "file": "dispatch_control_execution_context.binpb",
+    "doc": "Dispatch 携带内核签发的 ControlLease 执行上下文"
+  },
+  {
     "name": "interface_schema_bundle",
     "kind": "interface_schema_bundle",
     "file": "interface_schema_bundle.binpb",

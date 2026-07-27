@@ -155,7 +155,7 @@ func helloAckOK() *ipcv1.Envelope {
 	return &ipcv1.Envelope{Body: &ipcv1.Envelope_HelloAck{HelloAck: &ipcv1.HelloAck{
 		Outcome: &ipcv1.HelloAck_Success{Success: &ipcv1.HelloAckSuccess{
 			ProtocolMajor: 1,
-			ProtocolMinor: 0,
+			ProtocolMinor: protocolMinorMax,
 			PackageId:     testPackageID,
 			ComponentId:   testComponentID,
 			Limits: &ipcv1.ConnectionLimits{

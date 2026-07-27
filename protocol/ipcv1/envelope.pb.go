@@ -3306,9 +3306,13 @@ type Dispatch struct {
 	Payload     []byte `protobuf:"bytes,5,opt,name=payload,proto3" json:"payload,omitempty"`
 	// 由 nervud 附加的可信调用者上下文。Service 可以读，但不能用它绕过已经
 	// 生效的 nervud Policy，更不能自行创造身份或权限裁决（§10.2）。
-	Caller        *CallerContext `protobuf:"bytes,6,opt,name=caller,proto3" json:"caller,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Caller *CallerContext `protobuf:"bytes,6,opt,name=caller,proto3" json:"caller,omitempty"`
+	// 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+	// Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+	// 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+	ExecutionContext *ExecutionContext `protobuf:"bytes,7,opt,name=execution_context,json=executionContext,proto3" json:"execution_context,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *Dispatch) Reset() {
@@ -3383,6 +3387,121 @@ func (x *Dispatch) GetCaller() *CallerContext {
 	return nil
 }
 
+func (x *Dispatch) GetExecutionContext() *ExecutionContext {
+	if x != nil {
+		return x.ExecutionContext
+	}
+	return nil
+}
+
+// ExecutionContext 是一次 Dispatch 的不可变执行快照，由 nervud 生成。
+//
+// 它解决的是「内核检查通过后，命令在 Provider 队列里变旧」的问题：Provider
+// 可以在真正触碰设备前按 resource generation、motion epoch、command sequence
+// 和绝对 deadline 再做一次 fail-closed 检查。它不是可转让的 capability；尤其
+// lease_id 只用于把本次执行与调用方连接上的租约关联起来。
+type ExecutionContext struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// 需要 ControlLease 的方法恒非 0；普通方法为 0。
+	LeaseId uint64 `protobuf:"varint,1,opt,name=lease_id,json=leaseId,proto3" json:"lease_id,omitempty"`
+	// 从有效租约投影。无租约时必须为 UNSPECIFIED。当前 AcquireControl 的 class
+	// 仍是调用方选择并经 Policy 约束的值，不等同于独立的「人在场」证明。
+	ControllerClass ControllerClass `protobuf:"varint,2,opt,name=controller_class,json=controllerClass,proto3,enum=nervus.ipc.v1.ControllerClass" json:"controller_class,omitempty"`
+	// 租约签发时的撤销世代。需要 ControlLease 的方法恒非 0；普通方法为 0。
+	MotionEpoch uint64 `protobuf:"varint,3,opt,name=motion_epoch,json=motionEpoch,proto3" json:"motion_epoch,omitempty"`
+	// 本次执行的绝对截止时间，位于 Linux CLOCK_MONOTONIC 纳秒时钟域。
+	// 有租约时取 Request deadline 与 lease deadline 的较早者；恒大于 0。
+	DeadlineNanos int64 `protobuf:"varint,4,opt,name=deadline_nanos,json=deadlineNanos,proto3" json:"deadline_nanos,omitempty"`
+	// nervud 签发的命令序号。需要 ControlLease 的方法恒非 0，并且对同一
+	// (resource_handle, resource_generation) 单调递增；普通方法为 0。
+	CommandSequence uint64 `protobuf:"varint,5,opt,name=command_sequence,json=commandSequence,proto3" json:"command_sequence,omitempty"`
+	// 本次路由绑定的公开 Resource 与 catalog generation。无 Resource 的接口允许
+	// 两者同时为空/0；禁止只设置其中一个。
+	ResourceHandle     string `protobuf:"bytes,6,opt,name=resource_handle,json=resourceHandle,proto3" json:"resource_handle,omitempty"`
+	ResourceGeneration uint64 `protobuf:"varint,7,opt,name=resource_generation,json=resourceGeneration,proto3" json:"resource_generation,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *ExecutionContext) Reset() {
+	*x = ExecutionContext{}
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecutionContext) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecutionContext) ProtoMessage() {}
+
+func (x *ExecutionContext) ProtoReflect() protoreflect.Message {
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecutionContext.ProtoReflect.Descriptor instead.
+func (*ExecutionContext) Descriptor() ([]byte, []int) {
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ExecutionContext) GetLeaseId() uint64 {
+	if x != nil {
+		return x.LeaseId
+	}
+	return 0
+}
+
+func (x *ExecutionContext) GetControllerClass() ControllerClass {
+	if x != nil {
+		return x.ControllerClass
+	}
+	return ControllerClass_CONTROLLER_CLASS_UNSPECIFIED
+}
+
+func (x *ExecutionContext) GetMotionEpoch() uint64 {
+	if x != nil {
+		return x.MotionEpoch
+	}
+	return 0
+}
+
+func (x *ExecutionContext) GetDeadlineNanos() int64 {
+	if x != nil {
+		return x.DeadlineNanos
+	}
+	return 0
+}
+
+func (x *ExecutionContext) GetCommandSequence() uint64 {
+	if x != nil {
+		return x.CommandSequence
+	}
+	return 0
+}
+
+func (x *ExecutionContext) GetResourceHandle() string {
+	if x != nil {
+		return x.ResourceHandle
+	}
+	return ""
+}
+
+func (x *ExecutionContext) GetResourceGeneration() uint64 {
+	if x != nil {
+		return x.ResourceGeneration
+	}
+	return 0
+}
+
 // CallerContext 是 ConnectionContext 中可以外传的那一部分（§10.2）。
 //
 // 【internal_connection_id 永不出现在这里】——它不离开 nervud。
@@ -3408,7 +3527,7 @@ type CallerContext struct {
 
 func (x *CallerContext) Reset() {
 	*x = CallerContext{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[29]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3420,7 +3539,7 @@ func (x *CallerContext) String() string {
 func (*CallerContext) ProtoMessage() {}
 
 func (x *CallerContext) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[29]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3433,7 +3552,7 @@ func (x *CallerContext) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallerContext.ProtoReflect.Descriptor instead.
 func (*CallerContext) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{29}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *CallerContext) GetPackageId() string {
@@ -3509,7 +3628,7 @@ type DispatchResult struct {
 
 func (x *DispatchResult) Reset() {
 	*x = DispatchResult{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[30]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3521,7 +3640,7 @@ func (x *DispatchResult) String() string {
 func (*DispatchResult) ProtoMessage() {}
 
 func (x *DispatchResult) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[30]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3534,7 +3653,7 @@ func (x *DispatchResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DispatchResult.ProtoReflect.Descriptor instead.
 func (*DispatchResult) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{30}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *DispatchResult) GetRouteId() uint64 {
@@ -3605,7 +3724,7 @@ type CancelDispatch struct {
 
 func (x *CancelDispatch) Reset() {
 	*x = CancelDispatch{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[31]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3617,7 +3736,7 @@ func (x *CancelDispatch) String() string {
 func (*CancelDispatch) ProtoMessage() {}
 
 func (x *CancelDispatch) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[31]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3630,7 +3749,7 @@ func (x *CancelDispatch) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelDispatch.ProtoReflect.Descriptor instead.
 func (*CancelDispatch) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{31}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *CancelDispatch) GetRouteId() uint64 {
@@ -3662,7 +3781,7 @@ type Ping struct {
 
 func (x *Ping) Reset() {
 	*x = Ping{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[32]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3674,7 +3793,7 @@ func (x *Ping) String() string {
 func (*Ping) ProtoMessage() {}
 
 func (x *Ping) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[32]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3687,7 +3806,7 @@ func (x *Ping) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Ping.ProtoReflect.Descriptor instead.
 func (*Ping) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{32}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *Ping) GetNonce() uint64 {
@@ -3706,7 +3825,7 @@ type Pong struct {
 
 func (x *Pong) Reset() {
 	*x = Pong{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[33]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3718,7 +3837,7 @@ func (x *Pong) String() string {
 func (*Pong) ProtoMessage() {}
 
 func (x *Pong) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[33]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3731,7 +3850,7 @@ func (x *Pong) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pong.ProtoReflect.Descriptor instead.
 func (*Pong) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{33}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *Pong) GetNonce() uint64 {
@@ -3762,7 +3881,7 @@ type AcquireControl struct {
 
 func (x *AcquireControl) Reset() {
 	*x = AcquireControl{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[34]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3774,7 +3893,7 @@ func (x *AcquireControl) String() string {
 func (*AcquireControl) ProtoMessage() {}
 
 func (x *AcquireControl) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[34]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3787,7 +3906,7 @@ func (x *AcquireControl) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AcquireControl.ProtoReflect.Descriptor instead.
 func (*AcquireControl) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{34}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *AcquireControl) GetRequestId() uint64 {
@@ -3832,7 +3951,7 @@ type AcquireControlResult struct {
 
 func (x *AcquireControlResult) Reset() {
 	*x = AcquireControlResult{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[35]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3844,7 +3963,7 @@ func (x *AcquireControlResult) String() string {
 func (*AcquireControlResult) ProtoMessage() {}
 
 func (x *AcquireControlResult) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[35]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3857,7 +3976,7 @@ func (x *AcquireControlResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AcquireControlResult.ProtoReflect.Descriptor instead.
 func (*AcquireControlResult) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{35}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *AcquireControlResult) GetRequestId() uint64 {
@@ -3930,7 +4049,7 @@ type AcquireControlSuccess struct {
 
 func (x *AcquireControlSuccess) Reset() {
 	*x = AcquireControlSuccess{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[36]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3942,7 +4061,7 @@ func (x *AcquireControlSuccess) String() string {
 func (*AcquireControlSuccess) ProtoMessage() {}
 
 func (x *AcquireControlSuccess) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[36]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3955,7 +4074,7 @@ func (x *AcquireControlSuccess) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AcquireControlSuccess.ProtoReflect.Descriptor instead.
 func (*AcquireControlSuccess) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{36}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *AcquireControlSuccess) GetLeaseId() uint64 {
@@ -3999,7 +4118,7 @@ type ReleaseControl struct {
 
 func (x *ReleaseControl) Reset() {
 	*x = ReleaseControl{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[37]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4011,7 +4130,7 @@ func (x *ReleaseControl) String() string {
 func (*ReleaseControl) ProtoMessage() {}
 
 func (x *ReleaseControl) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[37]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4024,7 +4143,7 @@ func (x *ReleaseControl) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReleaseControl.ProtoReflect.Descriptor instead.
 func (*ReleaseControl) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{37}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ReleaseControl) GetRequestId() uint64 {
@@ -4055,7 +4174,7 @@ type ReleaseControlResult struct {
 
 func (x *ReleaseControlResult) Reset() {
 	*x = ReleaseControlResult{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[38]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4067,7 +4186,7 @@ func (x *ReleaseControlResult) String() string {
 func (*ReleaseControlResult) ProtoMessage() {}
 
 func (x *ReleaseControlResult) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[38]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4080,7 +4199,7 @@ func (x *ReleaseControlResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReleaseControlResult.ProtoReflect.Descriptor instead.
 func (*ReleaseControlResult) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{38}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *ReleaseControlResult) GetRequestId() uint64 {
@@ -4143,7 +4262,7 @@ type ControlLeaseErrorDetail struct {
 
 func (x *ControlLeaseErrorDetail) Reset() {
 	*x = ControlLeaseErrorDetail{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[39]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4155,7 +4274,7 @@ func (x *ControlLeaseErrorDetail) String() string {
 func (*ControlLeaseErrorDetail) ProtoMessage() {}
 
 func (x *ControlLeaseErrorDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[39]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4168,7 +4287,7 @@ func (x *ControlLeaseErrorDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ControlLeaseErrorDetail.ProtoReflect.Descriptor instead.
 func (*ControlLeaseErrorDetail) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{39}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ControlLeaseErrorDetail) GetReason() ControlLeaseErrorReason {
@@ -4212,7 +4331,7 @@ type LaunchComponent struct {
 
 func (x *LaunchComponent) Reset() {
 	*x = LaunchComponent{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[40]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4224,7 +4343,7 @@ func (x *LaunchComponent) String() string {
 func (*LaunchComponent) ProtoMessage() {}
 
 func (x *LaunchComponent) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[40]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4237,7 +4356,7 @@ func (x *LaunchComponent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LaunchComponent.ProtoReflect.Descriptor instead.
 func (*LaunchComponent) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{40}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *LaunchComponent) GetRequestId() uint64 {
@@ -4275,7 +4394,7 @@ type LaunchComponentResult struct {
 
 func (x *LaunchComponentResult) Reset() {
 	*x = LaunchComponentResult{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[41]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4287,7 +4406,7 @@ func (x *LaunchComponentResult) String() string {
 func (*LaunchComponentResult) ProtoMessage() {}
 
 func (x *LaunchComponentResult) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[41]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4300,7 +4419,7 @@ func (x *LaunchComponentResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LaunchComponentResult.ProtoReflect.Descriptor instead.
 func (*LaunchComponentResult) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{41}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *LaunchComponentResult) GetRequestId() uint64 {
@@ -4366,7 +4485,7 @@ type LaunchComponentSuccess struct {
 
 func (x *LaunchComponentSuccess) Reset() {
 	*x = LaunchComponentSuccess{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[42]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4378,7 +4497,7 @@ func (x *LaunchComponentSuccess) String() string {
 func (*LaunchComponentSuccess) ProtoMessage() {}
 
 func (x *LaunchComponentSuccess) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[42]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4391,7 +4510,7 @@ func (x *LaunchComponentSuccess) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LaunchComponentSuccess.ProtoReflect.Descriptor instead.
 func (*LaunchComponentSuccess) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{42}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *LaunchComponentSuccess) GetAlreadyRunning() bool {
@@ -4411,7 +4530,7 @@ type LaunchComponentErrorDetail struct {
 
 func (x *LaunchComponentErrorDetail) Reset() {
 	*x = LaunchComponentErrorDetail{}
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[43]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4423,7 +4542,7 @@ func (x *LaunchComponentErrorDetail) String() string {
 func (*LaunchComponentErrorDetail) ProtoMessage() {}
 
 func (x *LaunchComponentErrorDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[43]
+	mi := &file_nervus_ipc_v1_envelope_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4436,7 +4555,7 @@ func (x *LaunchComponentErrorDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LaunchComponentErrorDetail.ProtoReflect.Descriptor instead.
 func (*LaunchComponentErrorDetail) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{43}
+	return file_nervus_ipc_v1_envelope_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *LaunchComponentErrorDetail) GetReason() LaunchComponentReason {
@@ -4633,7 +4752,7 @@ const file_nervus_ipc_v1_envelope_proto_rawDesc = "" +
 	"\adropped\x18\x06 \x01(\x04R\adropped\"~\n" +
 	"\x12SubscriptionClosed\x12'\n" +
 	"\x0fsubscription_id\x18\x01 \x01(\x04R\x0esubscriptionId\x12?\n" +
-	"\x06reason\x18\x02 \x01(\x0e2'.nervus.ipc.v1.SubscriptionClosedReasonR\x06reason\"\xd6\x01\n" +
+	"\x06reason\x18\x02 \x01(\x0e2'.nervus.ipc.v1.SubscriptionClosedReasonR\x06reason\"\xa4\x02\n" +
 	"\bDispatch\x12\x19\n" +
 	"\broute_id\x18\x01 \x01(\x04R\arouteId\x12\x1f\n" +
 	"\vendpoint_id\x18\x02 \x01(\x04R\n" +
@@ -4641,7 +4760,16 @@ const file_nervus_ipc_v1_envelope_proto_rawDesc = "" +
 	"\tmethod_id\x18\x03 \x01(\rR\bmethodId\x12!\n" +
 	"\fremaining_ms\x18\x04 \x01(\rR\vremainingMs\x12\x18\n" +
 	"\apayload\x18\x05 \x01(\fR\apayload\x124\n" +
-	"\x06caller\x18\x06 \x01(\v2\x1c.nervus.ipc.v1.CallerContextR\x06caller\"\xfa\x01\n" +
+	"\x06caller\x18\x06 \x01(\v2\x1c.nervus.ipc.v1.CallerContextR\x06caller\x12L\n" +
+	"\x11execution_context\x18\a \x01(\v2\x1f.nervus.ipc.v1.ExecutionContextR\x10executionContext\"\xc7\x02\n" +
+	"\x10ExecutionContext\x12\x19\n" +
+	"\blease_id\x18\x01 \x01(\x04R\aleaseId\x12I\n" +
+	"\x10controller_class\x18\x02 \x01(\x0e2\x1e.nervus.ipc.v1.ControllerClassR\x0fcontrollerClass\x12!\n" +
+	"\fmotion_epoch\x18\x03 \x01(\x04R\vmotionEpoch\x12%\n" +
+	"\x0edeadline_nanos\x18\x04 \x01(\x03R\rdeadlineNanos\x12)\n" +
+	"\x10command_sequence\x18\x05 \x01(\x04R\x0fcommandSequence\x12'\n" +
+	"\x0fresource_handle\x18\x06 \x01(\tR\x0eresourceHandle\x12/\n" +
+	"\x13resource_generation\x18\a \x01(\x04R\x12resourceGeneration\"\xfa\x01\n" +
 	"\rCallerContext\x12\x1d\n" +
 	"\n" +
 	"package_id\x18\x01 \x01(\tR\tpackageId\x12!\n" +
@@ -4773,7 +4901,7 @@ func file_nervus_ipc_v1_envelope_proto_rawDescGZIP() []byte {
 }
 
 var file_nervus_ipc_v1_envelope_proto_enumTypes = make([]protoimpl.EnumInfo, 9)
-var file_nervus_ipc_v1_envelope_proto_msgTypes = make([]protoimpl.MessageInfo, 44)
+var file_nervus_ipc_v1_envelope_proto_msgTypes = make([]protoimpl.MessageInfo, 45)
 var file_nervus_ipc_v1_envelope_proto_goTypes = []any{
 	(EndpointDiedReason)(0),            // 0: nervus.ipc.v1.EndpointDiedReason
 	(EndpointRevokedReason)(0),         // 1: nervus.ipc.v1.EndpointRevokedReason
@@ -4813,23 +4941,24 @@ var file_nervus_ipc_v1_envelope_proto_goTypes = []any{
 	(*Event)(nil),                      // 35: nervus.ipc.v1.Event
 	(*SubscriptionClosed)(nil),         // 36: nervus.ipc.v1.SubscriptionClosed
 	(*Dispatch)(nil),                   // 37: nervus.ipc.v1.Dispatch
-	(*CallerContext)(nil),              // 38: nervus.ipc.v1.CallerContext
-	(*DispatchResult)(nil),             // 39: nervus.ipc.v1.DispatchResult
-	(*CancelDispatch)(nil),             // 40: nervus.ipc.v1.CancelDispatch
-	(*Ping)(nil),                       // 41: nervus.ipc.v1.Ping
-	(*Pong)(nil),                       // 42: nervus.ipc.v1.Pong
-	(*AcquireControl)(nil),             // 43: nervus.ipc.v1.AcquireControl
-	(*AcquireControlResult)(nil),       // 44: nervus.ipc.v1.AcquireControlResult
-	(*AcquireControlSuccess)(nil),      // 45: nervus.ipc.v1.AcquireControlSuccess
-	(*ReleaseControl)(nil),             // 46: nervus.ipc.v1.ReleaseControl
-	(*ReleaseControlResult)(nil),       // 47: nervus.ipc.v1.ReleaseControlResult
-	(*ControlLeaseErrorDetail)(nil),    // 48: nervus.ipc.v1.ControlLeaseErrorDetail
-	(*LaunchComponent)(nil),            // 49: nervus.ipc.v1.LaunchComponent
-	(*LaunchComponentResult)(nil),      // 50: nervus.ipc.v1.LaunchComponentResult
-	(*LaunchComponentSuccess)(nil),     // 51: nervus.ipc.v1.LaunchComponentSuccess
-	(*LaunchComponentErrorDetail)(nil), // 52: nervus.ipc.v1.LaunchComponentErrorDetail
-	(*Failure)(nil),                    // 53: nervus.ipc.v1.Failure
-	(*Success)(nil),                    // 54: nervus.ipc.v1.Success
+	(*ExecutionContext)(nil),           // 38: nervus.ipc.v1.ExecutionContext
+	(*CallerContext)(nil),              // 39: nervus.ipc.v1.CallerContext
+	(*DispatchResult)(nil),             // 40: nervus.ipc.v1.DispatchResult
+	(*CancelDispatch)(nil),             // 41: nervus.ipc.v1.CancelDispatch
+	(*Ping)(nil),                       // 42: nervus.ipc.v1.Ping
+	(*Pong)(nil),                       // 43: nervus.ipc.v1.Pong
+	(*AcquireControl)(nil),             // 44: nervus.ipc.v1.AcquireControl
+	(*AcquireControlResult)(nil),       // 45: nervus.ipc.v1.AcquireControlResult
+	(*AcquireControlSuccess)(nil),      // 46: nervus.ipc.v1.AcquireControlSuccess
+	(*ReleaseControl)(nil),             // 47: nervus.ipc.v1.ReleaseControl
+	(*ReleaseControlResult)(nil),       // 48: nervus.ipc.v1.ReleaseControlResult
+	(*ControlLeaseErrorDetail)(nil),    // 49: nervus.ipc.v1.ControlLeaseErrorDetail
+	(*LaunchComponent)(nil),            // 50: nervus.ipc.v1.LaunchComponent
+	(*LaunchComponentResult)(nil),      // 51: nervus.ipc.v1.LaunchComponentResult
+	(*LaunchComponentSuccess)(nil),     // 52: nervus.ipc.v1.LaunchComponentSuccess
+	(*LaunchComponentErrorDetail)(nil), // 53: nervus.ipc.v1.LaunchComponentErrorDetail
+	(*Failure)(nil),                    // 54: nervus.ipc.v1.Failure
+	(*Success)(nil),                    // 55: nervus.ipc.v1.Success
 }
 var file_nervus_ipc_v1_envelope_proto_depIdxs = []int32{
 	10, // 0: nervus.ipc.v1.Envelope.hello:type_name -> nervus.ipc.v1.Hello
@@ -4852,56 +4981,58 @@ var file_nervus_ipc_v1_envelope_proto_depIdxs = []int32{
 	33, // 17: nervus.ipc.v1.Envelope.unsubscribe_result:type_name -> nervus.ipc.v1.UnsubscribeResult
 	36, // 18: nervus.ipc.v1.Envelope.subscription_closed:type_name -> nervus.ipc.v1.SubscriptionClosed
 	37, // 19: nervus.ipc.v1.Envelope.dispatch:type_name -> nervus.ipc.v1.Dispatch
-	39, // 20: nervus.ipc.v1.Envelope.dispatch_result:type_name -> nervus.ipc.v1.DispatchResult
-	40, // 21: nervus.ipc.v1.Envelope.cancel_dispatch:type_name -> nervus.ipc.v1.CancelDispatch
-	41, // 22: nervus.ipc.v1.Envelope.ping:type_name -> nervus.ipc.v1.Ping
-	42, // 23: nervus.ipc.v1.Envelope.pong:type_name -> nervus.ipc.v1.Pong
-	43, // 24: nervus.ipc.v1.Envelope.acquire_control:type_name -> nervus.ipc.v1.AcquireControl
-	44, // 25: nervus.ipc.v1.Envelope.acquire_control_result:type_name -> nervus.ipc.v1.AcquireControlResult
-	46, // 26: nervus.ipc.v1.Envelope.release_control:type_name -> nervus.ipc.v1.ReleaseControl
-	47, // 27: nervus.ipc.v1.Envelope.release_control_result:type_name -> nervus.ipc.v1.ReleaseControlResult
-	49, // 28: nervus.ipc.v1.Envelope.launch_component:type_name -> nervus.ipc.v1.LaunchComponent
-	50, // 29: nervus.ipc.v1.Envelope.launch_component_result:type_name -> nervus.ipc.v1.LaunchComponentResult
+	40, // 20: nervus.ipc.v1.Envelope.dispatch_result:type_name -> nervus.ipc.v1.DispatchResult
+	41, // 21: nervus.ipc.v1.Envelope.cancel_dispatch:type_name -> nervus.ipc.v1.CancelDispatch
+	42, // 22: nervus.ipc.v1.Envelope.ping:type_name -> nervus.ipc.v1.Ping
+	43, // 23: nervus.ipc.v1.Envelope.pong:type_name -> nervus.ipc.v1.Pong
+	44, // 24: nervus.ipc.v1.Envelope.acquire_control:type_name -> nervus.ipc.v1.AcquireControl
+	45, // 25: nervus.ipc.v1.Envelope.acquire_control_result:type_name -> nervus.ipc.v1.AcquireControlResult
+	47, // 26: nervus.ipc.v1.Envelope.release_control:type_name -> nervus.ipc.v1.ReleaseControl
+	48, // 27: nervus.ipc.v1.Envelope.release_control_result:type_name -> nervus.ipc.v1.ReleaseControlResult
+	50, // 28: nervus.ipc.v1.Envelope.launch_component:type_name -> nervus.ipc.v1.LaunchComponent
+	51, // 29: nervus.ipc.v1.Envelope.launch_component_result:type_name -> nervus.ipc.v1.LaunchComponentResult
 	12, // 30: nervus.ipc.v1.HelloAck.success:type_name -> nervus.ipc.v1.HelloAckSuccess
-	53, // 31: nervus.ipc.v1.HelloAck.failure:type_name -> nervus.ipc.v1.Failure
+	54, // 31: nervus.ipc.v1.HelloAck.failure:type_name -> nervus.ipc.v1.Failure
 	13, // 32: nervus.ipc.v1.HelloAckSuccess.limits:type_name -> nervus.ipc.v1.ConnectionLimits
 	15, // 33: nervus.ipc.v1.ResolveEndpoint.selector:type_name -> nervus.ipc.v1.ResourceSelector
 	17, // 34: nervus.ipc.v1.ResolveEndpointResult.success:type_name -> nervus.ipc.v1.ResolveEndpointSuccess
-	53, // 35: nervus.ipc.v1.ResolveEndpointResult.failure:type_name -> nervus.ipc.v1.Failure
+	54, // 35: nervus.ipc.v1.ResolveEndpointResult.failure:type_name -> nervus.ipc.v1.Failure
 	20, // 36: nervus.ipc.v1.RegisterEndpointResult.success:type_name -> nervus.ipc.v1.RegisterEndpointSuccess
-	53, // 37: nervus.ipc.v1.RegisterEndpointResult.failure:type_name -> nervus.ipc.v1.Failure
+	54, // 37: nervus.ipc.v1.RegisterEndpointResult.failure:type_name -> nervus.ipc.v1.Failure
 	23, // 38: nervus.ipc.v1.UnregisterEndpointResult.success:type_name -> nervus.ipc.v1.UnregisterEndpointSuccess
-	53, // 39: nervus.ipc.v1.UnregisterEndpointResult.failure:type_name -> nervus.ipc.v1.Failure
+	54, // 39: nervus.ipc.v1.UnregisterEndpointResult.failure:type_name -> nervus.ipc.v1.Failure
 	0,  // 40: nervus.ipc.v1.EndpointDied.reason:type_name -> nervus.ipc.v1.EndpointDiedReason
 	1,  // 41: nervus.ipc.v1.EndpointRevoked.reason:type_name -> nervus.ipc.v1.EndpointRevokedReason
-	54, // 42: nervus.ipc.v1.Response.success:type_name -> nervus.ipc.v1.Success
-	53, // 43: nervus.ipc.v1.Response.failure:type_name -> nervus.ipc.v1.Failure
+	55, // 42: nervus.ipc.v1.Response.success:type_name -> nervus.ipc.v1.Success
+	54, // 43: nervus.ipc.v1.Response.failure:type_name -> nervus.ipc.v1.Failure
 	31, // 44: nervus.ipc.v1.SubscribeResult.success:type_name -> nervus.ipc.v1.SubscribeSuccess
-	53, // 45: nervus.ipc.v1.SubscribeResult.failure:type_name -> nervus.ipc.v1.Failure
+	54, // 45: nervus.ipc.v1.SubscribeResult.failure:type_name -> nervus.ipc.v1.Failure
 	2,  // 46: nervus.ipc.v1.SubscribeSuccess.delivery_class:type_name -> nervus.ipc.v1.DeliveryClass
 	34, // 47: nervus.ipc.v1.UnsubscribeResult.success:type_name -> nervus.ipc.v1.UnsubscribeSuccess
-	53, // 48: nervus.ipc.v1.UnsubscribeResult.failure:type_name -> nervus.ipc.v1.Failure
+	54, // 48: nervus.ipc.v1.UnsubscribeResult.failure:type_name -> nervus.ipc.v1.Failure
 	3,  // 49: nervus.ipc.v1.SubscriptionClosed.reason:type_name -> nervus.ipc.v1.SubscriptionClosedReason
-	38, // 50: nervus.ipc.v1.Dispatch.caller:type_name -> nervus.ipc.v1.CallerContext
-	4,  // 51: nervus.ipc.v1.CallerContext.trust_profile:type_name -> nervus.ipc.v1.TrustProfile
-	54, // 52: nervus.ipc.v1.DispatchResult.success:type_name -> nervus.ipc.v1.Success
-	53, // 53: nervus.ipc.v1.DispatchResult.failure:type_name -> nervus.ipc.v1.Failure
-	5,  // 54: nervus.ipc.v1.CancelDispatch.reason:type_name -> nervus.ipc.v1.CancelDispatchReason
-	6,  // 55: nervus.ipc.v1.AcquireControl.controller_class:type_name -> nervus.ipc.v1.ControllerClass
-	15, // 56: nervus.ipc.v1.AcquireControl.resource:type_name -> nervus.ipc.v1.ResourceSelector
-	45, // 57: nervus.ipc.v1.AcquireControlResult.success:type_name -> nervus.ipc.v1.AcquireControlSuccess
-	53, // 58: nervus.ipc.v1.AcquireControlResult.failure:type_name -> nervus.ipc.v1.Failure
-	54, // 59: nervus.ipc.v1.ReleaseControlResult.success:type_name -> nervus.ipc.v1.Success
-	53, // 60: nervus.ipc.v1.ReleaseControlResult.failure:type_name -> nervus.ipc.v1.Failure
-	7,  // 61: nervus.ipc.v1.ControlLeaseErrorDetail.reason:type_name -> nervus.ipc.v1.ControlLeaseErrorReason
-	51, // 62: nervus.ipc.v1.LaunchComponentResult.success:type_name -> nervus.ipc.v1.LaunchComponentSuccess
-	53, // 63: nervus.ipc.v1.LaunchComponentResult.failure:type_name -> nervus.ipc.v1.Failure
-	8,  // 64: nervus.ipc.v1.LaunchComponentErrorDetail.reason:type_name -> nervus.ipc.v1.LaunchComponentReason
-	65, // [65:65] is the sub-list for method output_type
-	65, // [65:65] is the sub-list for method input_type
-	65, // [65:65] is the sub-list for extension type_name
-	65, // [65:65] is the sub-list for extension extendee
-	0,  // [0:65] is the sub-list for field type_name
+	39, // 50: nervus.ipc.v1.Dispatch.caller:type_name -> nervus.ipc.v1.CallerContext
+	38, // 51: nervus.ipc.v1.Dispatch.execution_context:type_name -> nervus.ipc.v1.ExecutionContext
+	6,  // 52: nervus.ipc.v1.ExecutionContext.controller_class:type_name -> nervus.ipc.v1.ControllerClass
+	4,  // 53: nervus.ipc.v1.CallerContext.trust_profile:type_name -> nervus.ipc.v1.TrustProfile
+	55, // 54: nervus.ipc.v1.DispatchResult.success:type_name -> nervus.ipc.v1.Success
+	54, // 55: nervus.ipc.v1.DispatchResult.failure:type_name -> nervus.ipc.v1.Failure
+	5,  // 56: nervus.ipc.v1.CancelDispatch.reason:type_name -> nervus.ipc.v1.CancelDispatchReason
+	6,  // 57: nervus.ipc.v1.AcquireControl.controller_class:type_name -> nervus.ipc.v1.ControllerClass
+	15, // 58: nervus.ipc.v1.AcquireControl.resource:type_name -> nervus.ipc.v1.ResourceSelector
+	46, // 59: nervus.ipc.v1.AcquireControlResult.success:type_name -> nervus.ipc.v1.AcquireControlSuccess
+	54, // 60: nervus.ipc.v1.AcquireControlResult.failure:type_name -> nervus.ipc.v1.Failure
+	55, // 61: nervus.ipc.v1.ReleaseControlResult.success:type_name -> nervus.ipc.v1.Success
+	54, // 62: nervus.ipc.v1.ReleaseControlResult.failure:type_name -> nervus.ipc.v1.Failure
+	7,  // 63: nervus.ipc.v1.ControlLeaseErrorDetail.reason:type_name -> nervus.ipc.v1.ControlLeaseErrorReason
+	52, // 64: nervus.ipc.v1.LaunchComponentResult.success:type_name -> nervus.ipc.v1.LaunchComponentSuccess
+	54, // 65: nervus.ipc.v1.LaunchComponentResult.failure:type_name -> nervus.ipc.v1.Failure
+	8,  // 66: nervus.ipc.v1.LaunchComponentErrorDetail.reason:type_name -> nervus.ipc.v1.LaunchComponentReason
+	67, // [67:67] is the sub-list for method output_type
+	67, // [67:67] is the sub-list for method input_type
+	67, // [67:67] is the sub-list for extension type_name
+	67, // [67:67] is the sub-list for extension extendee
+	0,  // [0:67] is the sub-list for field type_name
 }
 
 func init() { file_nervus_ipc_v1_envelope_proto_init() }
@@ -4970,19 +5101,19 @@ func file_nervus_ipc_v1_envelope_proto_init() {
 		(*UnsubscribeResult_Success)(nil),
 		(*UnsubscribeResult_Failure)(nil),
 	}
-	file_nervus_ipc_v1_envelope_proto_msgTypes[30].OneofWrappers = []any{
+	file_nervus_ipc_v1_envelope_proto_msgTypes[31].OneofWrappers = []any{
 		(*DispatchResult_Success)(nil),
 		(*DispatchResult_Failure)(nil),
 	}
-	file_nervus_ipc_v1_envelope_proto_msgTypes[35].OneofWrappers = []any{
+	file_nervus_ipc_v1_envelope_proto_msgTypes[36].OneofWrappers = []any{
 		(*AcquireControlResult_Success)(nil),
 		(*AcquireControlResult_Failure)(nil),
 	}
-	file_nervus_ipc_v1_envelope_proto_msgTypes[38].OneofWrappers = []any{
+	file_nervus_ipc_v1_envelope_proto_msgTypes[39].OneofWrappers = []any{
 		(*ReleaseControlResult_Success)(nil),
 		(*ReleaseControlResult_Failure)(nil),
 	}
-	file_nervus_ipc_v1_envelope_proto_msgTypes[41].OneofWrappers = []any{
+	file_nervus_ipc_v1_envelope_proto_msgTypes[42].OneofWrappers = []any{
 		(*LaunchComponentResult_Success)(nil),
 		(*LaunchComponentResult_Failure)(nil),
 	}
@@ -4992,7 +5123,7 @@ func file_nervus_ipc_v1_envelope_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nervus_ipc_v1_envelope_proto_rawDesc), len(file_nervus_ipc_v1_envelope_proto_rawDesc)),
 			NumEnums:      9,
-			NumMessages:   44,
+			NumMessages:   45,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

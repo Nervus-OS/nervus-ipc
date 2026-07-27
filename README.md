@@ -42,11 +42,15 @@ JVM 侧的手写 SDK **不在本仓库**，在 `nervus-app-sdk`（`com.nervus.sd
 | Cancel | 32 | ❌ | 调用方发来仍会关连接 |
 | Subscribe / Unsubscribe | 40, 42 | ❌ | 收到即关连接 |
 | SubscribeResult / UnsubscribeResult / Event / SubscriptionClosed | 41, 43-45 | ❌ | nervud 不会发出 |
-| Dispatch / DispatchResult | 50-51 | ✅ | nervud ↔ Service |
+| Dispatch / DispatchResult | 50-51 | ✅ | nervud ↔ Service；protocol 1.1 附带 `ExecutionContext` |
 | CancelDispatch | 52 | ⚠️ | deadline / 调用方断线会发；显式 Cancel 尚未接线。Go ServiceHost 已支持 |
 | Ping / Pong | 60-61 | ✅ | |
 | AcquireControl / ReleaseControl + Result | 70-73 | ✅ | 已接到 `internal/control` |
 | LaunchComponent / Result | 80-81 | ✅ | |
+
+Go `ServiceHost` 从 protocol 1.1 起要求每个 Dispatch 都有内核生成的
+`ExecutionContext`。nervud 对 minor 0 Provider 只保留不需要控制租约的兼容调用；
+控制/运动方法一律 fail closed，不会让旧 Provider 忽略新字段后继续执行。
 
 非 Envelope 的 proto：
 

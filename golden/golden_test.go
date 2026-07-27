@@ -199,6 +199,24 @@ func TestGoldenDecode(t *testing.T) {
 		}
 	}
 
+	// Dispatch ExecutionContext：可信租约证明字段必须完整跨语言保留
+	{
+		var env ipcv1.Envelope
+		if err := proto.Unmarshal(read("dispatch_control_execution_context"), &env); err != nil {
+			t.Fatal(err)
+		}
+		d := env.GetDispatch()
+		ec := d.GetExecutionContext()
+		if env.GetProtocolMinor() != 1 || d.GetRouteId() != 15 ||
+			ec.GetLeaseId() != 0xABCD ||
+			ec.GetControllerClass() != ipcv1.ControllerClass_CONTROLLER_CLASS_HUMAN ||
+			ec.GetMotionEpoch() != 3 || ec.GetDeadlineNanos() != 1_234_567_890 ||
+			ec.GetCommandSequence() != 17 || ec.GetResourceHandle() != "base.main" ||
+			ec.GetResourceGeneration() != 4 {
+			t.Errorf("dispatch execution context decoded wrong: envelope=%+v context=%+v", &env, ec)
+		}
+	}
+
 	// InterfaceSchemaBundle
 	{
 		var b ipcv1.InterfaceSchemaBundle

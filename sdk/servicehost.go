@@ -52,6 +52,12 @@ type CallContext struct {
 	// fail-closed 复核（「我这个方法要 X 权限，投影里没有 X，拒绝」），不是让你
 	// 重新裁决。
 	Caller *ipcv1.CallerContext
+
+	// Execution 是 nervud 在方法门禁后冻结的可信执行快照。需要控制租约的方法
+	// 必须在真正触碰设备前使用其中的 resource generation、motion epoch、命令
+	// 序号和绝对 deadline 做最后一道陈旧检查。LeaseId 只用于关联，不能当作可
+	// 转让的 bearer capability。
+	Execution *ipcv1.ExecutionContext
 }
 
 // Handler 处理一次方法调用。
@@ -119,6 +125,10 @@ func NewServiceHost(cfg Config) (*ServiceHost, error) {
 	if err := co.handshake(cfg.SDKName, cfg.SDKVersion, cfg.ComponentID, cfg.HandshakeTimeout); err != nil {
 		co.close()
 		return nil, err
+	}
+	if co.negMinor < executionContextProtocolMinor {
+		co.close()
+		return nil, fmt.Errorf("%w: ServiceHost requires protocol 1.1 execution context", ErrProtocol)
 	}
 
 	h := &ServiceHost{
@@ -640,7 +650,7 @@ func (h *ServiceHost) deliverControl(id uint64, env *ipcv1.Envelope) {
 }
 
 func (h *ServiceHost) startDispatch(d *ipcv1.Dispatch) bool {
-	if d == nil || d.GetRouteId() == 0 {
+	if d == nil || d.GetRouteId() == 0 || !validExecutionContext(d.GetExecutionContext()) {
 		return false
 	}
 	// remaining_ms 是剩余预算。为 0 时不设 deadline——协议里 0 表示「用默认值」
@@ -712,6 +722,7 @@ func (h *ServiceHost) dispatch(d *ipcv1.Dispatch, ctx context.Context, call *inf
 		RouteID:    routeID,
 		EndpointID: d.GetEndpointId(),
 		Caller:     d.GetCaller(),
+		Execution:  d.GetExecutionContext(),
 	}
 
 	payload, err := h.safeCall(fn, cc, d.GetPayload())
@@ -747,6 +758,30 @@ func (h *ServiceHost) dispatch(d *ipcv1.Dispatch, ctx context.Context, call *inf
 	}}
 	if err := h.co.writeEnvelope(env); err != nil {
 		h.log.Debug("sdk: send DispatchResult failed", "route_id", routeID, "err", err)
+	}
+}
+
+func validExecutionContext(ec *ipcv1.ExecutionContext) bool {
+	if ec == nil || ec.GetDeadlineNanos() <= 0 {
+		return false
+	}
+	hasResource := ec.GetResourceHandle() != ""
+	if hasResource != (ec.GetResourceGeneration() != 0) {
+		return false
+	}
+	if ec.GetLeaseId() == 0 {
+		return ec.GetControllerClass() == ipcv1.ControllerClass_CONTROLLER_CLASS_UNSPECIFIED &&
+			ec.GetMotionEpoch() == 0 && ec.GetCommandSequence() == 0
+	}
+	if !hasResource || ec.GetMotionEpoch() == 0 || ec.GetCommandSequence() == 0 {
+		return false
+	}
+	switch ec.GetControllerClass() {
+	case ipcv1.ControllerClass_CONTROLLER_CLASS_HUMAN,
+		ipcv1.ControllerClass_CONTROLLER_CLASS_AI:
+		return true
+	default:
+		return false
 	}
 }
 

@@ -169,6 +169,50 @@ private static final long serialVersionUID = 0L;
     return caller_ == null ? io.github.nervusos.ipc.v1.CallerContext.getDefaultInstance() : caller_;
   }
 
+  public static final int EXECUTION_CONTEXT_FIELD_NUMBER = 7;
+  private io.github.nervusos.ipc.v1.ExecutionContext executionContext_;
+  /**
+   * <pre>
+   * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+   * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+   * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+   * @return Whether the executionContext field is set.
+   */
+  @java.lang.Override
+  public boolean hasExecutionContext() {
+    return ((bitField0_ & 0x00000002) != 0);
+  }
+  /**
+   * <pre>
+   * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+   * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+   * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+   * @return The executionContext.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.ExecutionContext getExecutionContext() {
+    return executionContext_ == null ? io.github.nervusos.ipc.v1.ExecutionContext.getDefaultInstance() : executionContext_;
+  }
+  /**
+   * <pre>
+   * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+   * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+   * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.ExecutionContextOrBuilder getExecutionContextOrBuilder() {
+    return executionContext_ == null ? io.github.nervusos.ipc.v1.ExecutionContext.getDefaultInstance() : executionContext_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -200,6 +244,9 @@ private static final long serialVersionUID = 0L;
     }
     if (((bitField0_ & 0x00000001) != 0)) {
       output.writeMessage(6, getCaller());
+    }
+    if (((bitField0_ & 0x00000002) != 0)) {
+      output.writeMessage(7, getExecutionContext());
     }
     getUnknownFields().writeTo(output);
   }
@@ -234,6 +281,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(6, getCaller());
     }
+    if (((bitField0_ & 0x00000002) != 0)) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(7, getExecutionContext());
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -264,6 +315,11 @@ private static final long serialVersionUID = 0L;
       if (!getCaller()
           .equals(other.getCaller())) return false;
     }
+    if (hasExecutionContext() != other.hasExecutionContext()) return false;
+    if (hasExecutionContext()) {
+      if (!getExecutionContext()
+          .equals(other.getExecutionContext())) return false;
+    }
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -290,6 +346,10 @@ private static final long serialVersionUID = 0L;
     if (hasCaller()) {
       hash = (37 * hash) + CALLER_FIELD_NUMBER;
       hash = (53 * hash) + getCaller().hashCode();
+    }
+    if (hasExecutionContext()) {
+      hash = (37 * hash) + EXECUTION_CONTEXT_FIELD_NUMBER;
+      hash = (53 * hash) + getExecutionContext().hashCode();
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -430,6 +490,7 @@ private static final long serialVersionUID = 0L;
       if (com.google.protobuf.GeneratedMessage
               .alwaysUseFieldBuilders) {
         getCallerFieldBuilder();
+        getExecutionContextFieldBuilder();
       }
     }
     @java.lang.Override
@@ -445,6 +506,11 @@ private static final long serialVersionUID = 0L;
       if (callerBuilder_ != null) {
         callerBuilder_.dispose();
         callerBuilder_ = null;
+      }
+      executionContext_ = null;
+      if (executionContextBuilder_ != null) {
+        executionContextBuilder_.dispose();
+        executionContextBuilder_ = null;
       }
       return this;
     }
@@ -501,6 +567,12 @@ private static final long serialVersionUID = 0L;
             : callerBuilder_.build();
         to_bitField0_ |= 0x00000001;
       }
+      if (((from_bitField0_ & 0x00000040) != 0)) {
+        result.executionContext_ = executionContextBuilder_ == null
+            ? executionContext_
+            : executionContextBuilder_.build();
+        to_bitField0_ |= 0x00000002;
+      }
       result.bitField0_ |= to_bitField0_;
     }
 
@@ -533,6 +605,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasCaller()) {
         mergeCaller(other.getCaller());
+      }
+      if (other.hasExecutionContext()) {
+        mergeExecutionContext(other.getExecutionContext());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -592,6 +667,13 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000020;
               break;
             } // case 50
+            case 58: {
+              input.readMessage(
+                  getExecutionContextFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00000040;
+              break;
+            } // case 58
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -996,6 +1078,181 @@ private static final long serialVersionUID = 0L;
         caller_ = null;
       }
       return callerBuilder_;
+    }
+
+    private io.github.nervusos.ipc.v1.ExecutionContext executionContext_;
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.ExecutionContext, io.github.nervusos.ipc.v1.ExecutionContext.Builder, io.github.nervusos.ipc.v1.ExecutionContextOrBuilder> executionContextBuilder_;
+    /**
+     * <pre>
+     * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+     * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+     * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+     * @return Whether the executionContext field is set.
+     */
+    public boolean hasExecutionContext() {
+      return ((bitField0_ & 0x00000040) != 0);
+    }
+    /**
+     * <pre>
+     * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+     * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+     * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+     * @return The executionContext.
+     */
+    public io.github.nervusos.ipc.v1.ExecutionContext getExecutionContext() {
+      if (executionContextBuilder_ == null) {
+        return executionContext_ == null ? io.github.nervusos.ipc.v1.ExecutionContext.getDefaultInstance() : executionContext_;
+      } else {
+        return executionContextBuilder_.getMessage();
+      }
+    }
+    /**
+     * <pre>
+     * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+     * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+     * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+     */
+    public Builder setExecutionContext(io.github.nervusos.ipc.v1.ExecutionContext value) {
+      if (executionContextBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        executionContext_ = value;
+      } else {
+        executionContextBuilder_.setMessage(value);
+      }
+      bitField0_ |= 0x00000040;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+     * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+     * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+     */
+    public Builder setExecutionContext(
+        io.github.nervusos.ipc.v1.ExecutionContext.Builder builderForValue) {
+      if (executionContextBuilder_ == null) {
+        executionContext_ = builderForValue.build();
+      } else {
+        executionContextBuilder_.setMessage(builderForValue.build());
+      }
+      bitField0_ |= 0x00000040;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+     * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+     * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+     */
+    public Builder mergeExecutionContext(io.github.nervusos.ipc.v1.ExecutionContext value) {
+      if (executionContextBuilder_ == null) {
+        if (((bitField0_ & 0x00000040) != 0) &&
+          executionContext_ != null &&
+          executionContext_ != io.github.nervusos.ipc.v1.ExecutionContext.getDefaultInstance()) {
+          getExecutionContextBuilder().mergeFrom(value);
+        } else {
+          executionContext_ = value;
+        }
+      } else {
+        executionContextBuilder_.mergeFrom(value);
+      }
+      if (executionContext_ != null) {
+        bitField0_ |= 0x00000040;
+        onChanged();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+     * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+     * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+     */
+    public Builder clearExecutionContext() {
+      bitField0_ = (bitField0_ & ~0x00000040);
+      executionContext_ = null;
+      if (executionContextBuilder_ != null) {
+        executionContextBuilder_.dispose();
+        executionContextBuilder_ = null;
+      }
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+     * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+     * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+     */
+    public io.github.nervusos.ipc.v1.ExecutionContext.Builder getExecutionContextBuilder() {
+      bitField0_ |= 0x00000040;
+      onChanged();
+      return getExecutionContextFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+     * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+     * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+     */
+    public io.github.nervusos.ipc.v1.ExecutionContextOrBuilder getExecutionContextOrBuilder() {
+      if (executionContextBuilder_ != null) {
+        return executionContextBuilder_.getMessageOrBuilder();
+      } else {
+        return executionContext_ == null ?
+            io.github.nervusos.ipc.v1.ExecutionContext.getDefaultInstance() : executionContext_;
+      }
+    }
+    /**
+     * <pre>
+     * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+     * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+     * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.ExecutionContext, io.github.nervusos.ipc.v1.ExecutionContext.Builder, io.github.nervusos.ipc.v1.ExecutionContextOrBuilder> 
+        getExecutionContextFieldBuilder() {
+      if (executionContextBuilder_ == null) {
+        executionContextBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.ExecutionContext, io.github.nervusos.ipc.v1.ExecutionContext.Builder, io.github.nervusos.ipc.v1.ExecutionContextOrBuilder>(
+                getExecutionContext(),
+                getParentForChildren(),
+                isClean());
+        executionContext_ = null;
+      }
+      return executionContextBuilder_;
     }
 
     // @@protoc_insertion_point(builder_scope:nervus.ipc.v1.Dispatch)

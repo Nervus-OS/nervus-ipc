@@ -28,9 +28,10 @@ const DefaultSockPath = "/run/nervus/nervud.sock"
 // 与 nervud 的 internal/ipc 常量对齐：只实现 major 1；minor 只增不减，握手时
 // 由服务端在客户端声明的范围内取交集。
 const (
-	protocolMajorMin = 1
-	protocolMajorMax = 1
-	protocolMinorMax = 0
+	protocolMajorMin              = 1
+	protocolMajorMax              = 1
+	protocolMinorMax              = 1
+	executionContextProtocolMinor = 1
 )
 
 // conn 是一条已建立（但未必已握手）的控制面连接。

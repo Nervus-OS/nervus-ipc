@@ -653,6 +653,42 @@ message Dispatch {
   // 由 nervud 附加的可信调用者上下文。Service 可以读，但不能用它绕过已经
   // 生效的 nervud Policy，更不能自行创造身份或权限裁决（§10.2）。
   CallerContext caller = 6;
+
+  // 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+  // Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+  // 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+  ExecutionContext execution_context = 7;
+}
+
+// ExecutionContext 是一次 Dispatch 的不可变执行快照，由 nervud 生成。
+//
+// 它解决的是「内核检查通过后，命令在 Provider 队列里变旧」的问题：Provider
+// 可以在真正触碰设备前按 resource generation、motion epoch、command sequence
+// 和绝对 deadline 再做一次 fail-closed 检查。它不是可转让的 capability；尤其
+// lease_id 只用于把本次执行与调用方连接上的租约关联起来。
+message ExecutionContext {
+  // 需要 ControlLease 的方法恒非 0；普通方法为 0。
+  uint64 lease_id = 1;
+
+  // 从有效租约投影。无租约时必须为 UNSPECIFIED。当前 AcquireControl 的 class
+  // 仍是调用方选择并经 Policy 约束的值，不等同于独立的「人在场」证明。
+  ControllerClass controller_class = 2;
+
+  // 租约签发时的撤销世代。需要 ControlLease 的方法恒非 0；普通方法为 0。
+  uint64 motion_epoch = 3;
+
+  // 本次执行的绝对截止时间，位于 Linux CLOCK_MONOTONIC 纳秒时钟域。
+  // 有租约时取 Request deadline 与 lease deadline 的较早者；恒大于 0。
+  int64 deadline_nanos = 4;
+
+  // nervud 签发的命令序号。需要 ControlLease 的方法恒非 0，并且对同一
+  // (resource_handle, resource_generation) 单调递增；普通方法为 0。
+  uint64 command_sequence = 5;
+
+  // 本次路由绑定的公开 Resource 与 catalog generation。无 Resource 的接口允许
+  // 两者同时为空/0；禁止只设置其中一个。
+  string resource_handle = 6;
+  uint64 resource_generation = 7;
 }
 
 // CallerContext 是 ConnectionContext 中可以外传的那一部分（§10.2）。

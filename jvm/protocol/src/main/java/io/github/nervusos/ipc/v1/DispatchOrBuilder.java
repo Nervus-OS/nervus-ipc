@@ -89,4 +89,37 @@ public interface DispatchOrBuilder extends
    * <code>.nervus.ipc.v1.CallerContext caller = 6 [json_name = "caller"];</code>
    */
   io.github.nervusos.ipc.v1.CallerContextOrBuilder getCallerOrBuilder();
+
+  /**
+   * <pre>
+   * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+   * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+   * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+   * @return Whether the executionContext field is set.
+   */
+  boolean hasExecutionContext();
+  /**
+   * <pre>
+   * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+   * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+   * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+   * @return The executionContext.
+   */
+  io.github.nervusos.ipc.v1.ExecutionContext getExecutionContext();
+  /**
+   * <pre>
+   * 由 nervud 在完成方法门禁后附加的执行授权快照。protocol minor 1 起每个
+   * Dispatch 都必须携带；普通调用只有 deadline/resource 投影，需要控制租约的
+   * 调用还会携带完整 lease/epoch/sequence。Provider 不得从 payload 自行补造。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ExecutionContext execution_context = 7 [json_name = "executionContext"];</code>
+   */
+  io.github.nervusos.ipc.v1.ExecutionContextOrBuilder getExecutionContextOrBuilder();
 }

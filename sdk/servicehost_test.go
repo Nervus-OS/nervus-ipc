@@ -24,6 +24,10 @@ func mustMarshal(t *testing.T, m proto.Message) []byte {
 
 func contains(s, sub string) bool { return strings.Contains(s, sub) }
 
+func testExecutionContext() *ipcv1.ExecutionContext {
+	return &ipcv1.ExecutionContext{DeadlineNanos: 1}
+}
+
 func TestServiceHost_RegisterEndpoint(t *testing.T) {
 	f := startFakeNervud(t)
 	f.setHandler(autoHandshake(func(c net.Conn, env *ipcv1.Envelope) []*ipcv1.Envelope {
@@ -61,6 +65,27 @@ func TestServiceHost_RegisterEndpoint(t *testing.T) {
 	}
 	if epID != 3 {
 		t.Fatalf("endpoint id = %d, want 3", epID)
+	}
+}
+
+func TestServiceHost_RequiresExecutionContextProtocol(t *testing.T) {
+	f := startFakeNervud(t)
+	f.setHandler(func(_ net.Conn, env *ipcv1.Envelope) []*ipcv1.Envelope {
+		if env.GetHello() == nil {
+			return nil
+		}
+		ack := helloAckOK()
+		ack.GetHelloAck().GetSuccess().ProtocolMinor = 0
+		return []*ipcv1.Envelope{ack}
+	})
+
+	h, err := NewServiceHost(quietConfig(f.sockPath()))
+	if h != nil {
+		_ = h.Close()
+		t.Fatal("ServiceHost accepted protocol minor 0")
+	}
+	if !errors.Is(err, ErrProtocol) {
+		t.Fatalf("NewServiceHost error = %v, want ErrProtocol", err)
 	}
 }
 
@@ -102,8 +127,10 @@ func TestServiceHost_DispatchSuccess(t *testing.T) {
 	defer func() { _ = h.Close() }()
 
 	var gotCaller *ipcv1.CallerContext
+	var gotExecution *ipcv1.ExecutionContext
 	h.Handle(5, func(cc CallContext, payload []byte) ([]byte, error) {
 		gotCaller = cc.Caller
+		gotExecution = cc.Execution
 		return append([]byte("ok:"), payload...), nil
 	})
 
@@ -140,6 +167,15 @@ func TestServiceHost_DispatchSuccess(t *testing.T) {
 						TrustProfile:       ipcv1.TrustProfile_TRUST_PROFILE_ORDINARY,
 						GrantedPermissions: []string{"perm.motion.control"},
 					},
+					ExecutionContext: &ipcv1.ExecutionContext{
+						LeaseId:            9,
+						ControllerClass:    ipcv1.ControllerClass_CONTROLLER_CLASS_HUMAN,
+						MotionEpoch:        12,
+						DeadlineNanos:      123456,
+						CommandSequence:    21,
+						ResourceHandle:     "base.main",
+						ResourceGeneration: 4,
+					},
 				}}},
 			}
 		}
@@ -174,6 +210,45 @@ func TestServiceHost_DispatchSuccess(t *testing.T) {
 	}
 	if len(gotCaller.GetGrantedPermissions()) != 1 {
 		t.Errorf("granted permissions not passed through: %+v", gotCaller.GetGrantedPermissions())
+	}
+	if gotExecution.GetLeaseId() != 9 || gotExecution.GetMotionEpoch() != 12 ||
+		gotExecution.GetCommandSequence() != 21 {
+		t.Errorf("execution context not passed through: %+v", gotExecution)
+	}
+}
+
+func TestValidExecutionContext(t *testing.T) {
+	plain := &ipcv1.ExecutionContext{DeadlineNanos: 1}
+	controlled := &ipcv1.ExecutionContext{
+		LeaseId:            1,
+		ControllerClass:    ipcv1.ControllerClass_CONTROLLER_CLASS_AI,
+		MotionEpoch:        2,
+		DeadlineNanos:      3,
+		CommandSequence:    4,
+		ResourceHandle:     "arm.main",
+		ResourceGeneration: 5,
+	}
+	tests := []struct {
+		name string
+		ec   *ipcv1.ExecutionContext
+		want bool
+	}{
+		{name: "plain", ec: plain, want: true},
+		{name: "controlled", ec: controlled, want: true},
+		{name: "missing", ec: nil},
+		{name: "deadline", ec: &ipcv1.ExecutionContext{}},
+		{name: "partial resource", ec: &ipcv1.ExecutionContext{DeadlineNanos: 1, ResourceHandle: "arm.main"}},
+		{name: "lease without proof", ec: &ipcv1.ExecutionContext{DeadlineNanos: 1, LeaseId: 1}},
+		{name: "plain with class", ec: &ipcv1.ExecutionContext{
+			DeadlineNanos: 1, ControllerClass: ipcv1.ControllerClass_CONTROLLER_CLASS_HUMAN,
+		}},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := validExecutionContext(tc.ec); got != tc.want {
+				t.Fatalf("validExecutionContext() = %v, want %v", got, tc.want)
+			}
+		})
 	}
 }
 
@@ -281,9 +356,11 @@ func TestServiceHost_EndpointScopedHandlers(t *testing.T) {
 				}},
 				{Body: &ipcv1.Envelope_Dispatch{Dispatch: &ipcv1.Dispatch{
 					RouteId: 101, EndpointId: 1, MethodId: 1, RemainingMs: 1000,
+					ExecutionContext: testExecutionContext(),
 				}}},
 				{Body: &ipcv1.Envelope_Dispatch{Dispatch: &ipcv1.Dispatch{
 					RouteId: 102, EndpointId: 2, MethodId: 1, RemainingMs: 1000,
+					ExecutionContext: testExecutionContext(),
 				}}},
 			}
 		}
@@ -360,6 +437,7 @@ func TestServiceHost_RegisterInstallsHandlersBeforeFirstDispatch(t *testing.T) {
 				}},
 				{Body: &ipcv1.Envelope_Dispatch{Dispatch: &ipcv1.Dispatch{
 					RouteId: 77, EndpointId: 7, MethodId: 1, RemainingMs: 1000,
+					ExecutionContext: testExecutionContext(),
 				}}},
 			}
 		}
@@ -410,6 +488,7 @@ func TestServiceHost_HandlerCanCallSystemInterfaceOnSameConnection(t *testing.T)
 				}},
 				{Body: &ipcv1.Envelope_Dispatch{Dispatch: &ipcv1.Dispatch{
 					RouteId: 42, EndpointId: 1, MethodId: 1, RemainingMs: 2000,
+					ExecutionContext: testExecutionContext(),
 				}}},
 			}
 		}
@@ -499,6 +578,7 @@ func TestServiceHost_CancelDispatchCancelsHandler(t *testing.T) {
 				}},
 				{Body: &ipcv1.Envelope_Dispatch{Dispatch: &ipcv1.Dispatch{
 					RouteId: 88, EndpointId: 1, MethodId: 1,
+					ExecutionContext: testExecutionContext(),
 				}}},
 				{Body: &ipcv1.Envelope_CancelDispatch{CancelDispatch: &ipcv1.CancelDispatch{
 					RouteId: 88,
@@ -570,6 +650,9 @@ func dispatchViaUnregister(t *testing.T, register func(*ServiceHost), d *ipcv1.D
 	}
 	if d.GetEndpointId() == 0 {
 		d.EndpointId = 1
+	}
+	if d.GetExecutionContext() == nil {
+		d.ExecutionContext = &ipcv1.ExecutionContext{DeadlineNanos: 1}
 	}
 
 	f.setHandler(func(c net.Conn, env *ipcv1.Envelope) []*ipcv1.Envelope {

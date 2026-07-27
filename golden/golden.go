@@ -284,6 +284,33 @@ func Vectors() []Vector {
 				}}}
 			},
 		},
+		{
+			Name: "dispatch_control_execution_context",
+			Kind: KindEnvelope,
+			Doc:  "Dispatch 携带内核签发的 ControlLease 执行上下文",
+			Build: func() proto.Message {
+				return &ipcv1.Envelope{
+					ProtocolMajor: 1,
+					ProtocolMinor: 1,
+					Body: &ipcv1.Envelope_Dispatch{Dispatch: &ipcv1.Dispatch{
+						RouteId:     15,
+						EndpointId:  23,
+						MethodId:    7,
+						RemainingMs: 250,
+						Payload:     []byte("move"),
+						ExecutionContext: &ipcv1.ExecutionContext{
+							LeaseId:            0xABCD,
+							ControllerClass:    ipcv1.ControllerClass_CONTROLLER_CLASS_HUMAN,
+							MotionEpoch:        3,
+							DeadlineNanos:      1_234_567_890,
+							CommandSequence:    17,
+							ResourceHandle:     "base.main",
+							ResourceGeneration: 4,
+						},
+					}},
+				}
+			},
+		},
 
 		// --- schema bundle 分发（A5 §2）---
 		{

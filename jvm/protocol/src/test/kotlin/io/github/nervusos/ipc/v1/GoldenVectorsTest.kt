@@ -186,6 +186,29 @@ class GoldenVectorsTest {
                 )
             ).build().toByteArray()
 
+        "dispatch_control_execution_context" ->
+            Envelope.newBuilder()
+                .setProtocolMajor(1)
+                .setProtocolMinor(1)
+                .setDispatch(
+                    Dispatch.newBuilder()
+                        .setRouteId(15)
+                        .setEndpointId(23)
+                        .setMethodId(7)
+                        .setRemainingMs(250)
+                        .setPayload(ByteString.copyFromUtf8("move"))
+                        .setExecutionContext(
+                            ExecutionContext.newBuilder()
+                                .setLeaseId(0xABCD)
+                                .setControllerClass(ControllerClass.CONTROLLER_CLASS_HUMAN)
+                                .setMotionEpoch(3)
+                                .setDeadlineNanos(1_234_567_890)
+                                .setCommandSequence(17)
+                                .setResourceHandle("base.main")
+                                .setResourceGeneration(4)
+                        )
+                ).build().toByteArray()
+
         "interface_schema_bundle" ->
             InterfaceSchemaBundle.newBuilder()
                 .setInterfaceId("com.acme.interface.gripper")
@@ -293,6 +316,21 @@ class GoldenVectorsTest {
         assertEquals(StatusCode.STATUS_CODE_FAILED_PRECONDITION, f.code)
         val d = ControlLeaseErrorDetail.parseFrom(f.errorDetail)
         assertEquals(ControlLeaseErrorReason.CONTROL_LEASE_ERROR_REASON_HELD_BY_HUMAN, d.reason)
+    }
+
+    @Test
+    fun `dispatch execution context preserves kernel proof`() {
+        val env = Envelope.parseFrom(File(goldenDir, "dispatch_control_execution_context.binpb").readBytes())
+        val context = env.dispatch.executionContext
+        assertEquals(1, env.protocolMinor)
+        assertEquals(15, env.dispatch.routeId)
+        assertEquals(0xABCD, context.leaseId)
+        assertEquals(ControllerClass.CONTROLLER_CLASS_HUMAN, context.controllerClass)
+        assertEquals(3, context.motionEpoch)
+        assertEquals(1_234_567_890, context.deadlineNanos)
+        assertEquals(17, context.commandSequence)
+        assertEquals("base.main", context.resourceHandle)
+        assertEquals(4, context.resourceGeneration)
     }
 
     @Test
