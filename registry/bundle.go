@@ -289,6 +289,44 @@ type ProviderArtifacts struct {
 	Schemas    *SchemaSet
 }
 
+// MarshalProviderArtifacts 把一份 ProviderDescriptor 与它引用的 schema bundle 集
+// 编码成【将要落盘、被 digest 覆盖、最终进内核 Catalog 的那两串字节】。
+//
+// 打包器（nervus-system-server 的 providergen）与 nervud 的 bootstrap 都应该走
+// 这个函数，而不是各自写一遍 marshal + Parse 校验：两边的编码选项一旦分叉，
+// 表现是「同一个 descriptor 在打包机与内核算出不同的 digest」，而那种失败会被
+// 报成「镜像损坏」。
+//
+// 必须 Deterministic：digest 覆盖的是这串字节，非确定性编码会让同一份输入在两次
+// 构建里产出不同 digest，可重复构建就不成立。
+//
+// 编码后立刻 ParseProviderArtifacts 回来校验一遍——打包期就挡下内核会拒的
+// 内容，好过等到目标机装载时才发现，那时镜像已经烧好了。
+func MarshalProviderArtifacts(
+	descriptor *ipcv1.ProviderDescriptor,
+	bundles *ipcv1.InterfaceSchemaBundleSet,
+) (descriptorWire, schemaWire []byte, err error) {
+	if descriptor == nil {
+		return nil, nil, errors.New("registry: nil provider descriptor")
+	}
+	if bundles == nil {
+		return nil, nil, errors.New("registry: nil schema bundle set")
+	}
+	marshal := proto.MarshalOptions{Deterministic: true}
+	descriptorWire, err = marshal.Marshal(descriptor)
+	if err != nil {
+		return nil, nil, fmt.Errorf("registry: marshal provider descriptor: %w", err)
+	}
+	schemaWire, err = marshal.Marshal(bundles)
+	if err != nil {
+		return nil, nil, fmt.Errorf("registry: marshal schema bundle set: %w", err)
+	}
+	if _, err = ParseProviderArtifacts(descriptorWire, schemaWire); err != nil {
+		return nil, nil, err
+	}
+	return descriptorWire, schemaWire, nil
+}
+
 func ParseProviderArtifacts(descriptorWire, schemaWire []byte) (*ProviderArtifacts, error) {
 	var descriptor ipcv1.ProviderDescriptor
 	if err := proto.Unmarshal(descriptorWire, &descriptor); err != nil {
