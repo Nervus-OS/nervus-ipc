@@ -423,8 +423,12 @@ type AttachTransferSuccess struct {
 	Mode              TransferMode           `protobuf:"varint,1,opt,name=mode,proto3,enum=nervus.ipc.v1.TransferMode" json:"mode,omitempty"`
 	MaxPacketBytes    uint32                 `protobuf:"varint,2,opt,name=max_packet_bytes,json=maxPacketBytes,proto3" json:"max_packet_bytes,omitempty"`
 	MaxBytesPerSecond uint64                 `protobuf:"varint,3,opt,name=max_bytes_per_second,json=maxBytesPerSecond,proto3" json:"max_bytes_per_second,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+	//
+	// 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+	Ring          *TransferRingConfig `protobuf:"bytes,4,opt,name=ring,proto3" json:"ring,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AttachTransferSuccess) Reset() {
@@ -478,6 +482,151 @@ func (x *AttachTransferSuccess) GetMaxBytesPerSecond() uint64 {
 	return 0
 }
 
+func (x *AttachTransferSuccess) GetRing() *TransferRingConfig {
+	if x != nil {
+		return x.Ring
+	}
+	return nil
+}
+
+// TransferRingConfig 是 SHARED_MEMORY_RING 的几何参数。
+//
+// # 为什么参数走控制面而不是只放在共享内存头部
+//
+// 共享内存是【两端都能写】的。如果消费者从头部读 slot_count / slot_size 再据此
+// 计算偏移，一个恶意或有 bug 的生产者只要改写头部就能让对端越界读——而那是在
+// 对端自己的地址空间里，没有任何东西能拦住。
+//
+// 因此几何参数由 nervud 在 AttachTransferResult 里下发：它经过控制面、由内核
+// 产生、不可被对端篡改。共享内存头部里也放一份，但那份【只用于自检】
+// （对不上说明实现有 bug 或内存被踩），绝不作为边界计算的依据。
+//
+// # 文件描述符
+//
+// AttachTransferResult 成功且 mode == SHARED_MEMORY_RING 时，nervud 在同一条
+// 数据 UDS 上用 SCM_RIGHTS 附带【恰好 2 个】fd，顺序固定：
+//
+//	fd[0]  memfd   ring 内存。生产者拿到 PROT_READ|PROT_WRITE，
+//	               消费者拿到 PROT_READ（nervud 用 F_SEAL_WRITE 之外的方式保证：
+//	               消费者侧以 O_RDONLY 复制的 fd 附送）
+//	fd[1]  eventfd  生产者写入后 write(1) 唤醒消费者；消费者用 read 或 poll 等待
+//
+// 收到的 fd 数量不等于 2 必须视为协议违规并关闭连接，不能只用前几个——
+// 数量不符说明两侧对 ABI 的理解已经分叉。
+//
+// # 内存布局（NVR1）
+//
+//	偏移 0                    header_bytes                    第一个 slot 载荷
+//	┌──────────────┬──────────────────────────┬────────────────────────────┐
+//	│ 环头部        │ slot 描述符 × slot_count  │ 载荷区 × slot_count        │
+//	│ header_bytes │ descriptor_bytes 每个     │ slot_size 每个             │
+//	└──────────────┴──────────────────────────┴────────────────────────────┘
+//
+// 总长度 = header_bytes + slot_count*descriptor_bytes + slot_count*slot_size，
+// 必须与 memfd 的实际大小完全相等；不等即协议违规。
+//
+// 环头部（小端，与本机字节序一致；本 ABI 只在同机进程间使用）：
+//
+//	 0  magic[4]      "NVR1"
+//	 4  version u32    当前为 1
+//	 8  slot_count u32     ┐
+//	12  slot_size u32      ├ 仅供自检，边界计算【不得】使用这三项
+//	16  descriptor_bytes u32 ┘
+//	24  producer_cursor u64  只由生产者写，消费者只读
+//	32  consumer_cursor u64  只由消费者写，生产者只读
+//	40  保留，必须为 0
+//
+// slot 描述符（小端）：
+//
+//	 0  sequence u64    生产者在写完载荷后【最后】以 release 语义写入。
+//	                    奇数 = 正在写入，偶数 = 已就绪。消费者读到奇数即跳过。
+//	 8  payload_length u32  必须 <= slot_size；【消费者必须自己校验】
+//	12  flags u32
+//	16  monotonic_timestamp_nanos u64
+//	24  保留，必须为 0
+//
+// # 不可信输入规则（实现必须遵守）
+//
+//  1. payload_length 一律与控制面下发的 slot_size 比较后再使用，超出即丢弃该
+//     slot 并计一次协议错误。不要 clamp 后继续读——那会把一个 bug 变成静默的
+//     数据损坏。
+//  2. 对端游标是不可信的。消费者推进时必须校验
+//     producer_cursor - consumer_cursor <= slot_count；超出说明被生产者套圈，
+//     应当跳到最新一圈而不是读一批已被覆盖的 slot。
+//  3. 头部里的 slot_count / slot_size / descriptor_bytes 与控制面不符时，直接
+//     视为协议违规关闭传输——这是自检点，不是可协商的参数。
+type TransferRingConfig struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// 环中 slot 的数量。必须是 2 的幂，便于用掩码取模且不引入除法。
+	SlotCount uint32 `protobuf:"varint,1,opt,name=slot_count,json=slotCount,proto3" json:"slot_count,omitempty"`
+	// 每个 slot 的载荷容量，等于生效后的 max_packet_bytes。
+	SlotSize uint32 `protobuf:"varint,2,opt,name=slot_size,json=slotSize,proto3" json:"slot_size,omitempty"`
+	// 环头部字节数。固定 4096（一页），让描述符区页对齐。
+	HeaderBytes uint32 `protobuf:"varint,3,opt,name=header_bytes,json=headerBytes,proto3" json:"header_bytes,omitempty"`
+	// 每个 slot 描述符的字节数。固定 32。
+	DescriptorBytes uint32 `protobuf:"varint,4,opt,name=descriptor_bytes,json=descriptorBytes,proto3" json:"descriptor_bytes,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *TransferRingConfig) Reset() {
+	*x = TransferRingConfig{}
+	mi := &file_nervus_ipc_v1_transfer_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferRingConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferRingConfig) ProtoMessage() {}
+
+func (x *TransferRingConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_nervus_ipc_v1_transfer_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferRingConfig.ProtoReflect.Descriptor instead.
+func (*TransferRingConfig) Descriptor() ([]byte, []int) {
+	return file_nervus_ipc_v1_transfer_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TransferRingConfig) GetSlotCount() uint32 {
+	if x != nil {
+		return x.SlotCount
+	}
+	return 0
+}
+
+func (x *TransferRingConfig) GetSlotSize() uint32 {
+	if x != nil {
+		return x.SlotSize
+	}
+	return 0
+}
+
+func (x *TransferRingConfig) GetHeaderBytes() uint32 {
+	if x != nil {
+		return x.HeaderBytes
+	}
+	return 0
+}
+
+func (x *TransferRingConfig) GetDescriptorBytes() uint32 {
+	if x != nil {
+		return x.DescriptorBytes
+	}
+	return 0
+}
+
 type AttachTransferResult struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Types that are valid to be assigned to Outcome:
@@ -491,7 +640,7 @@ type AttachTransferResult struct {
 
 func (x *AttachTransferResult) Reset() {
 	*x = AttachTransferResult{}
-	mi := &file_nervus_ipc_v1_transfer_proto_msgTypes[4]
+	mi := &file_nervus_ipc_v1_transfer_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -503,7 +652,7 @@ func (x *AttachTransferResult) String() string {
 func (*AttachTransferResult) ProtoMessage() {}
 
 func (x *AttachTransferResult) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_ipc_v1_transfer_proto_msgTypes[4]
+	mi := &file_nervus_ipc_v1_transfer_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -516,7 +665,7 @@ func (x *AttachTransferResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AttachTransferResult.ProtoReflect.Descriptor instead.
 func (*AttachTransferResult) Descriptor() ([]byte, []int) {
-	return file_nervus_ipc_v1_transfer_proto_rawDescGZIP(), []int{4}
+	return file_nervus_ipc_v1_transfer_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *AttachTransferResult) GetOutcome() isAttachTransferResult_Outcome {
@@ -584,11 +733,18 @@ const file_nervus_ipc_v1_transfer_proto_rawDesc = "" +
 	"\vtransfer_id\x18\x01 \x01(\fR\n" +
 	"transferId\x12#\n" +
 	"\rattach_ticket\x18\x02 \x01(\fR\fattachTicket\x12/\n" +
-	"\x04role\x18\x03 \x01(\x0e2\x1b.nervus.ipc.v1.TransferRoleR\x04role\"\xa3\x01\n" +
+	"\x04role\x18\x03 \x01(\x0e2\x1b.nervus.ipc.v1.TransferRoleR\x04role\"\xda\x01\n" +
 	"\x15AttachTransferSuccess\x12/\n" +
 	"\x04mode\x18\x01 \x01(\x0e2\x1b.nervus.ipc.v1.TransferModeR\x04mode\x12(\n" +
 	"\x10max_packet_bytes\x18\x02 \x01(\rR\x0emaxPacketBytes\x12/\n" +
-	"\x14max_bytes_per_second\x18\x03 \x01(\x04R\x11maxBytesPerSecond\"\x97\x01\n" +
+	"\x14max_bytes_per_second\x18\x03 \x01(\x04R\x11maxBytesPerSecond\x125\n" +
+	"\x04ring\x18\x04 \x01(\v2!.nervus.ipc.v1.TransferRingConfigR\x04ring\"\x9e\x01\n" +
+	"\x12TransferRingConfig\x12\x1d\n" +
+	"\n" +
+	"slot_count\x18\x01 \x01(\rR\tslotCount\x12\x1b\n" +
+	"\tslot_size\x18\x02 \x01(\rR\bslotSize\x12!\n" +
+	"\fheader_bytes\x18\x03 \x01(\rR\vheaderBytes\x12)\n" +
+	"\x10descriptor_bytes\x18\x04 \x01(\rR\x0fdescriptorBytes\"\x97\x01\n" +
 	"\x14AttachTransferResult\x12@\n" +
 	"\asuccess\x18\x01 \x01(\v2$.nervus.ipc.v1.AttachTransferSuccessH\x00R\asuccess\x122\n" +
 	"\afailure\x18\x02 \x01(\v2\x16.nervus.ipc.v1.FailureH\x00R\afailureB\t\n" +
@@ -622,7 +778,7 @@ func file_nervus_ipc_v1_transfer_proto_rawDescGZIP() []byte {
 }
 
 var file_nervus_ipc_v1_transfer_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_nervus_ipc_v1_transfer_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_nervus_ipc_v1_transfer_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_nervus_ipc_v1_transfer_proto_goTypes = []any{
 	(TransferDirection)(0),        // 0: nervus.ipc.v1.TransferDirection
 	(TransferMode)(0),             // 1: nervus.ipc.v1.TransferMode
@@ -631,8 +787,9 @@ var file_nervus_ipc_v1_transfer_proto_goTypes = []any{
 	(*TransferHandle)(nil),        // 4: nervus.ipc.v1.TransferHandle
 	(*AttachTransfer)(nil),        // 5: nervus.ipc.v1.AttachTransfer
 	(*AttachTransferSuccess)(nil), // 6: nervus.ipc.v1.AttachTransferSuccess
-	(*AttachTransferResult)(nil),  // 7: nervus.ipc.v1.AttachTransferResult
-	(*Failure)(nil),               // 8: nervus.ipc.v1.Failure
+	(*TransferRingConfig)(nil),    // 7: nervus.ipc.v1.TransferRingConfig
+	(*AttachTransferResult)(nil),  // 8: nervus.ipc.v1.AttachTransferResult
+	(*Failure)(nil),               // 9: nervus.ipc.v1.Failure
 }
 var file_nervus_ipc_v1_transfer_proto_depIdxs = []int32{
 	0, // 0: nervus.ipc.v1.TransferPolicy.direction:type_name -> nervus.ipc.v1.TransferDirection
@@ -641,13 +798,14 @@ var file_nervus_ipc_v1_transfer_proto_depIdxs = []int32{
 	1, // 3: nervus.ipc.v1.TransferHandle.mode:type_name -> nervus.ipc.v1.TransferMode
 	2, // 4: nervus.ipc.v1.AttachTransfer.role:type_name -> nervus.ipc.v1.TransferRole
 	1, // 5: nervus.ipc.v1.AttachTransferSuccess.mode:type_name -> nervus.ipc.v1.TransferMode
-	6, // 6: nervus.ipc.v1.AttachTransferResult.success:type_name -> nervus.ipc.v1.AttachTransferSuccess
-	8, // 7: nervus.ipc.v1.AttachTransferResult.failure:type_name -> nervus.ipc.v1.Failure
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	7, // 6: nervus.ipc.v1.AttachTransferSuccess.ring:type_name -> nervus.ipc.v1.TransferRingConfig
+	6, // 7: nervus.ipc.v1.AttachTransferResult.success:type_name -> nervus.ipc.v1.AttachTransferSuccess
+	9, // 8: nervus.ipc.v1.AttachTransferResult.failure:type_name -> nervus.ipc.v1.Failure
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_nervus_ipc_v1_transfer_proto_init() }
@@ -656,7 +814,7 @@ func file_nervus_ipc_v1_transfer_proto_init() {
 		return
 	}
 	file_nervus_ipc_v1_status_proto_init()
-	file_nervus_ipc_v1_transfer_proto_msgTypes[4].OneofWrappers = []any{
+	file_nervus_ipc_v1_transfer_proto_msgTypes[5].OneofWrappers = []any{
 		(*AttachTransferResult_Success)(nil),
 		(*AttachTransferResult_Failure)(nil),
 	}
@@ -666,7 +824,7 @@ func file_nervus_ipc_v1_transfer_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nervus_ipc_v1_transfer_proto_rawDesc), len(file_nervus_ipc_v1_transfer_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

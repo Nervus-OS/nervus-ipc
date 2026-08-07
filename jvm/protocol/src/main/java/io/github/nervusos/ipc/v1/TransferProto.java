@@ -46,6 +46,11 @@ public final class TransferProto {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_nervus_ipc_v1_AttachTransferSuccess_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_nervus_ipc_v1_TransferRingConfig_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_nervus_ipc_v1_TransferRingConfig_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_nervus_ipc_v1_AttachTransferResult_descriptor;
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -78,28 +83,34 @@ public final class TransferProto {
       "nt\"\207\001\n\016AttachTransfer\022\037\n\013transfer_id\030\001 \001" +
       "(\014R\ntransferId\022#\n\rattach_ticket\030\002 \001(\014R\014a" +
       "ttachTicket\022/\n\004role\030\003 \001(\0162\033.nervus.ipc.v" +
-      "1.TransferRoleR\004role\"\243\001\n\025AttachTransferS" +
+      "1.TransferRoleR\004role\"\332\001\n\025AttachTransferS" +
       "uccess\022/\n\004mode\030\001 \001(\0162\033.nervus.ipc.v1.Tra" +
       "nsferModeR\004mode\022(\n\020max_packet_bytes\030\002 \001(" +
       "\rR\016maxPacketBytes\022/\n\024max_bytes_per_secon" +
-      "d\030\003 \001(\004R\021maxBytesPerSecond\"\227\001\n\024AttachTra" +
-      "nsferResult\022@\n\007success\030\001 \001(\0132$.nervus.ip" +
-      "c.v1.AttachTransferSuccessH\000R\007success\0222\n" +
-      "\007failure\030\002 \001(\0132\026.nervus.ipc.v1.FailureH\000" +
-      "R\007failureB\t\n\007outcome*\263\001\n\021TransferDirecti" +
-      "on\022\"\n\036TRANSFER_DIRECTION_UNSPECIFIED\020\000\022)" +
-      "\n%TRANSFER_DIRECTION_PROVIDER_TO_CALLER\020" +
-      "\001\022)\n%TRANSFER_DIRECTION_CALLER_TO_PROVID" +
-      "ER\020\002\022$\n TRANSFER_DIRECTION_BIDIRECTIONAL" +
-      "\020\003*s\n\014TransferMode\022\035\n\031TRANSFER_MODE_UNSP" +
-      "ECIFIED\020\000\022\036\n\032TRANSFER_MODE_FRAMED_RELAY\020" +
-      "\001\022$\n TRANSFER_MODE_SHARED_MEMORY_RING\020\002*" +
-      "}\n\014TransferRole\022\035\n\031TRANSFER_ROLE_UNSPECI" +
-      "FIED\020\000\022\032\n\026TRANSFER_ROLE_PRODUCER\020\001\022\032\n\026TR" +
-      "ANSFER_ROLE_CONSUMER\020\002\022\026\n\022TRANSFER_ROLE_" +
-      "PEER\020\003Bb\n\031io.github.nervusos.ipc.v1B\rTra" +
-      "nsferProtoP\001Z4github.com/nervus-os/nervu" +
-      "s-ipc/protocol/ipcv1;ipcv1b\006proto3"
+      "d\030\003 \001(\004R\021maxBytesPerSecond\0225\n\004ring\030\004 \001(\013" +
+      "2!.nervus.ipc.v1.TransferRingConfigR\004rin" +
+      "g\"\236\001\n\022TransferRingConfig\022\035\n\nslot_count\030\001" +
+      " \001(\rR\tslotCount\022\033\n\tslot_size\030\002 \001(\rR\010slot" +
+      "Size\022!\n\014header_bytes\030\003 \001(\rR\013headerBytes\022" +
+      ")\n\020descriptor_bytes\030\004 \001(\rR\017descriptorByt" +
+      "es\"\227\001\n\024AttachTransferResult\022@\n\007success\030\001" +
+      " \001(\0132$.nervus.ipc.v1.AttachTransferSucce" +
+      "ssH\000R\007success\0222\n\007failure\030\002 \001(\0132\026.nervus." +
+      "ipc.v1.FailureH\000R\007failureB\t\n\007outcome*\263\001\n" +
+      "\021TransferDirection\022\"\n\036TRANSFER_DIRECTION" +
+      "_UNSPECIFIED\020\000\022)\n%TRANSFER_DIRECTION_PRO" +
+      "VIDER_TO_CALLER\020\001\022)\n%TRANSFER_DIRECTION_" +
+      "CALLER_TO_PROVIDER\020\002\022$\n TRANSFER_DIRECTI" +
+      "ON_BIDIRECTIONAL\020\003*s\n\014TransferMode\022\035\n\031TR" +
+      "ANSFER_MODE_UNSPECIFIED\020\000\022\036\n\032TRANSFER_MO" +
+      "DE_FRAMED_RELAY\020\001\022$\n TRANSFER_MODE_SHARE" +
+      "D_MEMORY_RING\020\002*}\n\014TransferRole\022\035\n\031TRANS" +
+      "FER_ROLE_UNSPECIFIED\020\000\022\032\n\026TRANSFER_ROLE_" +
+      "PRODUCER\020\001\022\032\n\026TRANSFER_ROLE_CONSUMER\020\002\022\026" +
+      "\n\022TRANSFER_ROLE_PEER\020\003Bb\n\031io.github.nerv" +
+      "usos.ipc.v1B\rTransferProtoP\001Z4github.com" +
+      "/nervus-os/nervus-ipc/protocol/ipcv1;ipc" +
+      "v1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -129,9 +140,15 @@ public final class TransferProto {
     internal_static_nervus_ipc_v1_AttachTransferSuccess_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_AttachTransferSuccess_descriptor,
-        new java.lang.String[] { "Mode", "MaxPacketBytes", "MaxBytesPerSecond", });
-    internal_static_nervus_ipc_v1_AttachTransferResult_descriptor =
+        new java.lang.String[] { "Mode", "MaxPacketBytes", "MaxBytesPerSecond", "Ring", });
+    internal_static_nervus_ipc_v1_TransferRingConfig_descriptor =
       getDescriptor().getMessageTypes().get(4);
+    internal_static_nervus_ipc_v1_TransferRingConfig_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_nervus_ipc_v1_TransferRingConfig_descriptor,
+        new java.lang.String[] { "SlotCount", "SlotSize", "HeaderBytes", "DescriptorBytes", });
+    internal_static_nervus_ipc_v1_AttachTransferResult_descriptor =
+      getDescriptor().getMessageTypes().get(5);
     internal_static_nervus_ipc_v1_AttachTransferResult_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_AttachTransferResult_descriptor,

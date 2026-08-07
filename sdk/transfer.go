@@ -1,3 +1,7 @@
+//go:build linux
+
+// 通用高速数据面的客户端。
+// 它连的是 nervud 的 /run/nervus/nervud-transfer.sock
 package sdk
 
 import (
@@ -42,6 +46,55 @@ type TransferConn struct {
 	maxPacketBytes    uint32
 	maxBytesPerSecond uint64
 	readMu, writeMu   sync.Mutex
+
+	// 以下仅在 mode == SHARED_MEMORY_RING 时有效。
+	//
+	// ring 模式下 nervud 不在数据路径上：两端 mmap 同一块内存直接收发，
+	// co 那条 socket 只用来握手、收 fd、以及感知对端断开。
+	ring        *Ring
+	ringMem     []byte
+	ringMemFD   int
+	ringEventFD int
+}
+
+// Ring 返回共享内存环视图。仅在 mode == SHARED_MEMORY_RING 时非 nil。
+//
+// 【Frame.Payload 指向环内存，Advance 之后即失效】——需要留存必须自己复制。
+// 这是零拷贝的代价，也是它的全部意义。
+func (c *TransferConn) Ring() *Ring { return c.ring }
+
+// WriteRing 写一帧并唤醒对端。生产者专用。
+func (c *TransferConn) WriteRing(payload []byte, flags uint32, timestampNanos uint64) error {
+	if c.ring == nil {
+		return fmt.Errorf("%w: transfer is not in shared-memory ring mode", ErrProtocol)
+	}
+	c.writeMu.Lock()
+	defer c.writeMu.Unlock()
+	if err := c.ring.Write(payload, flags, timestampNanos); err != nil {
+		return err
+	}
+	return c.notifyRing()
+}
+
+// ReadRing 取一帧。没有数据时按 timeoutMillis 等待对端通知（负数无限等）。
+//
+// 返回 ErrRingEmpty 表示等到超时仍无数据。取到 ErrRingLapped 时调用方应当
+// SkipToLatest 之后重试——视频流的正确行为是丢积压看最新帧，而不是从一批已被
+// 覆盖的 slot 里读撕裂内容。
+func (c *TransferConn) ReadRing(timeoutMillis int) (Frame, error) {
+	if c.ring == nil {
+		return Frame{}, fmt.Errorf("%w: transfer is not in shared-memory ring mode", ErrProtocol)
+	}
+	c.readMu.Lock()
+	defer c.readMu.Unlock()
+	frame, err := c.ring.Read()
+	if err == nil || !errors.Is(err, ErrRingEmpty) {
+		return frame, err
+	}
+	if err := c.waitRing(timeoutMillis); err != nil {
+		return Frame{}, err
+	}
+	return c.ring.Read()
 }
 
 // AttachTransfer 使用 handle 中的一次性 ticket 附着通用数据面。
@@ -104,27 +157,40 @@ func AttachTransfer(ctx context.Context, handle *ipcv1.TransferHandle) (*Transfe
 		return fail(fmt.Errorf("%w: transfer mode changed from %s to %s",
 			ErrProtocol, handle.GetMode(), success.GetMode()))
 	}
-	if success.GetMode() != ipcv1.TransferMode_TRANSFER_MODE_FRAMED_RELAY {
+	switch success.GetMode() {
+	case ipcv1.TransferMode_TRANSFER_MODE_FRAMED_RELAY,
+		ipcv1.TransferMode_TRANSFER_MODE_SHARED_MEMORY_RING:
+	default:
 		return fail(fmt.Errorf("%w: transfer mode %s is not implemented by Go SDK",
 			ErrProtocol, success.GetMode()))
 	}
 	if success.GetMaxPacketBytes() == 0 || success.GetMaxBytesPerSecond() == 0 {
 		return fail(fmt.Errorf("%w: transfer limits must be non-zero", ErrProtocol))
 	}
+
+	conn := &TransferConn{
+		co:                raw,
+		role:              handle.GetRole(),
+		mode:              success.GetMode(),
+		maxPacketBytes:    success.GetMaxPacketBytes(),
+		maxBytesPerSecond: success.GetMaxBytesPerSecond(),
+	}
+
+	// ring 模式：结果帧之后 nervud 会用 SCM_RIGHTS 送 memfd 与 eventfd。
+	// 【在清除 deadline 之前收】——收 fd 仍属握手，超时必须仍然生效。
+	if success.GetMode() == ipcv1.TransferMode_TRANSFER_MODE_SHARED_MEMORY_RING {
+		if err := conn.attachRing(raw, success.GetRing()); err != nil {
+			return fail(err)
+		}
+	}
+
 	if !stopContext() {
 		return fail(ctx.Err())
 	}
 	if err := raw.SetDeadline(time.Time{}); err != nil {
 		return fail(fmt.Errorf("sdk: clear transfer handshake deadline: %w", err))
 	}
-
-	return &TransferConn{
-		co:                raw,
-		role:              handle.GetRole(),
-		mode:              success.GetMode(),
-		maxPacketBytes:    success.GetMaxPacketBytes(),
-		maxBytesPerSecond: success.GetMaxBytesPerSecond(),
-	}, nil
+	return conn, nil
 }
 
 func validateTransferHandle(handle *ipcv1.TransferHandle) error {
@@ -144,7 +210,10 @@ func validateTransferHandle(handle *ipcv1.TransferHandle) error {
 	default:
 		return fmt.Errorf("sdk: invalid transfer role %d", handle.GetRole())
 	}
-	if handle.GetMode() != ipcv1.TransferMode_TRANSFER_MODE_FRAMED_RELAY {
+	switch handle.GetMode() {
+	case ipcv1.TransferMode_TRANSFER_MODE_FRAMED_RELAY,
+		ipcv1.TransferMode_TRANSFER_MODE_SHARED_MEMORY_RING:
+	default:
 		return fmt.Errorf("sdk: unsupported transfer mode %s", handle.GetMode())
 	}
 	if handle.GetExpiresAtMonotonicNanos() == 0 {
@@ -168,7 +237,14 @@ func (c *TransferConn) MaxPacketBytes() uint32 { return c.maxPacketBytes }
 // MaxBytesPerSecond 返回 nervud 收紧后的速率上限。
 func (c *TransferConn) MaxBytesPerSecond() uint64 { return c.maxBytesPerSecond }
 
-func (c *TransferConn) Close() error { return c.co.Close() }
+// Close 关闭数据面连接，并在 ring 模式下解除映射、关掉两个 fd。
+//
+// 顺序是先解映射再关 socket：反过来的话对端会先看到断开、再有一小段时间
+// 我们仍持有内存映射，那段窗口里的行为不好推理。
+func (c *TransferConn) Close() error {
+	c.closeRing()
+	return c.co.Close()
+}
 
 func (c *TransferConn) SetDeadline(deadline time.Time) error {
 	return c.co.SetDeadline(deadline)

@@ -43,6 +43,7 @@ private static final long serialVersionUID = 0L;
             io.github.nervusos.ipc.v1.AttachTransferSuccess.class, io.github.nervusos.ipc.v1.AttachTransferSuccess.Builder.class);
   }
 
+  private int bitField0_;
   public static final int MODE_FIELD_NUMBER = 1;
   private int mode_ = 0;
   /**
@@ -83,6 +84,50 @@ private static final long serialVersionUID = 0L;
     return maxBytesPerSecond_;
   }
 
+  public static final int RING_FIELD_NUMBER = 4;
+  private io.github.nervusos.ipc.v1.TransferRingConfig ring_;
+  /**
+   * <pre>
+   * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+   *
+   * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+   * @return Whether the ring field is set.
+   */
+  @java.lang.Override
+  public boolean hasRing() {
+    return ((bitField0_ & 0x00000001) != 0);
+  }
+  /**
+   * <pre>
+   * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+   *
+   * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+   * @return The ring.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.TransferRingConfig getRing() {
+    return ring_ == null ? io.github.nervusos.ipc.v1.TransferRingConfig.getDefaultInstance() : ring_;
+  }
+  /**
+   * <pre>
+   * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+   *
+   * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.TransferRingConfigOrBuilder getRingOrBuilder() {
+    return ring_ == null ? io.github.nervusos.ipc.v1.TransferRingConfig.getDefaultInstance() : ring_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -106,6 +151,9 @@ private static final long serialVersionUID = 0L;
     if (maxBytesPerSecond_ != 0L) {
       output.writeUInt64(3, maxBytesPerSecond_);
     }
+    if (((bitField0_ & 0x00000001) != 0)) {
+      output.writeMessage(4, getRing());
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -127,6 +175,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(3, maxBytesPerSecond_);
     }
+    if (((bitField0_ & 0x00000001) != 0)) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(4, getRing());
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -147,6 +199,11 @@ private static final long serialVersionUID = 0L;
         != other.getMaxPacketBytes()) return false;
     if (getMaxBytesPerSecond()
         != other.getMaxBytesPerSecond()) return false;
+    if (hasRing() != other.hasRing()) return false;
+    if (hasRing()) {
+      if (!getRing()
+          .equals(other.getRing())) return false;
+    }
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -165,6 +222,10 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + MAX_BYTES_PER_SECOND_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         getMaxBytesPerSecond());
+    if (hasRing()) {
+      hash = (37 * hash) + RING_FIELD_NUMBER;
+      hash = (53 * hash) + getRing().hashCode();
+    }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -284,13 +345,19 @@ private static final long serialVersionUID = 0L;
 
     // Construct using io.github.nervusos.ipc.v1.AttachTransferSuccess.newBuilder()
     private Builder() {
-
+      maybeForceBuilderInitialization();
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       super(parent);
-
+      maybeForceBuilderInitialization();
+    }
+    private void maybeForceBuilderInitialization() {
+      if (com.google.protobuf.GeneratedMessage
+              .alwaysUseFieldBuilders) {
+        getRingFieldBuilder();
+      }
     }
     @java.lang.Override
     public Builder clear() {
@@ -299,6 +366,11 @@ private static final long serialVersionUID = 0L;
       mode_ = 0;
       maxPacketBytes_ = 0;
       maxBytesPerSecond_ = 0L;
+      ring_ = null;
+      if (ringBuilder_ != null) {
+        ringBuilder_.dispose();
+        ringBuilder_ = null;
+      }
       return this;
     }
 
@@ -341,6 +413,14 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000004) != 0)) {
         result.maxBytesPerSecond_ = maxBytesPerSecond_;
       }
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.ring_ = ringBuilder_ == null
+            ? ring_
+            : ringBuilder_.build();
+        to_bitField0_ |= 0x00000001;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
 
     @java.lang.Override
@@ -363,6 +443,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getMaxBytesPerSecond() != 0L) {
         setMaxBytesPerSecond(other.getMaxBytesPerSecond());
+      }
+      if (other.hasRing()) {
+        mergeRing(other.getRing());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -405,6 +488,13 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000004;
               break;
             } // case 24
+            case 34: {
+              input.readMessage(
+                  getRingFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00000008;
+              break;
+            } // case 34
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -537,6 +627,181 @@ private static final long serialVersionUID = 0L;
       maxBytesPerSecond_ = 0L;
       onChanged();
       return this;
+    }
+
+    private io.github.nervusos.ipc.v1.TransferRingConfig ring_;
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.TransferRingConfig, io.github.nervusos.ipc.v1.TransferRingConfig.Builder, io.github.nervusos.ipc.v1.TransferRingConfigOrBuilder> ringBuilder_;
+    /**
+     * <pre>
+     * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+     *
+     * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+     * @return Whether the ring field is set.
+     */
+    public boolean hasRing() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <pre>
+     * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+     *
+     * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+     * @return The ring.
+     */
+    public io.github.nervusos.ipc.v1.TransferRingConfig getRing() {
+      if (ringBuilder_ == null) {
+        return ring_ == null ? io.github.nervusos.ipc.v1.TransferRingConfig.getDefaultInstance() : ring_;
+      } else {
+        return ringBuilder_.getMessage();
+      }
+    }
+    /**
+     * <pre>
+     * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+     *
+     * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+     */
+    public Builder setRing(io.github.nervusos.ipc.v1.TransferRingConfig value) {
+      if (ringBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ring_ = value;
+      } else {
+        ringBuilder_.setMessage(value);
+      }
+      bitField0_ |= 0x00000008;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+     *
+     * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+     */
+    public Builder setRing(
+        io.github.nervusos.ipc.v1.TransferRingConfig.Builder builderForValue) {
+      if (ringBuilder_ == null) {
+        ring_ = builderForValue.build();
+      } else {
+        ringBuilder_.setMessage(builderForValue.build());
+      }
+      bitField0_ |= 0x00000008;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+     *
+     * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+     */
+    public Builder mergeRing(io.github.nervusos.ipc.v1.TransferRingConfig value) {
+      if (ringBuilder_ == null) {
+        if (((bitField0_ & 0x00000008) != 0) &&
+          ring_ != null &&
+          ring_ != io.github.nervusos.ipc.v1.TransferRingConfig.getDefaultInstance()) {
+          getRingBuilder().mergeFrom(value);
+        } else {
+          ring_ = value;
+        }
+      } else {
+        ringBuilder_.mergeFrom(value);
+      }
+      if (ring_ != null) {
+        bitField0_ |= 0x00000008;
+        onChanged();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+     *
+     * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+     */
+    public Builder clearRing() {
+      bitField0_ = (bitField0_ & ~0x00000008);
+      ring_ = null;
+      if (ringBuilder_ != null) {
+        ringBuilder_.dispose();
+        ringBuilder_ = null;
+      }
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+     *
+     * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+     */
+    public io.github.nervusos.ipc.v1.TransferRingConfig.Builder getRingBuilder() {
+      bitField0_ |= 0x00000008;
+      onChanged();
+      return getRingFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+     *
+     * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+     */
+    public io.github.nervusos.ipc.v1.TransferRingConfigOrBuilder getRingOrBuilder() {
+      if (ringBuilder_ != null) {
+        return ringBuilder_.getMessageOrBuilder();
+      } else {
+        return ring_ == null ?
+            io.github.nervusos.ipc.v1.TransferRingConfig.getDefaultInstance() : ring_;
+      }
+    }
+    /**
+     * <pre>
+     * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+     *
+     * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.TransferRingConfig, io.github.nervusos.ipc.v1.TransferRingConfig.Builder, io.github.nervusos.ipc.v1.TransferRingConfigOrBuilder> 
+        getRingFieldBuilder() {
+      if (ringBuilder_ == null) {
+        ringBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.TransferRingConfig, io.github.nervusos.ipc.v1.TransferRingConfig.Builder, io.github.nervusos.ipc.v1.TransferRingConfigOrBuilder>(
+                getRing(),
+                getParentForChildren(),
+                isClean());
+        ring_ = null;
+      }
+      return ringBuilder_;
     }
 
     // @@protoc_insertion_point(builder_scope:nervus.ipc.v1.AttachTransferSuccess)

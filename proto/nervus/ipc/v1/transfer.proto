@@ -88,6 +88,91 @@ message AttachTransferSuccess {
   TransferMode mode = 1;
   uint32 max_packet_bytes = 2;
   uint64 max_bytes_per_second = 3;
+
+  // mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+  //
+  // 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+  TransferRingConfig ring = 4;
+}
+
+// TransferRingConfig 是 SHARED_MEMORY_RING 的几何参数。
+//
+// # 为什么参数走控制面而不是只放在共享内存头部
+//
+// 共享内存是【两端都能写】的。如果消费者从头部读 slot_count / slot_size 再据此
+// 计算偏移，一个恶意或有 bug 的生产者只要改写头部就能让对端越界读——而那是在
+// 对端自己的地址空间里，没有任何东西能拦住。
+//
+// 因此几何参数由 nervud 在 AttachTransferResult 里下发：它经过控制面、由内核
+// 产生、不可被对端篡改。共享内存头部里也放一份，但那份【只用于自检】
+// （对不上说明实现有 bug 或内存被踩），绝不作为边界计算的依据。
+//
+// # 文件描述符
+//
+// AttachTransferResult 成功且 mode == SHARED_MEMORY_RING 时，nervud 在同一条
+// 数据 UDS 上用 SCM_RIGHTS 附带【恰好 2 个】fd，顺序固定：
+//
+//	fd[0]  memfd   ring 内存。生产者拿到 PROT_READ|PROT_WRITE，
+//	               消费者拿到 PROT_READ（nervud 用 F_SEAL_WRITE 之外的方式保证：
+//	               消费者侧以 O_RDONLY 复制的 fd 附送）
+//	fd[1]  eventfd  生产者写入后 write(1) 唤醒消费者；消费者用 read 或 poll 等待
+//
+// 收到的 fd 数量不等于 2 必须视为协议违规并关闭连接，不能只用前几个——
+// 数量不符说明两侧对 ABI 的理解已经分叉。
+//
+// # 内存布局（NVR1）
+//
+//	偏移 0                    header_bytes                    第一个 slot 载荷
+//	┌──────────────┬──────────────────────────┬────────────────────────────┐
+//	│ 环头部        │ slot 描述符 × slot_count  │ 载荷区 × slot_count        │
+//	│ header_bytes │ descriptor_bytes 每个     │ slot_size 每个             │
+//	└──────────────┴──────────────────────────┴────────────────────────────┘
+//
+// 总长度 = header_bytes + slot_count*descriptor_bytes + slot_count*slot_size，
+// 必须与 memfd 的实际大小完全相等；不等即协议违规。
+//
+// 环头部（小端，与本机字节序一致；本 ABI 只在同机进程间使用）：
+//
+//	 0  magic[4]      "NVR1"
+//	 4  version u32    当前为 1
+//	 8  slot_count u32     ┐
+//	12  slot_size u32      ├ 仅供自检，边界计算【不得】使用这三项
+//	16  descriptor_bytes u32 ┘
+//	24  producer_cursor u64  只由生产者写，消费者只读
+//	32  consumer_cursor u64  只由消费者写，生产者只读
+//	40  保留，必须为 0
+//
+// slot 描述符（小端）：
+//
+//	 0  sequence u64    生产者在写完载荷后【最后】以 release 语义写入。
+//	                    奇数 = 正在写入，偶数 = 已就绪。消费者读到奇数即跳过。
+//	 8  payload_length u32  必须 <= slot_size；【消费者必须自己校验】
+//	12  flags u32
+//	16  monotonic_timestamp_nanos u64
+//	24  保留，必须为 0
+//
+// # 不可信输入规则（实现必须遵守）
+//
+//  1. payload_length 一律与控制面下发的 slot_size 比较后再使用，超出即丢弃该
+//     slot 并计一次协议错误。不要 clamp 后继续读——那会把一个 bug 变成静默的
+//     数据损坏。
+//  2. 对端游标是不可信的。消费者推进时必须校验
+//     producer_cursor - consumer_cursor <= slot_count；超出说明被生产者套圈，
+//     应当跳到最新一圈而不是读一批已被覆盖的 slot。
+//  3. 头部里的 slot_count / slot_size / descriptor_bytes 与控制面不符时，直接
+//     视为协议违规关闭传输——这是自检点，不是可协商的参数。
+message TransferRingConfig {
+  // 环中 slot 的数量。必须是 2 的幂，便于用掩码取模且不引入除法。
+  uint32 slot_count = 1;
+
+  // 每个 slot 的载荷容量，等于生效后的 max_packet_bytes。
+  uint32 slot_size = 2;
+
+  // 环头部字节数。固定 4096（一页），让描述符区页对齐。
+  uint32 header_bytes = 3;
+
+  // 每个 slot 描述符的字节数。固定 32。
+  uint32 descriptor_bytes = 4;
 }
 
 message AttachTransferResult {

@@ -31,4 +31,37 @@ public interface AttachTransferSuccessOrBuilder extends
    * @return The maxBytesPerSecond.
    */
   long getMaxBytesPerSecond();
+
+  /**
+   * <pre>
+   * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+   *
+   * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+   * @return Whether the ring field is set.
+   */
+  boolean hasRing();
+  /**
+   * <pre>
+   * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+   *
+   * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+   * @return The ring.
+   */
+  io.github.nervusos.ipc.v1.TransferRingConfig getRing();
+  /**
+   * <pre>
+   * mode == SHARED_MEMORY_RING 时必填，其余模式必须缺省。
+   *
+   * 【这份参数是权威的，共享内存里的头部副本不是】。见 TransferRingConfig。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.TransferRingConfig ring = 4 [json_name = "ring"];</code>
+   */
+  io.github.nervusos.ipc.v1.TransferRingConfigOrBuilder getRingOrBuilder();
 }
