@@ -39,6 +39,25 @@ func cameraLikeMethods() []*ipcv1.MethodMeta {
 	}
 }
 
+// cameraLikeEvents 是一个典型的元数据事件：设备状态变更 + 流终止。
+func cameraLikeEvents() []*ipcv1.EventMeta {
+	return []*ipcv1.EventMeta{
+		{
+			EventId:            1,
+			RequiredPermission: metaPermission,
+			RiskClass:          ipcv1.RiskClass_RISK_CLASS_NORMAL,
+			DeliveryClass:      ipcv1.DeliveryClass_DELIVERY_CLASS_STATE,
+			MaxEventsPerSecond: 10,
+		},
+		{
+			EventId:            2,
+			RequiredPermission: metaPermission,
+			RiskClass:          ipcv1.RiskClass_RISK_CLASS_NORMAL,
+			DeliveryClass:      ipcv1.DeliveryClass_DELIVERY_CLASS_RELIABLE,
+		},
+	}
+}
+
 func metadataDescriptor(t *testing.T, methods []*ipcv1.MethodMeta) *ipcv1.ProviderDescriptor {
 	t.Helper()
 	hash, err := MethodsHash(methods)

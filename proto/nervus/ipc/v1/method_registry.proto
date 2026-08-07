@@ -33,6 +33,7 @@ package nervus.ipc.v1;
 // 这是 protoc 的【内置】well-known 类型，buf / protoc 自带，无需第三方依赖，
 // 也不触碰任何在线服务（NRCP：不依赖 Google 在线服务的红线）。
 import "google/protobuf/descriptor.proto";
+import "nervus/ipc/v1/envelope.proto";
 import "nervus/ipc/v1/transfer.proto";
 
 option go_package = "github.com/nervus-os/nervus-ipc/protocol/ipcv1;ipcv1";
@@ -151,10 +152,65 @@ message MethodMeta {
   string error_detail_type = 16;
 }
 
+// EventMeta 是【订阅事件】的权威元数据，与 MethodMeta 在方法上的地位相同。
+//
+// # 为什么事件必须有自己的元数据
+//
+// Subscribe 按 (endpoint_id, event_id) 粒度建立。nervud 要回答三个问题才能
+// 放行一次订阅，而三个答案都不在事件的载荷里：
+//
+//	谁能订阅       —— required_permission
+//	推送多快       —— max_events_per_second / max_payload_bytes
+//	缺口意味着什么 —— delivery_class
+//
+// 最后一条尤其不能由 Provider 运行时自报：DeliveryClass 决定客户端看到 sequence
+// 跳号时该「什么都不做」还是「数据永久丢失」。让 Provider 每次推送时自己说，
+// 等于把一个安全/正确性判断交给被观察方。
+message EventMeta {
+  // 稳定的数字 event_id，进 Subscribe.event_id 与 Event.event_id。
+  // 【必须等于所在枚举值的数字值】，规则同 MethodMeta.method_id。
+  uint32 event_id = 1;
+
+  // 订阅该事件所需的 Permission id。空 = 接口级 Resolve 已足够。
+  //
+  // 与方法级权限分开声明：一个接口可能允许任何人读状态，却只让特权方订阅
+  // 原始遥测——把两者合并会逼所有事件用最严的那一档。
+  string required_permission = 2;
+
+  RiskClass risk_class = 3;
+
+  // 本事件的投递类别。【由 schema 声明，Provider 不能在运行时自报】。
+  //
+  // 未指定时 nervud 必须 fail closed 按 RELIABLE 处理：那是最严的一档
+  // （不允许任何丢弃），把一个漏填当成「可以随便丢」才是危险的默认。
+  DeliveryClass delivery_class = 4;
+
+  // 事件载荷的 Protobuf 全名。空表示无载荷（纯信号事件）。
+  string payload_type = 5;
+
+  // 单条事件载荷上限。0 表示采用 nervud 的保守默认，不表示无限。
+  uint32 max_payload_bytes = 6;
+
+  // 每秒最大推送条数。0 表示采用 nervud 的保守默认，不表示无限。
+  //
+  // 它是背压的第一道闸：超出时按 delivery_class 决定合并、丢弃还是断开慢消费者。
+  uint32 max_events_per_second = 7;
+}
+
 // method_meta 是挂在 EnumValueOptions 上的扩展 option。
 //
 // 扩展号 60001 落在 protobuf 自定义扩展的私有区间（50000–99999），不与任何
 // 公开注册的扩展冲突。【冻结后永不改动此号】——见文件头说明。
 extend google.protobuf.EnumValueOptions {
   MethodMeta method_meta = 60001;
+
+  // event_meta 与 method_meta 用【同一套机制、不同的扩展号】。
+  //
+  // 分成两个号而不是共用一个：method_id 与 event_id 是两个互不相干的编号空间
+  // （同一个接口里 method 1 和 event 1 毫无关系）。共用一个 option 就得靠字段
+  // 是否为零来区分这条枚举值是方法还是事件，而那种区分方式在漏填时会静默
+  // 把一个事件当成方法。
+  //
+  // 60002 同样落在私有区间（50000–99999）。【冻结后永不改动此号】。
+  EventMeta event_meta = 60002;
 }

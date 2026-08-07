@@ -19,6 +19,7 @@ public final class MethodRegistryProto {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistryLite registry) {
     registry.add(io.github.nervusos.ipc.v1.MethodRegistryProto.methodMeta);
+    registry.add(io.github.nervusos.ipc.v1.MethodRegistryProto.eventMeta);
   }
 
   public static void registerAllExtensions(
@@ -37,11 +38,38 @@ public final class MethodRegistryProto {
           .newFileScopedGeneratedExtension(
         io.github.nervusos.ipc.v1.MethodMeta.class,
         io.github.nervusos.ipc.v1.MethodMeta.getDefaultInstance());
+  public static final int EVENT_META_FIELD_NUMBER = 60002;
+  /**
+   * <pre>
+   * event_meta 与 method_meta 用【同一套机制、不同的扩展号】。
+   *
+   * 分成两个号而不是共用一个：method_id 与 event_id 是两个互不相干的编号空间
+   * （同一个接口里 method 1 和 event 1 毫无关系）。共用一个 option 就得靠字段
+   * 是否为零来区分这条枚举值是方法还是事件，而那种区分方式在漏填时会静默
+   * 把一个事件当成方法。
+   *
+   * 60002 同样落在私有区间（50000–99999）。【冻结后永不改动此号】。
+   * </pre>
+   *
+   * <code>extend .google.protobuf.EnumValueOptions { ... }</code>
+   */
+  public static final
+    com.google.protobuf.GeneratedMessage.GeneratedExtension<
+      com.google.protobuf.DescriptorProtos.EnumValueOptions,
+      io.github.nervusos.ipc.v1.EventMeta> eventMeta = com.google.protobuf.GeneratedMessage
+          .newFileScopedGeneratedExtension(
+        io.github.nervusos.ipc.v1.EventMeta.class,
+        io.github.nervusos.ipc.v1.EventMeta.getDefaultInstance());
   static final com.google.protobuf.Descriptors.Descriptor
     internal_static_nervus_ipc_v1_MethodMeta_descriptor;
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_nervus_ipc_v1_MethodMeta_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_nervus_ipc_v1_EventMeta_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_nervus_ipc_v1_EventMeta_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -53,40 +81,52 @@ public final class MethodRegistryProto {
     java.lang.String[] descriptorData = {
       "\n#nervus/ipc/v1/method_registry.proto\022\rn" +
       "ervus.ipc.v1\032 google/protobuf/descriptor" +
-      ".proto\032\034nervus/ipc/v1/transfer.proto\"\312\005\n" +
-      "\nMethodMeta\022\033\n\tmethod_id\030\001 \001(\rR\010methodId" +
-      "\022/\n\023required_permission\030\002 \001(\tR\022requiredP" +
-      "ermission\0227\n\nrisk_class\030\003 \001(\0162\030.nervus.i" +
-      "pc.v1.RiskClassR\triskClass\0224\n\026requires_c" +
-      "ontrol_lease\030\004 \001(\010R\024requiresControlLease" +
-      "\022+\n\021returns_operation\030\005 \001(\010R\020returnsOper" +
-      "ation\0226\n\027needs_user_confirmation\030\006 \001(\010R\025" +
-      "needsUserConfirmation\022!\n\014request_type\030\007 " +
-      "\001(\tR\013requestType\022#\n\rresponse_type\030\010 \001(\tR" +
-      "\014responseType\022 \n\014is_read_only\030\t \001(\010R\nisR" +
-      "eadOnly\022\033\n\tis_motion\030\n \001(\010R\010isMotion\022,\n\022" +
-      "default_timeout_ms\030\013 \001(\rR\020defaultTimeout" +
-      "Ms\022$\n\016max_timeout_ms\030\014 \001(\rR\014maxTimeoutMs" +
-      "\022*\n\021max_request_bytes\030\r \001(\rR\017maxRequestB" +
-      "ytes\022,\n\022max_response_bytes\030\016 \001(\rR\020maxRes" +
-      "ponseBytes\0229\n\010transfer\030\017 \001(\0132\035.nervus.ip" +
-      "c.v1.TransferPolicyR\010transfer\022*\n\021error_d" +
-      "etail_type\030\020 \001(\tR\017errorDetailType*\241\001\n\tRi" +
-      "skClass\022\032\n\026RISK_CLASS_UNSPECIFIED\020\000\022\025\n\021R" +
-      "ISK_CLASS_NORMAL\020\001\022 \n\034RISK_CLASS_PRIVACY" +
-      "_SENSITIVE\020\002\022\037\n\033RISK_CLASS_PHYSICAL_CONT" +
-      "ROL\020\003\022\036\n\032RISK_CLASS_CRITICAL_SAFETY\020\004:_\n" +
-      "\013method_meta\022!.google.protobuf.EnumValue" +
-      "Options\030\341\324\003 \001(\0132\031.nervus.ipc.v1.MethodMe" +
-      "taR\nmethodMetaBh\n\031io.github.nervusos.ipc" +
-      ".v1B\023MethodRegistryProtoP\001Z4github.com/n" +
-      "ervus-os/nervus-ipc/protocol/ipcv1;ipcv1" +
-      "b\006proto3"
+      ".proto\032\034nervus/ipc/v1/envelope.proto\032\034ne" +
+      "rvus/ipc/v1/transfer.proto\"\312\005\n\nMethodMet" +
+      "a\022\033\n\tmethod_id\030\001 \001(\rR\010methodId\022/\n\023requir" +
+      "ed_permission\030\002 \001(\tR\022requiredPermission\022" +
+      "7\n\nrisk_class\030\003 \001(\0162\030.nervus.ipc.v1.Risk" +
+      "ClassR\triskClass\0224\n\026requires_control_lea" +
+      "se\030\004 \001(\010R\024requiresControlLease\022+\n\021return" +
+      "s_operation\030\005 \001(\010R\020returnsOperation\0226\n\027n" +
+      "eeds_user_confirmation\030\006 \001(\010R\025needsUserC" +
+      "onfirmation\022!\n\014request_type\030\007 \001(\tR\013reque" +
+      "stType\022#\n\rresponse_type\030\010 \001(\tR\014responseT" +
+      "ype\022 \n\014is_read_only\030\t \001(\010R\nisReadOnly\022\033\n" +
+      "\tis_motion\030\n \001(\010R\010isMotion\022,\n\022default_ti" +
+      "meout_ms\030\013 \001(\rR\020defaultTimeoutMs\022$\n\016max_" +
+      "timeout_ms\030\014 \001(\rR\014maxTimeoutMs\022*\n\021max_re" +
+      "quest_bytes\030\r \001(\rR\017maxRequestBytes\022,\n\022ma" +
+      "x_response_bytes\030\016 \001(\rR\020maxResponseBytes" +
+      "\0229\n\010transfer\030\017 \001(\0132\035.nervus.ipc.v1.Trans" +
+      "ferPolicyR\010transfer\022*\n\021error_detail_type" +
+      "\030\020 \001(\tR\017errorDetailType\"\327\002\n\tEventMeta\022\031\n" +
+      "\010event_id\030\001 \001(\rR\007eventId\022/\n\023required_per" +
+      "mission\030\002 \001(\tR\022requiredPermission\0227\n\nris" +
+      "k_class\030\003 \001(\0162\030.nervus.ipc.v1.RiskClassR" +
+      "\triskClass\022C\n\016delivery_class\030\004 \001(\0162\034.ner" +
+      "vus.ipc.v1.DeliveryClassR\rdeliveryClass\022" +
+      "!\n\014payload_type\030\005 \001(\tR\013payloadType\022*\n\021ma" +
+      "x_payload_bytes\030\006 \001(\rR\017maxPayloadBytes\0221" +
+      "\n\025max_events_per_second\030\007 \001(\rR\022maxEvents" +
+      "PerSecond*\241\001\n\tRiskClass\022\032\n\026RISK_CLASS_UN" +
+      "SPECIFIED\020\000\022\025\n\021RISK_CLASS_NORMAL\020\001\022 \n\034RI" +
+      "SK_CLASS_PRIVACY_SENSITIVE\020\002\022\037\n\033RISK_CLA" +
+      "SS_PHYSICAL_CONTROL\020\003\022\036\n\032RISK_CLASS_CRIT" +
+      "ICAL_SAFETY\020\004:_\n\013method_meta\022!.google.pr" +
+      "otobuf.EnumValueOptions\030\341\324\003 \001(\0132\031.nervus" +
+      ".ipc.v1.MethodMetaR\nmethodMeta:\\\n\nevent_" +
+      "meta\022!.google.protobuf.EnumValueOptions\030" +
+      "\342\324\003 \001(\0132\030.nervus.ipc.v1.EventMetaR\tevent" +
+      "MetaBh\n\031io.github.nervusos.ipc.v1B\023Metho" +
+      "dRegistryProtoP\001Z4github.com/nervus-os/n" +
+      "ervus-ipc/protocol/ipcv1;ipcv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.google.protobuf.DescriptorProtos.getDescriptor(),
+          io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor(),
           io.github.nervusos.ipc.v1.TransferProto.getDescriptor(),
         });
     internal_static_nervus_ipc_v1_MethodMeta_descriptor =
@@ -95,9 +135,17 @@ public final class MethodRegistryProto {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_MethodMeta_descriptor,
         new java.lang.String[] { "MethodId", "RequiredPermission", "RiskClass", "RequiresControlLease", "ReturnsOperation", "NeedsUserConfirmation", "RequestType", "ResponseType", "IsReadOnly", "IsMotion", "DefaultTimeoutMs", "MaxTimeoutMs", "MaxRequestBytes", "MaxResponseBytes", "Transfer", "ErrorDetailType", });
+    internal_static_nervus_ipc_v1_EventMeta_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_nervus_ipc_v1_EventMeta_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_nervus_ipc_v1_EventMeta_descriptor,
+        new java.lang.String[] { "EventId", "RequiredPermission", "RiskClass", "DeliveryClass", "PayloadType", "MaxPayloadBytes", "MaxEventsPerSecond", });
     methodMeta.internalInit(descriptor.getExtensions().get(0));
+    eventMeta.internalInit(descriptor.getExtensions().get(1));
     descriptor.resolveAllFeaturesImmutable();
     com.google.protobuf.DescriptorProtos.getDescriptor();
+    io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor();
     io.github.nervusos.ipc.v1.TransferProto.getDescriptor();
   }
 

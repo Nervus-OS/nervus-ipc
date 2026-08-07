@@ -29,6 +29,27 @@ type Schema struct {
 	bundle  *ipcv1.InterfaceSchemaBundle
 	files   *protoregistry.Files
 	methods map[uint32]*ipcv1.MethodMeta
+	events  map[uint32]*ipcv1.EventMeta
+}
+
+// Event 返回某个 event_id 的权威元数据。
+//
+// nervud 的订阅准入靠它回答三件事：谁能订阅（required_permission）、推送多快
+// （max_events_per_second）、缺口意味着什么（delivery_class）。
+func (s *Schema) Event(id uint32) (*ipcv1.EventMeta, bool) {
+	e, ok := s.events[id]
+	if !ok {
+		return nil, false
+	}
+	return proto.Clone(e).(*ipcv1.EventMeta), true
+}
+
+func (s *Schema) Events() map[uint32]*ipcv1.EventMeta {
+	out := make(map[uint32]*ipcv1.EventMeta, len(s.events))
+	for id, e := range s.events {
+		out[id] = proto.Clone(e).(*ipcv1.EventMeta)
+	}
+	return out
 }
 
 func (s *Schema) InterfaceID() string { return s.bundle.GetInterfaceId() }

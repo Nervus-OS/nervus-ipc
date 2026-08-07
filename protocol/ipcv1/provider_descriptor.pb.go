@@ -459,7 +459,14 @@ type ProvidedInterfaceVersion struct {
 	//
 	// 元数据接口的方法【不得】声明 request_type / response_type / error_detail_type：
 	// 没有 schema bundle 可供解析它们，声明了也无从校验。
-	Methods       []*MethodMeta `protobuf:"bytes,3,rep,name=methods,proto3" json:"methods,omitempty"`
+	Methods []*MethodMeta `protobuf:"bytes,3,rep,name=methods,proto3" json:"methods,omitempty"`
+	// 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+	//
+	// 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+	// 关系，因此分成两个字段而不是合并成一张表。
+	//
+	// 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+	Events        []*EventMeta `protobuf:"bytes,4,rep,name=events,proto3" json:"events,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -511,6 +518,13 @@ func (x *ProvidedInterfaceVersion) GetSchemaHash() []byte {
 func (x *ProvidedInterfaceVersion) GetMethods() []*MethodMeta {
 	if x != nil {
 		return x.Methods
+	}
+	return nil
+}
+
+func (x *ProvidedInterfaceVersion) GetEvents() []*EventMeta {
+	if x != nil {
+		return x.Events
 	}
 	return nil
 }
@@ -798,12 +812,13 @@ const file_nervus_ipc_v1_provider_descriptor_proto_rawDesc = "" +
 	"\x19compatible_resource_types\x18\x06 \x03(\tR\x17compatibleResourceTypes\x122\n" +
 	"\x15default_resource_type\x18\a \x01(\tR\x13defaultResourceType\x122\n" +
 	"\x15default_resource_role\x18\b \x01(\tR\x13defaultResourceRole\x12V\n" +
-	"\x12interface_versions\x18\t \x03(\v2'.nervus.ipc.v1.ProvidedInterfaceVersionR\x11interfaceVersionsJ\x04\b\x02\x10\x03J\x04\b\x03\x10\x04R\bversionsR\vschema_hash\"\x86\x01\n" +
+	"\x12interface_versions\x18\t \x03(\v2'.nervus.ipc.v1.ProvidedInterfaceVersionR\x11interfaceVersionsJ\x04\b\x02\x10\x03J\x04\b\x03\x10\x04R\bversionsR\vschema_hash\"\xb8\x01\n" +
 	"\x18ProvidedInterfaceVersion\x12\x14\n" +
 	"\x05major\x18\x01 \x01(\rR\x05major\x12\x1f\n" +
 	"\vschema_hash\x18\x02 \x01(\fR\n" +
 	"schemaHash\x123\n" +
-	"\amethods\x18\x03 \x03(\v2\x19.nervus.ipc.v1.MethodMetaR\amethods\"\xd3\x02\n" +
+	"\amethods\x18\x03 \x03(\v2\x19.nervus.ipc.v1.MethodMetaR\amethods\x120\n" +
+	"\x06events\x18\x04 \x03(\v2\x18.nervus.ipc.v1.EventMetaR\x06events\"\xd3\x02\n" +
 	"\x0fManagedResource\x12\x1f\n" +
 	"\vstable_role\x18\x01 \x01(\tR\n" +
 	"stableRole\x12#\n" +
@@ -875,6 +890,7 @@ var file_nervus_ipc_v1_provider_descriptor_proto_goTypes = []any{
 	nil,                              // 9: nervus.ipc.v1.ManagedResource.LabelsEntry
 	(RiskClass)(0),                   // 10: nervus.ipc.v1.RiskClass
 	(*MethodMeta)(nil),               // 11: nervus.ipc.v1.MethodMeta
+	(*EventMeta)(nil),                // 12: nervus.ipc.v1.EventMeta
 }
 var file_nervus_ipc_v1_provider_descriptor_proto_depIdxs = []int32{
 	4,  // 0: nervus.ipc.v1.ProviderDescriptor.interfaces:type_name -> nervus.ipc.v1.ProvidedInterface
@@ -883,19 +899,20 @@ var file_nervus_ipc_v1_provider_descriptor_proto_depIdxs = []int32{
 	10, // 3: nervus.ipc.v1.ProvidedInterface.resource_risk_floor:type_name -> nervus.ipc.v1.RiskClass
 	5,  // 4: nervus.ipc.v1.ProvidedInterface.interface_versions:type_name -> nervus.ipc.v1.ProvidedInterfaceVersion
 	11, // 5: nervus.ipc.v1.ProvidedInterfaceVersion.methods:type_name -> nervus.ipc.v1.MethodMeta
-	0,  // 6: nervus.ipc.v1.ManagedResource.access_mode:type_name -> nervus.ipc.v1.ResourceAccessMode
-	10, // 7: nervus.ipc.v1.ManagedResource.risk_class:type_name -> nervus.ipc.v1.RiskClass
-	9,  // 8: nervus.ipc.v1.ManagedResource.labels:type_name -> nervus.ipc.v1.ManagedResource.LabelsEntry
-	2,  // 9: nervus.ipc.v1.DefinedPermission.grant_mode:type_name -> nervus.ipc.v1.GrantMode
-	10, // 10: nervus.ipc.v1.DefinedPermission.risk_class:type_name -> nervus.ipc.v1.RiskClass
-	8,  // 11: nervus.ipc.v1.DefinedPermission.display_name:type_name -> nervus.ipc.v1.LocalizedText
-	8,  // 12: nervus.ipc.v1.DefinedPermission.description:type_name -> nervus.ipc.v1.LocalizedText
-	1,  // 13: nervus.ipc.v1.DefinedPermission.minimum_trust:type_name -> nervus.ipc.v1.PermissionTrustFloor
-	14, // [14:14] is the sub-list for method output_type
-	14, // [14:14] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	12, // 6: nervus.ipc.v1.ProvidedInterfaceVersion.events:type_name -> nervus.ipc.v1.EventMeta
+	0,  // 7: nervus.ipc.v1.ManagedResource.access_mode:type_name -> nervus.ipc.v1.ResourceAccessMode
+	10, // 8: nervus.ipc.v1.ManagedResource.risk_class:type_name -> nervus.ipc.v1.RiskClass
+	9,  // 9: nervus.ipc.v1.ManagedResource.labels:type_name -> nervus.ipc.v1.ManagedResource.LabelsEntry
+	2,  // 10: nervus.ipc.v1.DefinedPermission.grant_mode:type_name -> nervus.ipc.v1.GrantMode
+	10, // 11: nervus.ipc.v1.DefinedPermission.risk_class:type_name -> nervus.ipc.v1.RiskClass
+	8,  // 12: nervus.ipc.v1.DefinedPermission.display_name:type_name -> nervus.ipc.v1.LocalizedText
+	8,  // 13: nervus.ipc.v1.DefinedPermission.description:type_name -> nervus.ipc.v1.LocalizedText
+	1,  // 14: nervus.ipc.v1.DefinedPermission.minimum_trust:type_name -> nervus.ipc.v1.PermissionTrustFloor
+	15, // [15:15] is the sub-list for method output_type
+	15, // [15:15] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_nervus_ipc_v1_provider_descriptor_proto_init() }

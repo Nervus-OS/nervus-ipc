@@ -29,6 +29,7 @@ private static final long serialVersionUID = 0L;
   private ProvidedInterfaceVersion() {
     schemaHash_ = com.google.protobuf.ByteString.EMPTY;
     methods_ = java.util.Collections.emptyList();
+    events_ = java.util.Collections.emptyList();
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -236,6 +237,92 @@ private static final long serialVersionUID = 0L;
     return methods_.get(index);
   }
 
+  public static final int EVENTS_FIELD_NUMBER = 4;
+  @SuppressWarnings("serial")
+  private java.util.List<io.github.nervusos.ipc.v1.EventMeta> events_;
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  @java.lang.Override
+  public java.util.List<io.github.nervusos.ipc.v1.EventMeta> getEventsList() {
+    return events_;
+  }
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends io.github.nervusos.ipc.v1.EventMetaOrBuilder> 
+      getEventsOrBuilderList() {
+    return events_;
+  }
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  @java.lang.Override
+  public int getEventsCount() {
+    return events_.size();
+  }
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.EventMeta getEvents(int index) {
+    return events_.get(index);
+  }
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.EventMetaOrBuilder getEventsOrBuilder(
+      int index) {
+    return events_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -259,6 +346,9 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < methods_.size(); i++) {
       output.writeMessage(3, methods_.get(i));
     }
+    for (int i = 0; i < events_.size(); i++) {
+      output.writeMessage(4, events_.get(i));
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -279,6 +369,10 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < methods_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(3, methods_.get(i));
+    }
+    for (int i = 0; i < events_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(4, events_.get(i));
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -301,6 +395,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getSchemaHash())) return false;
     if (!getMethodsList()
         .equals(other.getMethodsList())) return false;
+    if (!getEventsList()
+        .equals(other.getEventsList())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -319,6 +415,10 @@ private static final long serialVersionUID = 0L;
     if (getMethodsCount() > 0) {
       hash = (37 * hash) + METHODS_FIELD_NUMBER;
       hash = (53 * hash) + getMethodsList().hashCode();
+    }
+    if (getEventsCount() > 0) {
+      hash = (37 * hash) + EVENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getEventsList().hashCode();
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -460,6 +560,13 @@ private static final long serialVersionUID = 0L;
         methodsBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000004);
+      if (eventsBuilder_ == null) {
+        events_ = java.util.Collections.emptyList();
+      } else {
+        events_ = null;
+        eventsBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000008);
       return this;
     }
 
@@ -501,6 +608,15 @@ private static final long serialVersionUID = 0L;
         result.methods_ = methods_;
       } else {
         result.methods_ = methodsBuilder_.build();
+      }
+      if (eventsBuilder_ == null) {
+        if (((bitField0_ & 0x00000008) != 0)) {
+          events_ = java.util.Collections.unmodifiableList(events_);
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.events_ = events_;
+      } else {
+        result.events_ = eventsBuilder_.build();
       }
     }
 
@@ -558,6 +674,32 @@ private static final long serialVersionUID = 0L;
           }
         }
       }
+      if (eventsBuilder_ == null) {
+        if (!other.events_.isEmpty()) {
+          if (events_.isEmpty()) {
+            events_ = other.events_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureEventsIsMutable();
+            events_.addAll(other.events_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.events_.isEmpty()) {
+          if (eventsBuilder_.isEmpty()) {
+            eventsBuilder_.dispose();
+            eventsBuilder_ = null;
+            events_ = other.events_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+            eventsBuilder_ = 
+              com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                 getEventsFieldBuilder() : null;
+          } else {
+            eventsBuilder_.addAllMessages(other.events_);
+          }
+        }
+      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -607,6 +749,19 @@ private static final long serialVersionUID = 0L;
               }
               break;
             } // case 26
+            case 34: {
+              io.github.nervusos.ipc.v1.EventMeta m =
+                  input.readMessage(
+                      io.github.nervusos.ipc.v1.EventMeta.parser(),
+                      extensionRegistry);
+              if (eventsBuilder_ == null) {
+                ensureEventsIsMutable();
+                events_.add(m);
+              } else {
+                eventsBuilder_.addMessage(m);
+              }
+              break;
+            } // case 34
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1385,6 +1540,408 @@ private static final long serialVersionUID = 0L;
         methods_ = null;
       }
       return methodsBuilder_;
+    }
+
+    private java.util.List<io.github.nervusos.ipc.v1.EventMeta> events_ =
+      java.util.Collections.emptyList();
+    private void ensureEventsIsMutable() {
+      if (!((bitField0_ & 0x00000008) != 0)) {
+        events_ = new java.util.ArrayList<io.github.nervusos.ipc.v1.EventMeta>(events_);
+        bitField0_ |= 0x00000008;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilder<
+        io.github.nervusos.ipc.v1.EventMeta, io.github.nervusos.ipc.v1.EventMeta.Builder, io.github.nervusos.ipc.v1.EventMetaOrBuilder> eventsBuilder_;
+
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public java.util.List<io.github.nervusos.ipc.v1.EventMeta> getEventsList() {
+      if (eventsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(events_);
+      } else {
+        return eventsBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public int getEventsCount() {
+      if (eventsBuilder_ == null) {
+        return events_.size();
+      } else {
+        return eventsBuilder_.getCount();
+      }
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public io.github.nervusos.ipc.v1.EventMeta getEvents(int index) {
+      if (eventsBuilder_ == null) {
+        return events_.get(index);
+      } else {
+        return eventsBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public Builder setEvents(
+        int index, io.github.nervusos.ipc.v1.EventMeta value) {
+      if (eventsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureEventsIsMutable();
+        events_.set(index, value);
+        onChanged();
+      } else {
+        eventsBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public Builder setEvents(
+        int index, io.github.nervusos.ipc.v1.EventMeta.Builder builderForValue) {
+      if (eventsBuilder_ == null) {
+        ensureEventsIsMutable();
+        events_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        eventsBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public Builder addEvents(io.github.nervusos.ipc.v1.EventMeta value) {
+      if (eventsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureEventsIsMutable();
+        events_.add(value);
+        onChanged();
+      } else {
+        eventsBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public Builder addEvents(
+        int index, io.github.nervusos.ipc.v1.EventMeta value) {
+      if (eventsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureEventsIsMutable();
+        events_.add(index, value);
+        onChanged();
+      } else {
+        eventsBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public Builder addEvents(
+        io.github.nervusos.ipc.v1.EventMeta.Builder builderForValue) {
+      if (eventsBuilder_ == null) {
+        ensureEventsIsMutable();
+        events_.add(builderForValue.build());
+        onChanged();
+      } else {
+        eventsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public Builder addEvents(
+        int index, io.github.nervusos.ipc.v1.EventMeta.Builder builderForValue) {
+      if (eventsBuilder_ == null) {
+        ensureEventsIsMutable();
+        events_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        eventsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public Builder addAllEvents(
+        java.lang.Iterable<? extends io.github.nervusos.ipc.v1.EventMeta> values) {
+      if (eventsBuilder_ == null) {
+        ensureEventsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, events_);
+        onChanged();
+      } else {
+        eventsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public Builder clearEvents() {
+      if (eventsBuilder_ == null) {
+        events_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+      } else {
+        eventsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public Builder removeEvents(int index) {
+      if (eventsBuilder_ == null) {
+        ensureEventsIsMutable();
+        events_.remove(index);
+        onChanged();
+      } else {
+        eventsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public io.github.nervusos.ipc.v1.EventMeta.Builder getEventsBuilder(
+        int index) {
+      return getEventsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public io.github.nervusos.ipc.v1.EventMetaOrBuilder getEventsOrBuilder(
+        int index) {
+      if (eventsBuilder_ == null) {
+        return events_.get(index);  } else {
+        return eventsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public java.util.List<? extends io.github.nervusos.ipc.v1.EventMetaOrBuilder> 
+         getEventsOrBuilderList() {
+      if (eventsBuilder_ != null) {
+        return eventsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(events_);
+      }
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public io.github.nervusos.ipc.v1.EventMeta.Builder addEventsBuilder() {
+      return getEventsFieldBuilder().addBuilder(
+          io.github.nervusos.ipc.v1.EventMeta.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public io.github.nervusos.ipc.v1.EventMeta.Builder addEventsBuilder(
+        int index) {
+      return getEventsFieldBuilder().addBuilder(
+          index, io.github.nervusos.ipc.v1.EventMeta.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+     *
+     * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+     * 关系，因此分成两个字段而不是合并成一张表。
+     *
+     * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+     * </pre>
+     *
+     * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+     */
+    public java.util.List<io.github.nervusos.ipc.v1.EventMeta.Builder> 
+         getEventsBuilderList() {
+      return getEventsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilder<
+        io.github.nervusos.ipc.v1.EventMeta, io.github.nervusos.ipc.v1.EventMeta.Builder, io.github.nervusos.ipc.v1.EventMetaOrBuilder> 
+        getEventsFieldBuilder() {
+      if (eventsBuilder_ == null) {
+        eventsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+            io.github.nervusos.ipc.v1.EventMeta, io.github.nervusos.ipc.v1.EventMeta.Builder, io.github.nervusos.ipc.v1.EventMetaOrBuilder>(
+                events_,
+                ((bitField0_ & 0x00000008) != 0),
+                getParentForChildren(),
+                isClean());
+        events_ = null;
+      }
+      return eventsBuilder_;
     }
 
     // @@protoc_insertion_point(builder_scope:nervus.ipc.v1.ProvidedInterfaceVersion)

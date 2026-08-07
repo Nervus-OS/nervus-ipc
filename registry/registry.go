@@ -55,6 +55,34 @@ func ExtractMethodMetas(enum protoreflect.EnumDescriptor) ([]*ipcv1.MethodMeta, 
 	return out, nil
 }
 
+// ExtractEventMetas 与 ExtractMethodMetas 同规，读的是 event_meta option。
+//
+// 事件与方法用两个独立的扩展号，因此可以挂在【同一个枚举】上而互不干扰：
+// 一个接口把 method_id 与 event_id 放在一起声明是常见写法，抽取时各取各的。
+func ExtractEventMetas(enum protoreflect.EnumDescriptor) ([]*ipcv1.EventMeta, error) {
+	var out []*ipcv1.EventMeta
+	values := enum.Values()
+	for i := 0; i < values.Len(); i++ {
+		val := values.Get(i)
+		opts := val.Options()
+		if opts == nil || !proto.HasExtension(opts, ipcv1.E_EventMeta) {
+			continue
+		}
+		em, ok := proto.GetExtension(opts, ipcv1.E_EventMeta).(*ipcv1.EventMeta)
+		if !ok || em == nil {
+			continue
+		}
+		// 约定同 method：枚举值编号即 event_id，不一致即 .proto 写错了
+		if uint32(val.Number()) != em.GetEventId() {
+			return nil, fmt.Errorf(
+				"registry: enum value %q number %d != event_meta.event_id %d",
+				val.Name(), val.Number(), em.GetEventId())
+		}
+		out = append(out, proto.Clone(em).(*ipcv1.EventMeta))
+	}
+	return out, nil
+}
+
 // ValidateOEMNamespace 是 nervud §7.3 独立校验里「命名空间绑定」那一条的可执行
 // 参考实现（`00` 红线 #3：OEM 私有接口/权限/资源类型必须在定义者命名空间下）。
 //

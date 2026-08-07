@@ -173,4 +173,73 @@ public interface ProvidedInterfaceVersionOrBuilder extends
    */
   io.github.nervusos.ipc.v1.MethodMetaOrBuilder getMethodsOrBuilder(
       int index);
+
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  java.util.List<io.github.nervusos.ipc.v1.EventMeta> 
+      getEventsList();
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  io.github.nervusos.ipc.v1.EventMeta getEvents(int index);
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  int getEventsCount();
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  java.util.List<? extends io.github.nervusos.ipc.v1.EventMetaOrBuilder> 
+      getEventsOrBuilderList();
+  /**
+   * <pre>
+   * 本 major 可被订阅的事件。与 methods 同规：内联声明，进契约哈希。
+   *
+   * 事件与方法是两个独立的编号空间——同一个接口里 method 1 和 event 1 毫无
+   * 关系，因此分成两个字段而不是合并成一张表。
+   *
+   * 元数据接口的事件同样【不得】声明 payload_type（没有 schema 可解析）。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.EventMeta events = 4 [json_name = "events"];</code>
+   */
+  io.github.nervusos.ipc.v1.EventMetaOrBuilder getEventsOrBuilder(
+      int index);
 }

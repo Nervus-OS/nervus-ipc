@@ -326,6 +326,127 @@ func (x *MethodMeta) GetErrorDetailType() string {
 	return ""
 }
 
+// EventMeta 是【订阅事件】的权威元数据，与 MethodMeta 在方法上的地位相同。
+//
+// # 为什么事件必须有自己的元数据
+//
+// Subscribe 按 (endpoint_id, event_id) 粒度建立。nervud 要回答三个问题才能
+// 放行一次订阅，而三个答案都不在事件的载荷里：
+//
+//	谁能订阅       —— required_permission
+//	推送多快       —— max_events_per_second / max_payload_bytes
+//	缺口意味着什么 —— delivery_class
+//
+// 最后一条尤其不能由 Provider 运行时自报：DeliveryClass 决定客户端看到 sequence
+// 跳号时该「什么都不做」还是「数据永久丢失」。让 Provider 每次推送时自己说，
+// 等于把一个安全/正确性判断交给被观察方。
+type EventMeta struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// 稳定的数字 event_id，进 Subscribe.event_id 与 Event.event_id。
+	// 【必须等于所在枚举值的数字值】，规则同 MethodMeta.method_id。
+	EventId uint32 `protobuf:"varint,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	// 订阅该事件所需的 Permission id。空 = 接口级 Resolve 已足够。
+	//
+	// 与方法级权限分开声明：一个接口可能允许任何人读状态，却只让特权方订阅
+	// 原始遥测——把两者合并会逼所有事件用最严的那一档。
+	RequiredPermission string    `protobuf:"bytes,2,opt,name=required_permission,json=requiredPermission,proto3" json:"required_permission,omitempty"`
+	RiskClass          RiskClass `protobuf:"varint,3,opt,name=risk_class,json=riskClass,proto3,enum=nervus.ipc.v1.RiskClass" json:"risk_class,omitempty"`
+	// 本事件的投递类别。【由 schema 声明，Provider 不能在运行时自报】。
+	//
+	// 未指定时 nervud 必须 fail closed 按 RELIABLE 处理：那是最严的一档
+	// （不允许任何丢弃），把一个漏填当成「可以随便丢」才是危险的默认。
+	DeliveryClass DeliveryClass `protobuf:"varint,4,opt,name=delivery_class,json=deliveryClass,proto3,enum=nervus.ipc.v1.DeliveryClass" json:"delivery_class,omitempty"`
+	// 事件载荷的 Protobuf 全名。空表示无载荷（纯信号事件）。
+	PayloadType string `protobuf:"bytes,5,opt,name=payload_type,json=payloadType,proto3" json:"payload_type,omitempty"`
+	// 单条事件载荷上限。0 表示采用 nervud 的保守默认，不表示无限。
+	MaxPayloadBytes uint32 `protobuf:"varint,6,opt,name=max_payload_bytes,json=maxPayloadBytes,proto3" json:"max_payload_bytes,omitempty"`
+	// 每秒最大推送条数。0 表示采用 nervud 的保守默认，不表示无限。
+	//
+	// 它是背压的第一道闸：超出时按 delivery_class 决定合并、丢弃还是断开慢消费者。
+	MaxEventsPerSecond uint32 `protobuf:"varint,7,opt,name=max_events_per_second,json=maxEventsPerSecond,proto3" json:"max_events_per_second,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *EventMeta) Reset() {
+	*x = EventMeta{}
+	mi := &file_nervus_ipc_v1_method_registry_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EventMeta) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EventMeta) ProtoMessage() {}
+
+func (x *EventMeta) ProtoReflect() protoreflect.Message {
+	mi := &file_nervus_ipc_v1_method_registry_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EventMeta.ProtoReflect.Descriptor instead.
+func (*EventMeta) Descriptor() ([]byte, []int) {
+	return file_nervus_ipc_v1_method_registry_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *EventMeta) GetEventId() uint32 {
+	if x != nil {
+		return x.EventId
+	}
+	return 0
+}
+
+func (x *EventMeta) GetRequiredPermission() string {
+	if x != nil {
+		return x.RequiredPermission
+	}
+	return ""
+}
+
+func (x *EventMeta) GetRiskClass() RiskClass {
+	if x != nil {
+		return x.RiskClass
+	}
+	return RiskClass_RISK_CLASS_UNSPECIFIED
+}
+
+func (x *EventMeta) GetDeliveryClass() DeliveryClass {
+	if x != nil {
+		return x.DeliveryClass
+	}
+	return DeliveryClass_DELIVERY_CLASS_UNSPECIFIED
+}
+
+func (x *EventMeta) GetPayloadType() string {
+	if x != nil {
+		return x.PayloadType
+	}
+	return ""
+}
+
+func (x *EventMeta) GetMaxPayloadBytes() uint32 {
+	if x != nil {
+		return x.MaxPayloadBytes
+	}
+	return 0
+}
+
+func (x *EventMeta) GetMaxEventsPerSecond() uint32 {
+	if x != nil {
+		return x.MaxEventsPerSecond
+	}
+	return 0
+}
+
 var file_nervus_ipc_v1_method_registry_proto_extTypes = []protoimpl.ExtensionInfo{
 	{
 		ExtendedType:  (*descriptorpb.EnumValueOptions)(nil),
@@ -335,19 +456,38 @@ var file_nervus_ipc_v1_method_registry_proto_extTypes = []protoimpl.ExtensionInf
 		Tag:           "bytes,60001,opt,name=method_meta",
 		Filename:      "nervus/ipc/v1/method_registry.proto",
 	},
+	{
+		ExtendedType:  (*descriptorpb.EnumValueOptions)(nil),
+		ExtensionType: (*EventMeta)(nil),
+		Field:         60002,
+		Name:          "nervus.ipc.v1.event_meta",
+		Tag:           "bytes,60002,opt,name=event_meta",
+		Filename:      "nervus/ipc/v1/method_registry.proto",
+	},
 }
 
 // Extension fields to descriptorpb.EnumValueOptions.
 var (
 	// optional nervus.ipc.v1.MethodMeta method_meta = 60001;
 	E_MethodMeta = &file_nervus_ipc_v1_method_registry_proto_extTypes[0]
+	// event_meta 与 method_meta 用【同一套机制、不同的扩展号】。
+	//
+	// 分成两个号而不是共用一个：method_id 与 event_id 是两个互不相干的编号空间
+	// （同一个接口里 method 1 和 event 1 毫无关系）。共用一个 option 就得靠字段
+	// 是否为零来区分这条枚举值是方法还是事件，而那种区分方式在漏填时会静默
+	// 把一个事件当成方法。
+	//
+	// 60002 同样落在私有区间（50000–99999）。【冻结后永不改动此号】。
+	//
+	// optional nervus.ipc.v1.EventMeta event_meta = 60002;
+	E_EventMeta = &file_nervus_ipc_v1_method_registry_proto_extTypes[1]
 )
 
 var File_nervus_ipc_v1_method_registry_proto protoreflect.FileDescriptor
 
 const file_nervus_ipc_v1_method_registry_proto_rawDesc = "" +
 	"\n" +
-	"#nervus/ipc/v1/method_registry.proto\x12\rnervus.ipc.v1\x1a google/protobuf/descriptor.proto\x1a\x1cnervus/ipc/v1/transfer.proto\"\xca\x05\n" +
+	"#nervus/ipc/v1/method_registry.proto\x12\rnervus.ipc.v1\x1a google/protobuf/descriptor.proto\x1a\x1cnervus/ipc/v1/envelope.proto\x1a\x1cnervus/ipc/v1/transfer.proto\"\xca\x05\n" +
 	"\n" +
 	"MethodMeta\x12\x1b\n" +
 	"\tmethod_id\x18\x01 \x01(\rR\bmethodId\x12/\n" +
@@ -368,7 +508,16 @@ const file_nervus_ipc_v1_method_registry_proto_rawDesc = "" +
 	"\x11max_request_bytes\x18\r \x01(\rR\x0fmaxRequestBytes\x12,\n" +
 	"\x12max_response_bytes\x18\x0e \x01(\rR\x10maxResponseBytes\x129\n" +
 	"\btransfer\x18\x0f \x01(\v2\x1d.nervus.ipc.v1.TransferPolicyR\btransfer\x12*\n" +
-	"\x11error_detail_type\x18\x10 \x01(\tR\x0ferrorDetailType*\xa1\x01\n" +
+	"\x11error_detail_type\x18\x10 \x01(\tR\x0ferrorDetailType\"\xd7\x02\n" +
+	"\tEventMeta\x12\x19\n" +
+	"\bevent_id\x18\x01 \x01(\rR\aeventId\x12/\n" +
+	"\x13required_permission\x18\x02 \x01(\tR\x12requiredPermission\x127\n" +
+	"\n" +
+	"risk_class\x18\x03 \x01(\x0e2\x18.nervus.ipc.v1.RiskClassR\triskClass\x12C\n" +
+	"\x0edelivery_class\x18\x04 \x01(\x0e2\x1c.nervus.ipc.v1.DeliveryClassR\rdeliveryClass\x12!\n" +
+	"\fpayload_type\x18\x05 \x01(\tR\vpayloadType\x12*\n" +
+	"\x11max_payload_bytes\x18\x06 \x01(\rR\x0fmaxPayloadBytes\x121\n" +
+	"\x15max_events_per_second\x18\a \x01(\rR\x12maxEventsPerSecond*\xa1\x01\n" +
 	"\tRiskClass\x12\x1a\n" +
 	"\x16RISK_CLASS_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11RISK_CLASS_NORMAL\x10\x01\x12 \n" +
@@ -376,7 +525,9 @@ const file_nervus_ipc_v1_method_registry_proto_rawDesc = "" +
 	"\x1bRISK_CLASS_PHYSICAL_CONTROL\x10\x03\x12\x1e\n" +
 	"\x1aRISK_CLASS_CRITICAL_SAFETY\x10\x04:_\n" +
 	"\vmethod_meta\x12!.google.protobuf.EnumValueOptions\x18\xe1\xd4\x03 \x01(\v2\x19.nervus.ipc.v1.MethodMetaR\n" +
-	"methodMetaBh\n" +
+	"methodMeta:\\\n" +
+	"\n" +
+	"event_meta\x12!.google.protobuf.EnumValueOptions\x18\xe2\xd4\x03 \x01(\v2\x18.nervus.ipc.v1.EventMetaR\teventMetaBh\n" +
 	"\x19io.github.nervusos.ipc.v1B\x13MethodRegistryProtoP\x01Z4github.com/nervus-os/nervus-ipc/protocol/ipcv1;ipcv1b\x06proto3"
 
 var (
@@ -392,23 +543,29 @@ func file_nervus_ipc_v1_method_registry_proto_rawDescGZIP() []byte {
 }
 
 var file_nervus_ipc_v1_method_registry_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_nervus_ipc_v1_method_registry_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_nervus_ipc_v1_method_registry_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_nervus_ipc_v1_method_registry_proto_goTypes = []any{
 	(RiskClass)(0),                        // 0: nervus.ipc.v1.RiskClass
 	(*MethodMeta)(nil),                    // 1: nervus.ipc.v1.MethodMeta
-	(*TransferPolicy)(nil),                // 2: nervus.ipc.v1.TransferPolicy
-	(*descriptorpb.EnumValueOptions)(nil), // 3: google.protobuf.EnumValueOptions
+	(*EventMeta)(nil),                     // 2: nervus.ipc.v1.EventMeta
+	(*TransferPolicy)(nil),                // 3: nervus.ipc.v1.TransferPolicy
+	(DeliveryClass)(0),                    // 4: nervus.ipc.v1.DeliveryClass
+	(*descriptorpb.EnumValueOptions)(nil), // 5: google.protobuf.EnumValueOptions
 }
 var file_nervus_ipc_v1_method_registry_proto_depIdxs = []int32{
 	0, // 0: nervus.ipc.v1.MethodMeta.risk_class:type_name -> nervus.ipc.v1.RiskClass
-	2, // 1: nervus.ipc.v1.MethodMeta.transfer:type_name -> nervus.ipc.v1.TransferPolicy
-	3, // 2: nervus.ipc.v1.method_meta:extendee -> google.protobuf.EnumValueOptions
-	1, // 3: nervus.ipc.v1.method_meta:type_name -> nervus.ipc.v1.MethodMeta
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	3, // [3:4] is the sub-list for extension type_name
-	2, // [2:3] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	3, // 1: nervus.ipc.v1.MethodMeta.transfer:type_name -> nervus.ipc.v1.TransferPolicy
+	0, // 2: nervus.ipc.v1.EventMeta.risk_class:type_name -> nervus.ipc.v1.RiskClass
+	4, // 3: nervus.ipc.v1.EventMeta.delivery_class:type_name -> nervus.ipc.v1.DeliveryClass
+	5, // 4: nervus.ipc.v1.method_meta:extendee -> google.protobuf.EnumValueOptions
+	5, // 5: nervus.ipc.v1.event_meta:extendee -> google.protobuf.EnumValueOptions
+	1, // 6: nervus.ipc.v1.method_meta:type_name -> nervus.ipc.v1.MethodMeta
+	2, // 7: nervus.ipc.v1.event_meta:type_name -> nervus.ipc.v1.EventMeta
+	8, // [8:8] is the sub-list for method output_type
+	8, // [8:8] is the sub-list for method input_type
+	6, // [6:8] is the sub-list for extension type_name
+	4, // [4:6] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_nervus_ipc_v1_method_registry_proto_init() }
@@ -416,6 +573,7 @@ func file_nervus_ipc_v1_method_registry_proto_init() {
 	if File_nervus_ipc_v1_method_registry_proto != nil {
 		return
 	}
+	file_nervus_ipc_v1_envelope_proto_init()
 	file_nervus_ipc_v1_transfer_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -423,8 +581,8 @@ func file_nervus_ipc_v1_method_registry_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nervus_ipc_v1_method_registry_proto_rawDesc), len(file_nervus_ipc_v1_method_registry_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   1,
-			NumExtensions: 1,
+			NumMessages:   2,
+			NumExtensions: 2,
 			NumServices:   0,
 		},
 		GoTypes:           file_nervus_ipc_v1_method_registry_proto_goTypes,
