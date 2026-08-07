@@ -68,15 +68,18 @@ func TestConnect_FirstFrameIsHelloWithVersionRange(t *testing.T) {
 	if h == nil {
 		t.Fatalf("first frame is %T, want Hello", first.GetBody())
 	}
-	if h.GetMinProtocolMajor() != 1 || h.GetMaxProtocolMajor() != 1 {
-		t.Errorf("major range = [%d,%d], want [1,1]", h.GetMinProtocolMajor(), h.GetMaxProtocolMajor())
+	// 【下界与上界都是 2】：v2 不向下兼容 v1。声明 min=1 会让一个 v1 服务端
+	// 与本 SDK 握手成功，然后在空 selector 的语义上悄悄不一致——那比连不上
+	// 危险得多。这条断言就是防止有人为了「兼容老设备」把下界改回去。
+	if h.GetMinProtocolMajor() != 2 || h.GetMaxProtocolMajor() != 2 {
+		t.Errorf("major range = [%d,%d], want [2,2]", h.GetMinProtocolMajor(), h.GetMaxProtocolMajor())
 	}
 	if h.GetDeclaredComponentId() != testComponentID {
 		t.Errorf("declared component = %q", h.GetDeclaredComponentId())
 	}
 	// 握手帧【必须】带版本号——全协议只有这里的 protocol_major/minor 有意义。
-	if first.GetProtocolMajor() != 1 {
-		t.Errorf("Hello envelope protocol_major = %d, want 1", first.GetProtocolMajor())
+	if first.GetProtocolMajor() != 2 {
+		t.Errorf("Hello envelope protocol_major = %d, want 2", first.GetProtocolMajor())
 	}
 }
 

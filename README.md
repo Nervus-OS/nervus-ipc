@@ -31,26 +31,29 @@ JVM 侧的手写 SDK **不在本仓库**，在 `nervus-app-sdk`（`com.nervus.sd
 **关闭连接**并审计为 `UnsupportedBody`——SDK 侧只会看到「连接莫名断了」，
 审计只进 nervud 日志，极难排查。发之前先查这张表。
 
+**当前协议版本：2.0。v2 不向下兼容 v1**，握手时 major 谈不拢直接被拒
+（先发 Failure `HelloAck` 再关连接，能拿到确切原因）。
+断点是两条隐式默认的移除：`ResolveEndpoint` 与 `AcquireControl` 的空 selector
+不再指向 `{nervus.resource.motion.base, base.main}`。
+
 | body | 号 | nervud | 说明 |
 |---|---|:---:|---|
 | Hello / HelloAck | 10-11 | ✅ | |
-| ResolveEndpoint / Result | 20-21 | ✅ | |
+| ResolveEndpoint / Result | 20-21 | ✅ | 空 selector 不再有隐式默认，绑资源的接口必须显式指定 |
 | RegisterEndpoint / Result | 22-23 | ✅ | |
 | EndpointDied / EndpointRevoked | 24-25 | ✅ | nervud → 对端 |
 | UnregisterEndpoint / Result | 26-27 | ✅ | |
 | Request / Response | 30-31 | ✅ | **主调用链，短命令走这条** |
 | Cancel | 32 | ❌ | 调用方发来仍会关连接 |
-| Subscribe / Unsubscribe | 40, 42 | ❌ | 收到即关连接 |
-| SubscribeResult / UnsubscribeResult / Event / SubscriptionClosed | 41, 43-45 | ❌ | nervud 不会发出 |
-| Dispatch / DispatchResult | 50-51 | ✅ | nervud ↔ Service；protocol 1.1 附带 `ExecutionContext` |
+| Subscribe / Unsubscribe | 40, 42 | ✅ | 按 `(endpoint, event_id)` 订阅 |
+| SubscribeResult / UnsubscribeResult | 41, 44 | ✅ | 成功回带 `delivery_class` |
+| Event / SubscriptionClosed | 43, 45 | ✅ | nervud 扇出；背压按 `delivery_class` |
+| Dispatch / DispatchResult | 50-51 | ✅ | nervud ↔ Service；v2 起**无条件**附带 `ExecutionContext` |
 | CancelDispatch | 52 | ⚠️ | deadline / 调用方断线会发；显式 Cancel 尚未接线。Go ServiceHost 已支持 |
+| PublishEvent | 53 | ✅ | Service → nervud 单向上报，**没有结果**；订阅方不发也不收 |
 | Ping / Pong | 60-61 | ✅ | |
 | AcquireControl / ReleaseControl + Result | 70-73 | ✅ | 已接到 `internal/control` |
 | LaunchComponent / Result | 80-81 | ✅ | |
-
-Go `ServiceHost` 从 protocol 1.1 起要求每个 Dispatch 都有内核生成的
-`ExecutionContext`。nervud 对 minor 0 Provider 只保留不需要控制租约的兼容调用；
-控制/运动方法一律 fail closed，不会让旧 Provider 忽略新字段后继续执行。
 
 非 Envelope 的 proto：
 
@@ -58,19 +61,20 @@ Go `ServiceHost` 从 protocol 1.1 起要求每个 Dispatch 都有内核生成的
 |---|:---:|---|
 | `status.proto` | ✅ | |
 | `safety.proto` | ⚠️ 未接线 | 类型能编译，但投递端是 `NopPath`、上报端是 `NopReports` |
-| `schema.proto` | ⚠️ 未接线 | `registry` 已能构建、验 hash、动态解析 bundle；内核装包链未消费 |
-| `method_registry.proto` | ⚠️ 未接线 | `registry` 已能动态抽取并校验；内核 dispatch 未消费 |
-| `provider_descriptor.proto` | ⚠️ 未接线 | 内核三张表仍是硬编码，本文件是替换它们的解药 |
-| `transfer.proto` + `transfer_control.proto` | ⚠️ 未接线 | 通用高速数据面契约已定义；内核 Transfer Manager / UDS 尚未实现 |
+| `schema.proto` | ✅ | 装包链消费 `ProviderArtifacts`，Catalog 按 `schema_hash` 裁决 |
+| `method_registry.proto` | ✅ | `MethodMeta` / `EventMeta` 是 dispatch 与订阅的权威依据 |
+| `provider_descriptor.proto` | ✅ | 内核不再有硬编码的接口/权限/资源表 |
+| `transfer.proto` | ✅ | FRAMED_RELAY 与 SHARED_MEMORY_RING 均已接线 |
 
 **改动纪律**：内核每接通一项，同一个 PR 里更新本表 + 对应 `.proto` 的
 `[KERNEL: NOT IMPLEMENTED]` / `[KERNEL: NOT WIRED]` 标记。两处不同步就等于没标。
 
 ### 已知的踩坑风险
 
-`nervus-app-sdk` 目前**实现了 nervud 不支持的功能**：`SubscriptionManager`、
-`NervusClient.subscribe(...)`、`sendCancel(...)`。这些 API 编译得过、单测也过，
-一连真 nervud 就断连。使用前务必对照上表。
+`nervus-app-sdk`（Kotlin）**仍停在 protocol 1**，连不上 major 2 的 nervud——
+握手就会被拒，症状是「所有 App 都连不上」。它需要一次与本仓库 v2 对齐的升级：
+翻版本号、接上 `PublishEvent`、并核对 `SubscriptionManager` 的语义
+（订阅本身现已被内核支持，但 `sendCancel(...)` 仍然会被当成未实现 body 关连接）。
 
 ## 为什么多语言在同一个仓库
 
@@ -115,6 +119,8 @@ nervus-ipc/
 │   ├── nervus/interface/transfer/v1/ Transfer Control 系统接口
 │   ├── nervus/interface/basemotion/v1/   标准接口 BaseMotion@1（机械狗移动主线）
 │   ├── nervus/interface/manipulator/v1/  标准接口 Manipulator@1（机械臂）
+│   ├── nervus/interface/camera/v1/       标准接口 Camera@1 + CameraConfig@1
+│   ├── nervus/interface/resourcedir/v1/  标准接口 ResourceDirectory@1（内核内建）
 │   └── com/acme/dog/v1/                  OEM 私有接口样例（可拓展性验收）
 ├── protocol/                   生成的 Go 类型（提交进仓库，见下）
 ├── registry/                   动态 schema bundle / Provider Descriptor 校验

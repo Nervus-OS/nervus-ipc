@@ -107,8 +107,27 @@ type ServiceHost struct {
 	inflightMu sync.Mutex
 	inflight   map[uint64]*inflightCall
 
+	// subs 是订阅状态机，见 subscribe.go。Service 也会订阅别人的事件——
+	// nervus.camerad 就要订阅厂商 Provider 的帧就绪事件。
+	subs *subscriber
+
 	readErr  error
 	readDone chan struct{}
+}
+
+// writeEnvelope / nextRequestID 让 ServiceHost 满足 eventTransport
+// （closedErr 已有）。
+func (h *ServiceHost) writeEnvelope(env *ipcv1.Envelope) error { return h.co.writeEnvelope(env) }
+func (h *ServiceHost) nextRequestID() (uint64, error)          { return h.ids.nextID() }
+
+// Subscribe 订阅一个 endpoint 上的事件。语义与 Client.Subscribe 完全相同。
+func (h *ServiceHost) Subscribe(ctx context.Context, req SubscribeRequest) (*Subscription, error) {
+	return h.subs.subscribe(ctx, req)
+}
+
+// Unsubscribe 撤下一条订阅并关闭它的事件通道。
+func (h *ServiceHost) Unsubscribe(ctx context.Context, sub *Subscription) error {
+	return h.subs.unsubscribe(ctx, sub)
 }
 
 // NewServiceHost 建立连接并完成握手。
@@ -126,10 +145,9 @@ func NewServiceHost(cfg Config) (*ServiceHost, error) {
 		co.close()
 		return nil, err
 	}
-	if co.negMinor < executionContextProtocolMinor {
-		co.close()
-		return nil, fmt.Errorf("%w: ServiceHost requires protocol 1.1 execution context", ErrProtocol)
-	}
+	// v2 起 Dispatch 无条件携带 ExecutionContext，不再有 minor 门。曾经那道
+	// 检查存在的理由（1.0 的 Dispatch 没有调用方身份，Provider 无法鉴权）已经
+	// 随 major 一起消失：能握上手就说明对端是 v2。
 
 	h := &ServiceHost{
 		co:             co,
@@ -141,6 +159,7 @@ func NewServiceHost(cfg Config) (*ServiceHost, error) {
 		inflight:       make(map[uint64]*inflightCall),
 		readDone:       make(chan struct{}),
 	}
+	h.subs = newSubscriber(h, cfg.Log)
 	// 读循环在构造时就起，不等 Serve：RegisterEndpoint 需要读它自己的响应，
 	// 而调用顺序必然是「先报到、再 Serve」。若把读循环放进 Serve，报到时就
 	// 没有 reader，RegisterEndpoint 永远等不到结果——死锁。
@@ -266,6 +285,53 @@ func (e *EndpointHost) Unregister(ctx context.Context, drain bool) error {
 	e.endpointID = 0
 	e.registered = false
 	return nil
+}
+
+// PublishEvent 在本 endpoint 上报一条事件，不带产生时刻。
+//
+// 适用于纯信号与状态变更（「流开了」「设备掉了」）——这类事件的意义在于
+// 「发生了」，收到的先后就是全部时序信息。
+//
+// 承载采样数据的事件应当用 PublishEventAt 带上采集时刻。
+func (e *EndpointHost) PublishEvent(eventID uint32, payload []byte) error {
+	return e.PublishEventAt(eventID, payload, 0)
+}
+
+// PublishEventAt 上报一条带产生时刻的事件。
+//
+// # 时间戳必须由调用方给出，本 SDK 不代劳
+//
+// 有意义的时刻是【数据产生的那一刻】，而不是「Go 代码腾出手来发布的那一刻」。
+// 摄像头帧的正确取值是 V4L2 buffer 自带的 CLOCK_MONOTONIC 时间戳，IMU 是采样
+// 中断的时刻——这些都在驱动那一层，SDK 拿不到。让 SDK 随手打一个
+// time.Now() 会产出一个看起来合理、实际上混进了排队延迟的数字，而消费者
+// 无法分辨它是不是真的采集时刻。
+//
+// 拿不到真实采集时刻就传 0（表示未提供），不要用发布时刻冒充。
+//
+// # 单向，没有结果
+//
+// 上报不等结果：给它配一个结果会让 Provider 的事件循环变成请求-响应，
+// 一个慢订阅者就能拖住整个 Provider。背压的正确落点在 nervud 与订阅方之间。
+//
+// 返回的 error 只表示【本地写失败】（连接已断）。事件被 nervud 拒绝
+// （event_id 不在契约里、超出 max_payload_bytes）不会有任何回音，只在内核
+// 审计里留一条 ipc.PublishEventRejected。
+func (e *EndpointHost) PublishEventAt(eventID uint32, payload []byte, monotonicNanos uint64) error {
+	e.mu.Lock()
+	id, registered := e.endpointID, e.registered
+	e.mu.Unlock()
+	if !registered {
+		return errors.New("sdk: endpoint is not registered")
+	}
+	return e.host.co.writeEnvelope(&ipcv1.Envelope{
+		Body: &ipcv1.Envelope_PublishEvent{PublishEvent: &ipcv1.PublishEvent{
+			EndpointId:              id,
+			EventId:                 eventID,
+			Payload:                 payload,
+			MonotonicTimestampNanos: monotonicNanos,
+		}},
+	})
 }
 
 // ResolveEndpoint 在同一条 Service 控制连接上解析一个消费侧 endpoint。
@@ -570,6 +636,11 @@ func (h *ServiceHost) serve() {
 
 // handleEnvelope 分派一个收到的 Envelope，返回是否应当终止连接。
 func (h *ServiceHost) handleEnvelope(env *ipcv1.Envelope) bool {
+	// 订阅相关的四个 body 在两种角色上语义相同，交给共用的状态机。
+	if h.subs.handleSubscriptionBody(env) {
+		return false
+	}
+
 	switch body := env.GetBody().(type) {
 	case *ipcv1.Envelope_Dispatch:
 		// startDispatch 在读循环里先登记 route，再启动 goroutine。这样紧跟在
@@ -823,6 +894,8 @@ func (h *ServiceHost) replyFailure(routeID uint64, se *StatusError) {
 }
 
 func (h *ServiceHost) failAllPending() {
+	h.subs.closeAll(h.closedErr())
+
 	h.pendingMu.Lock()
 	m := h.pending
 	h.pending = make(map[uint64]*controlWaiter)

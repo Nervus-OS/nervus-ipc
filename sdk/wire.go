@@ -12,9 +12,11 @@
 //
 // # 本包【不】实现哪些 body
 //
-// nervud 目前不支持 Cancel(32)、Subscribe 组(40-45)、ControlLease 组(70-73)，
-// 收到即关闭连接并审计为 UnsupportedBody。本包因此【刻意不提供】这些 API：
-// 提供一个「编译得过、一调就断连」的方法比不提供更糟。
+// nervud 目前不支持 Cancel(32) 与 ControlLease 组(70-73)，收到即关闭连接并
+// 审计为 UnsupportedBody。本包因此【刻意不提供】这些 API：提供一个
+// 「编译得过、一调就断连」的方法比不提供更糟。
+//
+// 订阅组(40-45) 与 PublishEvent(53) 已由内核接通，API 见 subscribe.go。
 //
 // 权威依据是仓库根 README 的「实现状态」表。内核接通某一项后，先更新那张表，
 // 再在这里补 API。

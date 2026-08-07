@@ -68,21 +68,28 @@ func TestServiceHost_RegisterEndpoint(t *testing.T) {
 	}
 }
 
-func TestServiceHost_RequiresExecutionContextProtocol(t *testing.T) {
+// 【v1 服务端必须被拒】，而不是降级连上。
+//
+// 这里替代的是曾经的 minor 门（1.0 的 Dispatch 不带 ExecutionContext，Provider
+// 无法鉴权，所以要求 >=1.1）。v2 起 ExecutionContext 无条件携带，那道门随
+// major 一起消失——但「不和 v1 说话」这条约束反而更硬了：v2 移除了空 selector
+// 的隐式默认，与 v1 服务端通信会在资源解析上悄悄给出不同结果。
+func TestServiceHost_RejectsV1Server(t *testing.T) {
 	f := startFakeNervud(t)
 	f.setHandler(func(_ net.Conn, env *ipcv1.Envelope) []*ipcv1.Envelope {
 		if env.GetHello() == nil {
 			return nil
 		}
 		ack := helloAckOK()
-		ack.GetHelloAck().GetSuccess().ProtocolMinor = 0
+		ack.GetHelloAck().GetSuccess().ProtocolMajor = 1
+		ack.GetHelloAck().GetSuccess().ProtocolMinor = 1
 		return []*ipcv1.Envelope{ack}
 	})
 
 	h, err := NewServiceHost(quietConfig(f.sockPath()))
 	if h != nil {
 		_ = h.Close()
-		t.Fatal("ServiceHost accepted protocol minor 0")
+		t.Fatal("ServiceHost accepted a v1 server")
 	}
 	if !errors.Is(err, ErrProtocol) {
 		t.Fatalf("NewServiceHost error = %v, want ErrProtocol", err)

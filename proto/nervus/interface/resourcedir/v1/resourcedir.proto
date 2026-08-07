@@ -1,0 +1,122 @@
+// Nervus 标准接口 · ResourceDirectory@1  [REWRITE-v1 / experimental]
+//
+//   interface_id = nervus.interface.resource.directory ，major = 1
+//   Permission   = perm.resource.query
+//   Resource     = 无（本接口不绑资源，它描述的就是资源本身）
+//
+// 由 nervud 以【内建 endpoint】实现，只读。
+//
+// # 它补的是一个真实的缺口
+//
+// ResourceSelector 能回答「把我接到那个前视摄像头上」，但回答不了
+// 「这台机器上到底有几个摄像头」。缺了后者，App 只能靠反复 Resolve 去试探——
+// 试到 NOT_FOUND 为止。那既慢又不可靠：一次失败的 Resolve 分不清
+// 「没有这个设备」和「有但我没权限」。
+//
+// 有了目录，设备发现变成一次查询；Resolve 回归它本来的职责——建立路由。
+//
+// # 为什么由内核实现而不是某个系统服务
+//
+// 资源目录【就是 Catalog 本身】。让一个服务来代答，等于让它维护一份 Catalog
+// 的副本，而副本与真身之间必然存在一个可以漂移的窗口：装包已经生效、副本还
+// 没刷新，App 拿到的就是一份过期的设备清单。内核直接读自己的 Snapshot，
+// 不存在这个窗口。
+//
+// # 边界：这里【只放】一次成功 Resolve 已经会暴露的信息
+//
+// 返回的是公开投影——handle / 类型 / role / 访问模式 / 风险级 / 标签。
+// 【不含】设备节点路径、序列号、Provider PID、厂商固件版本。
+//
+// 这条边界是硬的：目录是所有持有 perm.resource.query 的 App 都能读的东西，
+// 往里加一个「顺便也返回一下」的字段，就等于把那个字段公开给了全系统。
+// 需要更细信息的调用方应当 Resolve 到具体接口，在那里接受该接口自己的权限裁决。
+//
+// [REWRITE-v1] experimental：v2 前允许破坏性调整；正式冻结后遵循 §10.12。
+
+syntax = "proto3";
+
+package nervus.interface.resourcedir.v1;
+
+import "nervus/ipc/v1/method_registry.proto";
+import "nervus/ipc/v1/provider_descriptor.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/resourcedirv1;resourcedirv1";
+
+// Java 包名不能含连字符，也不能用保留字 "interface" —— 用 "iface" 段。
+option java_package = "io.github.nervusos.iface.resourcedir.v1";
+option java_multiple_files = true;
+option java_outer_classname = "ResourceDirectoryProto";
+
+enum ResourceDirectoryMethod {
+  RESOURCE_DIRECTORY_METHOD_UNSPECIFIED = 0;
+
+  // 列出匹配的资源。纯读，不改变任何状态。
+  RESOURCE_DIRECTORY_METHOD_LIST_RESOURCES = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    required_permission: "perm.resource.query"
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.resourcedir.v1.ListResourcesRequest"
+    response_type: "nervus.interface.resourcedir.v1.ResourceList"
+    error_detail_type: ""
+  }];
+}
+
+// ListResourcesRequest —— 过滤条件。全部留空表示列出全部可见资源。
+//
+// # 为什么不直接用 ResourceSelector
+//
+// ResourceSelector 带一个 policy 字段（REQUIRE_UNIQUE / SYSTEM_PREFERRED），
+// 那是「多个候选时挑哪一个」的规则——而枚举【天生就是多值的】，policy 在这里
+// 没有意义。
+//
+// 复用它就得在实现里默默忽略 policy。一个被静默忽略的字段比没有这个字段
+// 危险得多：调用方填了 REQUIRE_UNIQUE，以为自己在断言「只该有一个」，
+// 实际上什么都没发生。所以这里重新声明三个真正生效的字段。
+message ListResourcesRequest {
+  // 资源类型，如 "nervus.resource.camera"。空 = 不按类型过滤。
+  string resource_type = 1;
+
+  // 稳定 role，如 "cam.front"。空 = 不按 role 过滤。
+  string stable_role = 2;
+
+  // 语义标签，全部键值都要命中（AND）。空 = 不按标签过滤。
+  //
+  // 【按标签查是推荐做法】：stable_role 是板级配置的产物（这块板上前视
+  // 摄像头叫 cam.front 还是 camera0），依赖它换块板就得改代码。
+  map<string, string> labels = 3;
+}
+
+// ResourceEntry —— 一个资源的公开投影。
+message ResourceEntry {
+  // 公开句柄，可直接填进 ResourceSelector 或 RegisterEndpoint。
+  string handle = 1;
+
+  string resource_type = 2;
+  string stable_role = 3;
+
+  // 访问模式决定这个资源【能不能被独占】。
+  //
+  // 对 App 是可操作信息：SHARED_OBSERVE 的资源不必申请租约，
+  // EXCLUSIVE_CONTROL 的必须先拿到租约才能调控制类方法。
+  nervus.ipc.v1.ResourceAccessMode access_mode = 4;
+
+  nervus.ipc.v1.RiskClass risk_class = 5;
+
+  // 语义标签，如 {"nervus.camera.facing": "front"}。
+  //
+  // 平台命名空间（nervus.*）的标签只有 platform-release 能定义——厂商无法
+  // 把自己的摄像头自封为「前视」。私有标签必须在厂商自己的包命名空间下。
+  map<string, string> labels = 6;
+}
+
+message ResourceList {
+  // 按 (resource_type, stable_role) 字典序排列。
+  //
+  // 【顺序是确定的】：Go 的 map 迭代顺序是随机的，直接返回遍历结果会让
+  // 同一份 Catalog 在两次调用上给出不同顺序。UI 里的表现是设备列表每次
+  // 刷新都在跳，而这种问题几乎不会有人报成 bug。
+  repeated ResourceEntry resources = 1;
+}

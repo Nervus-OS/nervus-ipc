@@ -1,0 +1,457 @@
+// Nervus 标准接口 · Camera@1 / CameraConfig@1  [REWRITE-v1 / experimental]
+//
+//   nervus.interface.camera@1         采集面，绑 nervus.resource.camera（SHARED_OBSERVE）
+//   nervus.interface.camera.config@1  配置面，绑 nervus.resource.camera.config（EXCLUSIVE_CONTROL）
+//   Permission = perm.camera.capture（采集） / perm.camera.configure（配置）
+//
+// # 为什么是两个接口而不是一个
+//
+// 「看画面」和「改参数」的资源语义相反：前者【多方共享】——导航、录制、AI
+// 检测可以同时看同一路画面；后者【必须独占】——两个进程同时改曝光，最后是谁
+// 说了算取决于时序，而画面会在两个值之间跳。
+//
+// 内核的租约是【按资源】发的，一个 endpoint 绑一个资源。把两件事塞进一个接口，
+// 就得让 SetExposure 去申请一个「不是本 endpoint 绑定的那个资源」的租约——
+// 那条路径在内核里不存在，硬做只会做出一个绕过独占语义的后门。
+//
+// 拆开之后，只想看画面的 App 永远不需要碰租约，也就永远不会因为别人在调参数
+// 而被拒绝。
+//
+// # 帧不走这条协议
+//
+// 控制面只负责【把管子接上】：OpenStream 返回一个 TransferHandle，调用方拿它
+// 去数据面 UDS 附着，随后帧在共享内存环里流动，nervud 不在数据路径上。
+//
+// 【刻意没有 FrameReady 事件】。环自带 eventfd 唤醒，再在控制面推一条「有新帧」
+// 等于把每帧一次的流量搬回控制面——正是共享内存数据面存在的理由。控制面的
+// 事件只留给不按帧发生的事：流状态变了、设备掉了。
+//
+// # 厂商怎么接进来
+//
+// 厂商【不实现本接口】，而是实现自己命名空间下的私有接口
+// （vendor.camerad.source@1 一类），由 nervus.camerad 转成本接口。这样：
+//   - 标准语义（facing=front）由平台声明，厂商无法自封；
+//   - 厂商可以有任意私有能力（结构光、ToF 深度），走自己的接口，不污染标准；
+//   - 数据面仍然直达：nervus.camerad 把厂商给的 TransferHandle 转交给 App，
+//     帧不经过 camerad 复制一次。
+//
+// [REWRITE-v1] experimental：v2 前允许破坏性调整；正式冻结后遵循 §10.12。
+
+syntax = "proto3";
+
+package nervus.interface.camera.v1;
+
+import "nervus/ipc/v1/method_registry.proto";
+import "nervus/ipc/v1/transfer.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/camerav1;camerav1";
+
+// Java 包名不能含连字符，也不能用保留字 "interface" —— 用 "iface" 段。
+option java_package = "io.github.nervusos.iface.camera.v1";
+option java_multiple_files = true;
+option java_outer_classname = "CameraProto";
+
+// =============================================================================
+// 采集面：nervus.interface.camera@1
+// =============================================================================
+
+// CameraMethod 的每个枚举值就是 wire method_id。
+enum CameraMethod {
+  CAMERA_METHOD_UNSPECIFIED = 0;
+
+  // 描述这一路摄像头能给什么：分辨率、像素格式、帧率。
+  //
+  // 【必须先问再开】：分辨率与像素格式不是 App 说了算的，板上装的是什么就是
+  // 什么。写死一个 1920x1080 然后在 OpenStream 失败时重试，等于把设备发现
+  // 做成了猜测。
+  CAMERA_METHOD_DESCRIBE_STREAM = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.camera.v1.DescribeStreamRequest"
+    response_type: "nervus.interface.camera.v1.StreamDescription"
+    error_detail_type: "nervus.interface.camera.v1.CameraErrorDetail"
+  }];
+
+  // 开一路取流，返回数据面凭证。
+  //
+  // risk_class = PRIVACY_SENSITIVE：这是【摄像头开始拍你】的那一刻。它不驱动
+  // 执行器，所以不是 PHYSICAL_CONTROL；但它比任何只读方法都敏感，
+  // 按 NORMAL 归类会让权限裁决与用户提示都失去依据。
+  //
+  // transfer 声明只允许 SHARED_MEMORY_RING：视频帧走 FRAMED_RELAY 意味着
+  // nervud 逐帧复制，一路 1080p30 就是 ~180 MB/s 穿过内核。
+  CAMERA_METHOD_OPEN_STREAM = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    required_permission: "perm.camera.capture"
+    risk_class: RISK_CLASS_PRIVACY_SENSITIVE
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.camera.v1.OpenStreamRequest"
+    response_type: "nervus.interface.camera.v1.OpenStreamResponse"
+    error_detail_type: "nervus.interface.camera.v1.CameraErrorDetail"
+    transfer: {
+      direction: TRANSFER_DIRECTION_PROVIDER_TO_CALLER
+      max_streams: 4
+      allowed_modes: [TRANSFER_MODE_SHARED_MEMORY_RING]
+    }
+  }];
+
+  // 关一路取流。
+  //
+  // 【必须有，不能只靠断线回收】：断线回收兜的是崩溃，不是正常关闭。一个
+  // 长驻 App 用完摄像头却只能靠自杀来释放，会让「关掉预览」这种普通操作
+  // 变成不可能。
+  CAMERA_METHOD_CLOSE_STREAM = 3 [(nervus.ipc.v1.method_meta) = {
+    method_id: 3
+    required_permission: "perm.camera.capture"
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.camera.v1.CloseStreamRequest"
+    response_type: ""
+    error_detail_type: "nervus.interface.camera.v1.CameraErrorDetail"
+  }];
+}
+
+// CameraEvent 的每个枚举值就是 wire event_id。
+//
+// event_id 与 method_id 是【两个互不相干的编号空间】：本接口的 event 1 与
+// method 1 毫无关系。
+enum CameraEvent {
+  CAMERA_EVENT_UNSPECIFIED = 0;
+
+  // 流状态变化：开始出帧、停了、设备掉了。
+  //
+  // STATE：订阅方只关心【当前是什么状态】。中间态被合并掉没有损失——
+  // 连续两次 STREAMING→STOPPED→STREAMING 之后，真正要紧的是最后那个值。
+  CAMERA_EVENT_STREAM_STATE_CHANGED = 1 [(nervus.ipc.v1.event_meta) = {
+    event_id: 1
+    required_permission: "perm.camera.capture"
+    risk_class: RISK_CLASS_NORMAL
+    delivery_class: DELIVERY_CLASS_STATE
+    payload_type: "nervus.interface.camera.v1.StreamState"
+    max_events_per_second: 20
+  }];
+
+  // 设备级错误：USB 掉线、内核缓冲溢出、传感器超时。
+  //
+  // RELIABLE：这类事件【不能合并也不能丢】。「上一秒的错误被这一秒的错误
+  // 合并掉了」会让排查失去第一现场；而丢弃一条掉线通知，App 会一直等一个
+  // 永远不来的帧。
+  CAMERA_EVENT_DEVICE_ERROR = 2 [(nervus.ipc.v1.event_meta) = {
+    event_id: 2
+    required_permission: "perm.camera.capture"
+    risk_class: RISK_CLASS_NORMAL
+    delivery_class: DELIVERY_CLASS_RELIABLE
+    payload_type: "nervus.interface.camera.v1.CameraDeviceError"
+    max_events_per_second: 10
+  }];
+}
+
+// =============================================================================
+// 配置面：nervus.interface.camera.config@1
+// =============================================================================
+
+enum CameraConfigMethod {
+  CAMERA_CONFIG_METHOD_UNSPECIFIED = 0;
+
+  // 列出这一路支持哪些可调项及其取值范围。只读，不需要租约。
+  //
+  // 【读不要租约】：让「看看能调什么」也要抢独占，会逼 UI 在用户还没决定
+  // 要不要改之前就把别人挡在外面。
+  CAMERA_CONFIG_METHOD_LIST_CONTROLS = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    required_permission: "perm.camera.configure"
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.camera.v1.ListControlsRequest"
+    response_type: "nervus.interface.camera.v1.ControlDescriptions"
+    error_detail_type: "nervus.interface.camera.v1.CameraErrorDetail"
+  }];
+
+  // 读当前生效值。只读，不需要租约。
+  CAMERA_CONFIG_METHOD_GET_CONTROLS = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    required_permission: "perm.camera.configure"
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.camera.v1.GetControlsRequest"
+    response_type: "nervus.interface.camera.v1.ControlValues"
+    error_detail_type: "nervus.interface.camera.v1.CameraErrorDetail"
+  }];
+
+  // 改参数。【需要独占租约】。
+  //
+  // 没有租约的话，两个进程同时调曝光的结果取决于谁的包后到，而画面会在两个
+  // 值之间跳——这类问题在现场几乎无法复现。租约把「谁在调」变成一个可以
+  // 被查询、被抢占、被审计的事实。
+  CAMERA_CONFIG_METHOD_SET_CONTROLS = 3 [(nervus.ipc.v1.method_meta) = {
+    method_id: 3
+    required_permission: "perm.camera.configure"
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: true
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.camera.v1.SetControlsRequest"
+    response_type: "nervus.interface.camera.v1.ControlValues"
+    error_detail_type: "nervus.interface.camera.v1.CameraErrorDetail"
+  }];
+}
+
+enum CameraConfigEvent {
+  CAMERA_CONFIG_EVENT_UNSPECIFIED = 0;
+
+  // 生效值发生变化（可能来自别的持租方，也可能来自自动曝光等设备内部逻辑）。
+  //
+  // STATE：UI 要的是「现在是多少」，中间值合并掉没有损失。
+  CAMERA_CONFIG_EVENT_CONTROLS_CHANGED = 1 [(nervus.ipc.v1.event_meta) = {
+    event_id: 1
+    required_permission: "perm.camera.configure"
+    risk_class: RISK_CLASS_NORMAL
+    delivery_class: DELIVERY_CLASS_STATE
+    payload_type: "nervus.interface.camera.v1.ControlValues"
+    max_events_per_second: 30
+  }];
+}
+
+// =============================================================================
+// 像素格式与流描述
+// =============================================================================
+
+// PixelFormat —— 帧在共享内存里的字节布局。
+//
+// 只收录【平台承诺能解释】的格式。厂商的私有格式不往这里加：加进来就意味着
+// 平台要为它定义内存布局，而那是厂商私有接口该做的事。
+enum PixelFormat {
+  PIXEL_FORMAT_UNSPECIFIED = 0;
+
+  // 平面 YUV 4:2:0，Y 平面后跟交错的 UV。摄像头最常见的原生输出。
+  PIXEL_FORMAT_NV12 = 1;
+  // 打包 YUV 4:2:2。UVC 摄像头的默认输出。
+  PIXEL_FORMAT_YUYV = 2;
+  // MJPEG 压缩帧。每帧长度可变，slot 内以实际长度为准。
+  PIXEL_FORMAT_MJPEG = 3;
+  // 打包 RGB，每像素 3 字节。
+  PIXEL_FORMAT_RGB888 = 4;
+  // 16 位深度图，单位由 StreamDescription.depth_unit_micrometers 给出。
+  PIXEL_FORMAT_DEPTH16 = 5;
+}
+
+// StreamFormat —— 一种可用的取流配置。
+message StreamFormat {
+  PixelFormat pixel_format = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+
+  // 该分辨率下支持的帧率（帧/秒）。可以有多个，如 [15, 30, 60]。
+  repeated uint32 frame_rates = 4;
+
+  // 单帧最大字节数。MJPEG 这类变长格式据此定 slot 大小。
+  uint32 max_frame_bytes = 5;
+}
+
+message DescribeStreamRequest {}
+
+// StreamDescription —— 这一路摄像头的能力。
+message StreamDescription {
+  repeated StreamFormat formats = 1;
+
+  // depth_unit_micrometers 是 DEPTH16 每个刻度代表的微米数。
+  // 非深度流为 0。没有它，深度值只是一个无量纲整数。
+  uint32 depth_unit_micrometers = 2;
+}
+
+// =============================================================================
+// 取流
+// =============================================================================
+
+message OpenStreamRequest {
+  // 期望的取流配置。必须是 DescribeStream 返回过的组合之一。
+  //
+  // 【Provider 不做就近匹配】：请求 1920x1080 而设备只有 1280x720 时返回
+  // FAILED_PRECONDITION + FORMAT_NOT_SUPPORTED，而不是悄悄给一个更小的。
+  // 静默降级会让 App 按错误的尺寸解析内存，画面撕裂却查不出原因。
+  StreamFormat format = 1;
+
+  // 期望帧率。必须在 format.frame_rates 里。
+  uint32 frame_rate = 2;
+}
+
+message OpenStreamResponse {
+  // 本次取流的句柄，CloseStream 用它。
+  uint64 stream_id = 1;
+
+  // 数据面凭证。调用方拿它去 TransferHandle.data_plane_endpoint 附着。
+  //
+  // 【这个句柄本身就是凭证】：能附上就说明有权看这路画面。因此它不能被
+  // 转发、不能写进日志、不能落盘——与文件路径不同，它没有第二道权限检查。
+  nervus.ipc.v1.TransferHandle transfer = 2;
+
+  // 实际生效的配置。可能与请求【完全一致】——不一致时本方法应当失败而不是
+  // 降级。保留这个字段是为了让调用方能断言这一点，而不是为了协商。
+  StreamFormat format = 3;
+  uint32 frame_rate = 4;
+}
+
+message CloseStreamRequest {
+  uint64 stream_id = 1;
+}
+
+// =============================================================================
+// 事件载荷
+// =============================================================================
+
+enum StreamPhase {
+  STREAM_PHASE_UNSPECIFIED = 0;
+  // 已开流但还没出第一帧（设备正在启动、自动曝光收敛中）。
+  STREAM_PHASE_STARTING = 1;
+  STREAM_PHASE_STREAMING = 2;
+  // 已停止，可以重新 OpenStream。
+  STREAM_PHASE_STOPPED = 3;
+  // 设备出错，stream_id 已失效，必须重新 DescribeStream + OpenStream。
+  STREAM_PHASE_FAULT = 4;
+}
+
+message StreamState {
+  uint64 stream_id = 1;
+  StreamPhase phase = 2;
+}
+
+enum CameraDeviceErrorKind {
+  CAMERA_DEVICE_ERROR_KIND_UNSPECIFIED = 0;
+  // 设备节点消失（USB 拔出、驱动崩溃）。
+  CAMERA_DEVICE_ERROR_KIND_DISCONNECTED = 1;
+  // 采集缓冲溢出：Provider 来不及取走，驱动丢了帧。
+  CAMERA_DEVICE_ERROR_KIND_BUFFER_OVERRUN = 2;
+  // 传感器在预期时间内没有出帧。
+  CAMERA_DEVICE_ERROR_KIND_TIMEOUT = 3;
+  // 底层驱动返回了 Provider 无法归类的错误。
+  CAMERA_DEVICE_ERROR_KIND_DRIVER_FAULT = 4;
+}
+
+message CameraDeviceError {
+  uint64 stream_id = 1;
+  CameraDeviceErrorKind kind = 2;
+
+  // 自本路开流以来累计丢帧数。BUFFER_OVERRUN 之外的 kind 为 0。
+  uint64 dropped_frames = 3;
+}
+
+// =============================================================================
+// 可调项
+// =============================================================================
+
+// ControlKind —— 平台承认的可调项。
+//
+// 用枚举而不是自由字符串键：字符串键意味着每个厂商可以叫自己喜欢的名字
+// （"exposure" / "exposure_time" / "ExposureAbsolute"），而 App 无从写出
+// 跨设备可用的代码。厂商的独有可调项走【厂商自己的接口】，不挤进这里。
+enum ControlKind {
+  CONTROL_KIND_UNSPECIFIED = 0;
+  CONTROL_KIND_BRIGHTNESS = 1;
+  CONTROL_KIND_CONTRAST = 2;
+  CONTROL_KIND_SATURATION = 3;
+  // 曝光时间，单位见 ControlDescription.unit。
+  CONTROL_KIND_EXPOSURE_TIME = 4;
+  // 自动曝光开关：0 = 手动，1 = 自动。
+  CONTROL_KIND_AUTO_EXPOSURE = 5;
+  CONTROL_KIND_GAIN = 6;
+  // 白平衡色温（开尔文）。
+  CONTROL_KIND_WHITE_BALANCE = 7;
+  CONTROL_KIND_AUTO_WHITE_BALANCE = 8;
+  // 焦距，单位见 ControlDescription.unit。
+  CONTROL_KIND_FOCUS = 9;
+  CONTROL_KIND_AUTO_FOCUS = 10;
+  // 画面旋转（度）：0 / 90 / 180 / 270。
+  CONTROL_KIND_ROTATION = 11;
+}
+
+// ControlDescription —— 一个可调项的取值范围。
+//
+// 【范围必须由 Provider 给出】：App 写死 0-255 的亮度范围，换个厂商就会
+// 设出一个被静默截断的值，而它以为自己设成功了。
+message ControlDescription {
+  ControlKind kind = 1;
+
+  int64 min = 2;
+  int64 max = 3;
+  // 步进。0 表示连续可调。
+  int64 step = 4;
+  int64 default_value = 5;
+
+  // 单位的人类可读标识（"us"、"K"、"deg"）。仅供 UI 显示，不参与程序判断。
+  string unit = 6;
+
+  // 只读项（如自动模式下的曝光时间读数）。SetControls 对它返回
+  // FAILED_PRECONDITION + CONTROL_READ_ONLY。
+  bool read_only = 7;
+}
+
+message ListControlsRequest {}
+
+message ControlDescriptions {
+  repeated ControlDescription controls = 1;
+}
+
+message ControlValue {
+  ControlKind kind = 1;
+  int64 value = 2;
+}
+
+message GetControlsRequest {
+  // 只读这些项。空表示全读。
+  repeated ControlKind kinds = 1;
+}
+
+message SetControlsRequest {
+  repeated ControlValue values = 1;
+}
+
+// ControlValues —— 一组可调项的当前生效值。
+//
+// SetControls 的响应也是它，且是【设置之后重新读回的值】而不是请求的回显。
+// 设备可能把 105 对齐到步进上的 100，回显请求值会让 UI 显示一个设备上并不
+// 存在的数字。
+message ControlValues {
+  repeated ControlValue values = 1;
+}
+
+// =============================================================================
+// 错误 detail
+// =============================================================================
+
+enum CameraReason {
+  CAMERA_REASON_UNSPECIFIED = 0;
+  // 请求的分辨率/像素格式/帧率组合不被支持。
+  CAMERA_REASON_FORMAT_NOT_SUPPORTED = 1;
+  // 设备当前不可用（未插入、已掉线、被独占）。
+  CAMERA_REASON_DEVICE_UNAVAILABLE = 2;
+  // 同时取流路数超过 Provider 上限。
+  CAMERA_REASON_TOO_MANY_STREAMS = 3;
+  // stream_id 不存在或已失效。
+  CAMERA_REASON_STREAM_NOT_FOUND = 4;
+  // 该可调项在本设备上不存在。
+  CAMERA_REASON_CONTROL_NOT_SUPPORTED = 5;
+  // 该可调项只读（通常因为对应的自动模式开着）。
+  CAMERA_REASON_CONTROL_READ_ONLY = 6;
+  // 值超出 ControlDescription 给出的范围。
+  CAMERA_REASON_CONTROL_OUT_OF_RANGE = 7;
+  // 底层驱动错误。
+  CAMERA_REASON_DRIVER_FAULT = 8;
+}
+
+message CameraErrorDetail {
+  CameraReason reason = 1;
+
+  // 触发失败的可调项。与 CONTROL_* 系列 reason 同现，其余为 UNSPECIFIED。
+  ControlKind control = 2;
+}

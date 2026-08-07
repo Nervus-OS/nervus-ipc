@@ -75,9 +75,16 @@ type Client struct {
 	resolveMu sync.Mutex
 	resolves  map[uint64]chan *ipcv1.ResolveEndpointResult
 
+	// subs 是订阅状态机，见 subscribe.go。
+	subs *subscriber
+
 	readErr  error
 	readDone chan struct{}
 }
+
+// writeEnvelope / nextRequestID / closedErr 让 Client 满足 eventTransport。
+func (c *Client) writeEnvelope(env *ipcv1.Envelope) error { return c.co.writeEnvelope(env) }
+func (c *Client) nextRequestID() (uint64, error)          { return c.ids.nextID() }
 
 // Connect 建立连接并完成握手。
 func Connect(cfg Config) (*Client, error) {
@@ -103,8 +110,25 @@ func Connect(cfg Config) (*Client, error) {
 		log:      cfg.Log,
 		readDone: make(chan struct{}),
 	}
+	c.subs = newSubscriber(c, cfg.Log)
 	go c.readLoop()
 	return c, nil
+}
+
+// Subscribe 订阅一个 endpoint 上的事件。
+//
+// 返回的 Subscription 的 C() 在订阅结束时被关闭，因此可以直接 range；结束原因
+// 见 Err()。【必须消费】：不读的订阅会按其 DeliveryClass 被合并、丢弃，
+// 或者（RELIABLE）被本地背压终止。
+func (c *Client) Subscribe(ctx context.Context, req SubscribeRequest) (*Subscription, error) {
+	return c.subs.subscribe(ctx, req)
+}
+
+// Unsubscribe 撤下一条订阅并关闭它的事件通道。
+//
+// 幂等性由服务端给出：重复退订返回 NOT_FOUND 的 *StatusError。
+func (c *Client) Unsubscribe(ctx context.Context, sub *Subscription) error {
+	return c.subs.unsubscribe(ctx, sub)
 }
 
 // Identity 返回握手时 nervud 核对确认的身份。
@@ -137,6 +161,11 @@ func (c *Client) readLoop() {
 			}
 			c.co.close()
 			return
+		}
+
+		// 订阅相关的四个 body 在两种角色上语义相同，交给共用的状态机。
+		if c.subs.handleSubscriptionBody(env) {
+			continue
 		}
 
 		switch body := env.GetBody().(type) {
@@ -172,8 +201,9 @@ func (c *Client) readLoop() {
 			c.log.Info("sdk: endpoint invalidated by server", "body", fmt.Sprintf("%T", body))
 
 		default:
-			// 其余 body 要么是 nervud 不会发的（Subscribe 组——内核未实现），
-			// 要么是只该出现在 Service 连接上的（Dispatch）。收到即协议违规。
+			// 走到这里的 body 要么是 nervud 不会主动发的（Cancel、ControlLease 组
+			// ——见 wire.go 的实现状态说明），要么是只该出现在 Service 连接上的
+			// （Dispatch）。收到即协议违规。
 			c.readErr = fmt.Errorf("%w: unexpected body %T on client connection", ErrProtocol, body)
 			c.log.Warn("sdk: unexpected body, closing", "body", fmt.Sprintf("%T", body))
 			c.co.close()
@@ -184,6 +214,7 @@ func (c *Client) readLoop() {
 
 func (c *Client) failAllPending() {
 	c.pend.failAll()
+	c.subs.closeAll(c.closedErr())
 	c.resolveMu.Lock()
 	m := c.resolves
 	c.resolves = make(map[uint64]chan *ipcv1.ResolveEndpointResult)
@@ -214,10 +245,12 @@ type ResolveRequest struct {
 	InterfaceID string
 	// MinMajor / MaxMajor 可接受的接口 major 版本闭区间。
 	MinMajor, MaxMajor uint32
-	// ResourceType / ResourceRole 选择目标 Resource。两者都留空时由 nervud
-	// 隐式取 {nervus.resource.motion.base, main}——移动主线因此不必显式填。
+	// ResourceType / ResourceRole 选择目标 Resource，只能表达「精确的 type +
+	// role」。要按标签选设备或指定多候选策略，用 Selector。
 	//
-	// 只能表达「精确的 type + role」。要按标签选设备或指定多候选策略，用 Selector。
+	// 【两者都留空不再有隐式默认】：v1 曾把空 selector 当成
+	// {nervus.resource.motion.base, main}，v2 移除了那条规则。绑物理资源的
+	// 接口留空会解析失败，必须显式说出要哪个设备。
 	ResourceType, ResourceRole string
 
 	// Selector 是完整的资源选择器：支持标签过滤与多候选策略。
@@ -322,8 +355,11 @@ func (c *Client) ResolveEndpoint(ctx context.Context, req ResolveRequest) (Endpo
 	}
 }
 
-// selectorOf 构造 ResourceSelector。两个字段都空时返回 nil——协议规定留空由
-// nervud 取隐式默认，发一个空 selector 与不发是同一语义，但不发少几个字节。
+// selectorOf 构造 ResourceSelector。两个字段都空时返回 nil。
+//
+// nil 在 v2 里表示「本接口不绑资源」，不再表示「取默认设备」。发一个空 selector
+// 与不发是同一语义，不发少几个字节。绑资源的接口收到 nil 会解析失败——这正是
+// 想要的：让「忘了填」在第一次 Resolve 就暴露，而不是路由到某个碰巧存在的设备。
 func selectorOf(typ, role string) *ipcv1.ResourceSelector {
 	if typ == "" && role == "" {
 		return nil

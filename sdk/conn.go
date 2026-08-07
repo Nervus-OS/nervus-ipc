@@ -25,13 +25,23 @@ const DefaultSockPath = "/run/nervus/nervud.sock"
 
 // 本 SDK 实现的协议版本。
 //
-// 与 nervud 的 internal/ipc 常量对齐：只实现 major 1；minor 只增不减，握手时
-// 由服务端在客户端声明的范围内取交集。
+// 与 nervud 的 internal/ipc 常量对齐：只实现这一个 major；minor 只增不减，
+// 握手时由服务端在客户端声明的范围内取交集。
+//
+// # 为什么下界也是 2，而不是保留 1
+//
+// v2 【不】向下兼容 v1，断点是两条隐式默认的移除：ResolveEndpoint 与
+// AcquireControl 的空 selector 不再隐式指向 {nervus.resource.motion.base,
+// main}。一个按 v1 写的调用方留空 selector 去申请底盘租约，在 v2 上拿到的是
+// 「解析不到」而不是底盘。
+//
+// 声明 min=1 会让这种连接【握手成功】，然后在某个具体调用上给出静默的语义
+// 变化——那比连不上危险得多。所以下界跟着上界一起抬，谈不拢就在握手阶段
+// 拿到一个明确的 FAILED_PRECONDITION。
 const (
-	protocolMajorMin              = 1
-	protocolMajorMax              = 1
-	protocolMinorMax              = 1
-	executionContextProtocolMinor = 1
+	protocolMajorMin = 2
+	protocolMajorMax = 2
+	protocolMinorMax = 0
 )
 
 // conn 是一条已建立（但未必已握手）的控制面连接。
