@@ -216,7 +216,34 @@ type ResolveRequest struct {
 	MinMajor, MaxMajor uint32
 	// ResourceType / ResourceRole 选择目标 Resource。两者都留空时由 nervud
 	// 隐式取 {nervus.resource.motion.base, main}——移动主线因此不必显式填。
+	//
+	// 只能表达「精确的 type + role」。要按标签选设备或指定多候选策略，用 Selector。
 	ResourceType, ResourceRole string
+
+	// Selector 是完整的资源选择器：支持标签过滤与多候选策略。
+	//
+	// 非空时【完全取代】上面两个字段——不做合并，避免出现「填了三处、
+	// 最终生效的是哪个」这种要看实现才知道的语义。
+	//
+	// 按标签选设备是推荐做法：stable_role 是板级配置的产物（这块板上前视摄像头
+	// 叫 cam.front 还是 camera0），依赖它换块板就得改代码。
+	//
+	//	Selector: &ipcv1.ResourceSelector{
+	//	    Type:   "nervus.resource.camera",
+	//	    Labels: map[string]string{"nervus.camera.facing": "front"},
+	//	}
+	//
+	// 【不指定 Policy 等于 REQUIRE_UNIQUE】：命中多个直接失败，而不是随便给一个。
+	// 要 nervud 替你挑，显式写 RESOURCE_SELECTION_POLICY_SYSTEM_PREFERRED。
+	Selector *ipcv1.ResourceSelector
+}
+
+// selector 给出本次请求最终发出的 ResourceSelector。
+func (r ResolveRequest) selector() *ipcv1.ResourceSelector {
+	if r.Selector != nil {
+		return r.Selector
+	}
+	return selectorOf(r.ResourceType, r.ResourceRole)
 }
 
 // Endpoint 是一次成功解析的结果。
@@ -248,7 +275,7 @@ func (c *Client) ResolveEndpoint(ctx context.Context, req ResolveRequest) (Endpo
 			InterfaceId:       req.InterfaceID,
 			MinInterfaceMajor: req.MinMajor,
 			MaxInterfaceMajor: req.MaxMajor,
-			Selector:          selectorOf(req.ResourceType, req.ResourceRole),
+			Selector:          req.selector(),
 		},
 	}}
 

@@ -283,7 +283,7 @@ func (h *ServiceHost) ResolveEndpoint(ctx context.Context, req ResolveRequest) (
 			InterfaceId:       req.InterfaceID,
 			MinInterfaceMajor: req.MinMajor,
 			MaxInterfaceMajor: req.MaxMajor,
-			Selector:          selectorOf(req.ResourceType, req.ResourceRole),
+			Selector:          req.selector(),
 		},
 	}}
 	res, err := h.roundTrip(ctx, id, env, nil)
