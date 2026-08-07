@@ -1,10 +1,9 @@
 // Nervus 标准接口 · PackageManager@1  [REWRITE-v1 / experimental]
 //
-// [KERNEL: PARTIALLY WIRED] nervud 支持本接口所需的全部机制（Request/Response、
-// Dispatch/DispatchResult、endpoint 注册与路由），因此调用链是通的。但接口级
-// 权限门槛尚未进 endpoint.DefaultInterfaceCatalog，method 级权限也未接线
-// （见 method_registry.proto 的 [KERNEL: NOT WIRED]）——目前 Resolve 不会因为
-// required_permission 而被拒。
+// [KERNEL: WIRED] nervud 支持本接口所需的全部机制（Request/Response、
+// Dispatch/DispatchResult、endpoint 注册与路由）。接口级权限以 perm.pkg.query
+// 保护解析与只读查询；每次路由还会叠加 method 级 required_permission，因此
+// 安装、卸载和启停组件仍需 perm.pkg.install。
 //
 // interface_id = nervus.interface.pkg.manager ，major = 1，experimental。
 //   实现者    = nervus.pkgmanagerd（系统服务，nervus-system-server 仓库）
