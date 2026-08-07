@@ -84,42 +84,43 @@ public final class ProviderDescriptorProto {
       "aultResourceType\0222\n\025default_resource_rol" +
       "e\030\010 \001(\tR\023defaultResourceRole\022V\n\022interfac" +
       "e_versions\030\t \003(\0132\'.nervus.ipc.v1.Provide" +
-      "dInterfaceVersionR\021interfaceVersions\"Q\n\030" +
-      "ProvidedInterfaceVersion\022\024\n\005major\030\001 \001(\rR" +
-      "\005major\022\037\n\013schema_hash\030\002 \001(\014R\nschemaHash\"" +
-      "\324\001\n\017ManagedResource\022\037\n\013stable_role\030\001 \001(\t" +
-      "R\nstableRole\022#\n\rresource_type\030\002 \001(\tR\014res" +
-      "ourceType\022B\n\013access_mode\030\003 \001(\0162!.nervus." +
-      "ipc.v1.ResourceAccessModeR\naccessMode\0227\n" +
-      "\nrisk_class\030\004 \001(\0162\030.nervus.ipc.v1.RiskCl" +
-      "assR\triskClass\"\250\003\n\021DefinedPermission\022\016\n\002" +
-      "id\030\001 \001(\tR\002id\0227\n\ngrant_mode\030\002 \001(\0162\030.nervu" +
-      "s.ipc.v1.GrantModeR\tgrantMode\0227\n\nrisk_cl" +
-      "ass\030\003 \001(\0162\030.nervus.ipc.v1.RiskClassR\tris" +
-      "kClass\022?\n\014display_name\030\004 \001(\0132\034.nervus.ip" +
-      "c.v1.LocalizedTextR\013displayName\022>\n\013descr" +
-      "iption\030\005 \001(\0132\034.nervus.ipc.v1.LocalizedTe" +
-      "xtR\013description\022H\n\rminimum_trust\030\006 \001(\0162#" +
-      ".nervus.ipc.v1.PermissionTrustFloorR\014min" +
-      "imumTrust\0220\n\024required_signer_role\030\007 \001(\tR" +
-      "\022requiredSignerRole\022\024\n\005group\030\010 \001(\tR\005grou" +
-      "p\"4\n\rLocalizedText\022\023\n\005zh_cn\030\001 \001(\tR\004zhCn\022" +
-      "\016\n\002en\030\002 \001(\tR\002en*\217\001\n\022ResourceAccessMode\022$" +
-      "\n RESOURCE_ACCESS_MODE_UNSPECIFIED\020\000\022*\n&" +
-      "RESOURCE_ACCESS_MODE_EXCLUSIVE_CONTROL\020\001" +
-      "\022\'\n#RESOURCE_ACCESS_MODE_SHARED_OBSERVE\020" +
-      "\002*\250\001\n\024PermissionTrustFloor\022&\n\"PERMISSION" +
-      "_TRUST_FLOOR_UNSPECIFIED\020\000\022#\n\037PERMISSION" +
-      "_TRUST_FLOOR_ORDINARY\020\001\022\036\n\032PERMISSION_TR" +
-      "UST_FLOOR_OEM\020\002\022#\n\037PERMISSION_TRUST_FLOO" +
-      "R_PLATFORM\020\003*\254\001\n\tGrantMode\022\032\n\026GRANT_MODE" +
-      "_UNSPECIFIED\020\000\022\025\n\021GRANT_MODE_NORMAL\020\001\022\033\n" +
-      "\027GRANT_MODE_USER_CONSENT\020\002\022\030\n\024GRANT_MODE" +
-      "_SIGNATURE\020\003\022\031\n\025GRANT_MODE_PRIVILEGED\020\004\022" +
-      "\032\n\026GRANT_MODE_SYSTEM_ONLY\020\005Bl\n\031io.github" +
-      ".nervusos.ipc.v1B\027ProviderDescriptorProt" +
-      "oP\001Z4github.com/nervus-os/nervus-ipc/pro" +
-      "tocol/ipcv1;ipcv1b\006proto3"
+      "dInterfaceVersionR\021interfaceVersions\"\206\001\n" +
+      "\030ProvidedInterfaceVersion\022\024\n\005major\030\001 \001(\r" +
+      "R\005major\022\037\n\013schema_hash\030\002 \001(\014R\nschemaHash" +
+      "\0223\n\007methods\030\003 \003(\0132\031.nervus.ipc.v1.Method" +
+      "MetaR\007methods\"\324\001\n\017ManagedResource\022\037\n\013sta" +
+      "ble_role\030\001 \001(\tR\nstableRole\022#\n\rresource_t" +
+      "ype\030\002 \001(\tR\014resourceType\022B\n\013access_mode\030\003" +
+      " \001(\0162!.nervus.ipc.v1.ResourceAccessModeR" +
+      "\naccessMode\0227\n\nrisk_class\030\004 \001(\0162\030.nervus" +
+      ".ipc.v1.RiskClassR\triskClass\"\250\003\n\021Defined" +
+      "Permission\022\016\n\002id\030\001 \001(\tR\002id\0227\n\ngrant_mode" +
+      "\030\002 \001(\0162\030.nervus.ipc.v1.GrantModeR\tgrantM" +
+      "ode\0227\n\nrisk_class\030\003 \001(\0162\030.nervus.ipc.v1." +
+      "RiskClassR\triskClass\022?\n\014display_name\030\004 \001" +
+      "(\0132\034.nervus.ipc.v1.LocalizedTextR\013displa" +
+      "yName\022>\n\013description\030\005 \001(\0132\034.nervus.ipc." +
+      "v1.LocalizedTextR\013description\022H\n\rminimum" +
+      "_trust\030\006 \001(\0162#.nervus.ipc.v1.PermissionT" +
+      "rustFloorR\014minimumTrust\0220\n\024required_sign" +
+      "er_role\030\007 \001(\tR\022requiredSignerRole\022\024\n\005gro" +
+      "up\030\010 \001(\tR\005group\"4\n\rLocalizedText\022\023\n\005zh_c" +
+      "n\030\001 \001(\tR\004zhCn\022\016\n\002en\030\002 \001(\tR\002en*\217\001\n\022Resour" +
+      "ceAccessMode\022$\n RESOURCE_ACCESS_MODE_UNS" +
+      "PECIFIED\020\000\022*\n&RESOURCE_ACCESS_MODE_EXCLU" +
+      "SIVE_CONTROL\020\001\022\'\n#RESOURCE_ACCESS_MODE_S" +
+      "HARED_OBSERVE\020\002*\250\001\n\024PermissionTrustFloor" +
+      "\022&\n\"PERMISSION_TRUST_FLOOR_UNSPECIFIED\020\000" +
+      "\022#\n\037PERMISSION_TRUST_FLOOR_ORDINARY\020\001\022\036\n" +
+      "\032PERMISSION_TRUST_FLOOR_OEM\020\002\022#\n\037PERMISS" +
+      "ION_TRUST_FLOOR_PLATFORM\020\003*\254\001\n\tGrantMode" +
+      "\022\032\n\026GRANT_MODE_UNSPECIFIED\020\000\022\025\n\021GRANT_MO" +
+      "DE_NORMAL\020\001\022\033\n\027GRANT_MODE_USER_CONSENT\020\002" +
+      "\022\030\n\024GRANT_MODE_SIGNATURE\020\003\022\031\n\025GRANT_MODE" +
+      "_PRIVILEGED\020\004\022\032\n\026GRANT_MODE_SYSTEM_ONLY\020" +
+      "\005Bl\n\031io.github.nervusos.ipc.v1B\027Provider" +
+      "DescriptorProtoP\001Z4github.com/nervus-os/" +
+      "nervus-ipc/protocol/ipcv1;ipcv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -143,7 +144,7 @@ public final class ProviderDescriptorProto {
     internal_static_nervus_ipc_v1_ProvidedInterfaceVersion_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_ProvidedInterfaceVersion_descriptor,
-        new java.lang.String[] { "Major", "SchemaHash", });
+        new java.lang.String[] { "Major", "SchemaHash", "Methods", });
     internal_static_nervus_ipc_v1_ManagedResource_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_nervus_ipc_v1_ManagedResource_fieldAccessorTable = new

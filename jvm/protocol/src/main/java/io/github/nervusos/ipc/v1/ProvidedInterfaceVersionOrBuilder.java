@@ -16,8 +16,161 @@ public interface ProvidedInterfaceVersionOrBuilder extends
   int getMajor();
 
   /**
+   * <pre>
+   * 该 major 的契约身份。它是 RegisterEndpoint.interface_schema_hash 的比对对象，
+   * 也是 nervud 判定「多个 Provider 说的是不是同一个接口」的依据。
+   *
+   * 取值来源取决于下面的 methods 是否为空：
+   * methods 为空   → 必须等于 InterfaceSchemaBundleSet 里对应 bundle 的 hash
+   * methods 非空   → 必须等于 registry.MethodsHash(methods)
+   * </pre>
+   *
    * <code>bytes schema_hash = 2 [json_name = "schemaHash"];</code>
    * @return The schemaHash.
    */
   com.google.protobuf.ByteString getSchemaHash();
+
+  /**
+   * <pre>
+   * methods 非空时，本 major 是一个【元数据接口】：只声明方法的 id、权限、风险与
+   * Transfer 预算，不带任何 protobuf 消息类型，也【不需要】schema bundle。
+   *
+   * # 为什么要有这条路
+   *
+   * 能力接口的载荷常常本来就不是 protobuf——摄像头帧、麦克风采样、雷达点云都走
+   * Transfer 数据面的不透明字节。为它们编一套永远用不上的 Request/Response 消息，
+   * 只是让「加一个能力」平白多出一份 .proto 要维护、要生成、要在多方之间对齐。
+   *
+   * 内核真正需要知道的从来只有三件事：谁在调（身份）、允不允许（权限）、能开多大
+   * 的管子（Transfer 预算）。这三件都在 MethodMeta 里，与消息形状无关。
+   *
+   * # 它没有放松什么
+   *
+   * schema_hash 仍然是契约身份，只是改由方法元数据算出。因此
+   * sameInterfaceContract 照旧成立：两个 Provider 想实现同一个标准接口，它们声明的
+   * method_id、required_permission、risk_class、transfer 预算必须逐字节一致，
+   * 否则内核拒绝第二个。「厂商可互换」这个性质完全保留。
+   *
+   * 元数据接口的方法【不得】声明 request_type / response_type / error_detail_type：
+   * 没有 schema bundle 可供解析它们，声明了也无从校验。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.MethodMeta methods = 3 [json_name = "methods"];</code>
+   */
+  java.util.List<io.github.nervusos.ipc.v1.MethodMeta> 
+      getMethodsList();
+  /**
+   * <pre>
+   * methods 非空时，本 major 是一个【元数据接口】：只声明方法的 id、权限、风险与
+   * Transfer 预算，不带任何 protobuf 消息类型，也【不需要】schema bundle。
+   *
+   * # 为什么要有这条路
+   *
+   * 能力接口的载荷常常本来就不是 protobuf——摄像头帧、麦克风采样、雷达点云都走
+   * Transfer 数据面的不透明字节。为它们编一套永远用不上的 Request/Response 消息，
+   * 只是让「加一个能力」平白多出一份 .proto 要维护、要生成、要在多方之间对齐。
+   *
+   * 内核真正需要知道的从来只有三件事：谁在调（身份）、允不允许（权限）、能开多大
+   * 的管子（Transfer 预算）。这三件都在 MethodMeta 里，与消息形状无关。
+   *
+   * # 它没有放松什么
+   *
+   * schema_hash 仍然是契约身份，只是改由方法元数据算出。因此
+   * sameInterfaceContract 照旧成立：两个 Provider 想实现同一个标准接口，它们声明的
+   * method_id、required_permission、risk_class、transfer 预算必须逐字节一致，
+   * 否则内核拒绝第二个。「厂商可互换」这个性质完全保留。
+   *
+   * 元数据接口的方法【不得】声明 request_type / response_type / error_detail_type：
+   * 没有 schema bundle 可供解析它们，声明了也无从校验。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.MethodMeta methods = 3 [json_name = "methods"];</code>
+   */
+  io.github.nervusos.ipc.v1.MethodMeta getMethods(int index);
+  /**
+   * <pre>
+   * methods 非空时，本 major 是一个【元数据接口】：只声明方法的 id、权限、风险与
+   * Transfer 预算，不带任何 protobuf 消息类型，也【不需要】schema bundle。
+   *
+   * # 为什么要有这条路
+   *
+   * 能力接口的载荷常常本来就不是 protobuf——摄像头帧、麦克风采样、雷达点云都走
+   * Transfer 数据面的不透明字节。为它们编一套永远用不上的 Request/Response 消息，
+   * 只是让「加一个能力」平白多出一份 .proto 要维护、要生成、要在多方之间对齐。
+   *
+   * 内核真正需要知道的从来只有三件事：谁在调（身份）、允不允许（权限）、能开多大
+   * 的管子（Transfer 预算）。这三件都在 MethodMeta 里，与消息形状无关。
+   *
+   * # 它没有放松什么
+   *
+   * schema_hash 仍然是契约身份，只是改由方法元数据算出。因此
+   * sameInterfaceContract 照旧成立：两个 Provider 想实现同一个标准接口，它们声明的
+   * method_id、required_permission、risk_class、transfer 预算必须逐字节一致，
+   * 否则内核拒绝第二个。「厂商可互换」这个性质完全保留。
+   *
+   * 元数据接口的方法【不得】声明 request_type / response_type / error_detail_type：
+   * 没有 schema bundle 可供解析它们，声明了也无从校验。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.MethodMeta methods = 3 [json_name = "methods"];</code>
+   */
+  int getMethodsCount();
+  /**
+   * <pre>
+   * methods 非空时，本 major 是一个【元数据接口】：只声明方法的 id、权限、风险与
+   * Transfer 预算，不带任何 protobuf 消息类型，也【不需要】schema bundle。
+   *
+   * # 为什么要有这条路
+   *
+   * 能力接口的载荷常常本来就不是 protobuf——摄像头帧、麦克风采样、雷达点云都走
+   * Transfer 数据面的不透明字节。为它们编一套永远用不上的 Request/Response 消息，
+   * 只是让「加一个能力」平白多出一份 .proto 要维护、要生成、要在多方之间对齐。
+   *
+   * 内核真正需要知道的从来只有三件事：谁在调（身份）、允不允许（权限）、能开多大
+   * 的管子（Transfer 预算）。这三件都在 MethodMeta 里，与消息形状无关。
+   *
+   * # 它没有放松什么
+   *
+   * schema_hash 仍然是契约身份，只是改由方法元数据算出。因此
+   * sameInterfaceContract 照旧成立：两个 Provider 想实现同一个标准接口，它们声明的
+   * method_id、required_permission、risk_class、transfer 预算必须逐字节一致，
+   * 否则内核拒绝第二个。「厂商可互换」这个性质完全保留。
+   *
+   * 元数据接口的方法【不得】声明 request_type / response_type / error_detail_type：
+   * 没有 schema bundle 可供解析它们，声明了也无从校验。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.MethodMeta methods = 3 [json_name = "methods"];</code>
+   */
+  java.util.List<? extends io.github.nervusos.ipc.v1.MethodMetaOrBuilder> 
+      getMethodsOrBuilderList();
+  /**
+   * <pre>
+   * methods 非空时，本 major 是一个【元数据接口】：只声明方法的 id、权限、风险与
+   * Transfer 预算，不带任何 protobuf 消息类型，也【不需要】schema bundle。
+   *
+   * # 为什么要有这条路
+   *
+   * 能力接口的载荷常常本来就不是 protobuf——摄像头帧、麦克风采样、雷达点云都走
+   * Transfer 数据面的不透明字节。为它们编一套永远用不上的 Request/Response 消息，
+   * 只是让「加一个能力」平白多出一份 .proto 要维护、要生成、要在多方之间对齐。
+   *
+   * 内核真正需要知道的从来只有三件事：谁在调（身份）、允不允许（权限）、能开多大
+   * 的管子（Transfer 预算）。这三件都在 MethodMeta 里，与消息形状无关。
+   *
+   * # 它没有放松什么
+   *
+   * schema_hash 仍然是契约身份，只是改由方法元数据算出。因此
+   * sameInterfaceContract 照旧成立：两个 Provider 想实现同一个标准接口，它们声明的
+   * method_id、required_permission、risk_class、transfer 预算必须逐字节一致，
+   * 否则内核拒绝第二个。「厂商可互换」这个性质完全保留。
+   *
+   * 元数据接口的方法【不得】声明 request_type / response_type / error_detail_type：
+   * 没有 schema bundle 可供解析它们，声明了也无从校验。
+   * </pre>
+   *
+   * <code>repeated .nervus.ipc.v1.MethodMeta methods = 3 [json_name = "methods"];</code>
+   */
+  io.github.nervusos.ipc.v1.MethodMetaOrBuilder getMethodsOrBuilder(
+      int index);
 }

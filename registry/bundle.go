@@ -14,7 +14,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 
-	ipcv1 "github.com/nervus-os/nervus-ipc/protocol/ipcv1"
+	"github.com/nervus-os/nervus-ipc/protocol/ipcv1"
 )
 
 // SchemaKey 唯一标识一个接口 major schema。
@@ -215,8 +215,8 @@ func validateMethodMeta(files *protoregistry.Files, meta *ipcv1.MethodMeta) erro
 	if !knownRiskClass(meta.GetRiskClass()) {
 		return fmt.Errorf("method %d has invalid risk class %d", meta.GetMethodId(), meta.GetRiskClass())
 	}
-	if max := meta.GetMaxTimeoutMs(); max != 0 &&
-		meta.GetDefaultTimeoutMs() != 0 && meta.GetDefaultTimeoutMs() > max {
+	if timeMax := meta.GetMaxTimeoutMs(); timeMax != 0 &&
+		meta.GetDefaultTimeoutMs() != 0 && meta.GetDefaultTimeoutMs() > timeMax {
 		return fmt.Errorf("method %d default timeout exceeds maximum", meta.GetMethodId())
 	}
 	for label, name := range map[string]string{
@@ -338,6 +338,12 @@ func ParseProviderArtifacts(descriptorWire, schemaWire []byte) (*ProviderArtifac
 	}
 	schemas, err := ParseSchemaBundleSet(&bundles)
 	if err != nil {
+		return nil, err
+	}
+	// 元数据接口的 Schema 不来自 bundle，而是从 descriptor 内联的 MethodMeta 合成，
+	// 合成后与普通 Schema 一起放进同一个 SchemaSet。消费者（nervud catalog）
+	// 因此看到的是同一种东西，不需要区分两条路。
+	if err := addMetadataSchemas(&descriptor, schemas); err != nil {
 		return nil, err
 	}
 	if err := ValidateProviderArtifacts(&descriptor, schemas); err != nil {

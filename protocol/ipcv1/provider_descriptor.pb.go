@@ -451,9 +451,38 @@ func (x *ProvidedInterface) GetInterfaceVersions() []*ProvidedInterfaceVersion {
 }
 
 type ProvidedInterfaceVersion struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Major         uint32                 `protobuf:"varint,1,opt,name=major,proto3" json:"major,omitempty"`
-	SchemaHash    []byte                 `protobuf:"bytes,2,opt,name=schema_hash,json=schemaHash,proto3" json:"schema_hash,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Major uint32                 `protobuf:"varint,1,opt,name=major,proto3" json:"major,omitempty"`
+	// 该 major 的契约身份。它是 RegisterEndpoint.interface_schema_hash 的比对对象，
+	// 也是 nervud 判定「多个 Provider 说的是不是同一个接口」的依据。
+	//
+	// 取值来源取决于下面的 methods 是否为空：
+	//
+	//	methods 为空   → 必须等于 InterfaceSchemaBundleSet 里对应 bundle 的 hash
+	//	methods 非空   → 必须等于 registry.MethodsHash(methods)
+	SchemaHash []byte `protobuf:"bytes,2,opt,name=schema_hash,json=schemaHash,proto3" json:"schema_hash,omitempty"`
+	// methods 非空时，本 major 是一个【元数据接口】：只声明方法的 id、权限、风险与
+	// Transfer 预算，不带任何 protobuf 消息类型，也【不需要】schema bundle。
+	//
+	// # 为什么要有这条路
+	//
+	// 能力接口的载荷常常本来就不是 protobuf——摄像头帧、麦克风采样、雷达点云都走
+	// Transfer 数据面的不透明字节。为它们编一套永远用不上的 Request/Response 消息，
+	// 只是让「加一个能力」平白多出一份 .proto 要维护、要生成、要在多方之间对齐。
+	//
+	// 内核真正需要知道的从来只有三件事：谁在调（身份）、允不允许（权限）、能开多大
+	// 的管子（Transfer 预算）。这三件都在 MethodMeta 里，与消息形状无关。
+	//
+	// # 它没有放松什么
+	//
+	// schema_hash 仍然是契约身份，只是改由方法元数据算出。因此
+	// sameInterfaceContract 照旧成立：两个 Provider 想实现同一个标准接口，它们声明的
+	// method_id、required_permission、risk_class、transfer 预算必须逐字节一致，
+	// 否则内核拒绝第二个。「厂商可互换」这个性质完全保留。
+	//
+	// 元数据接口的方法【不得】声明 request_type / response_type / error_detail_type：
+	// 没有 schema bundle 可供解析它们，声明了也无从校验。
+	Methods       []*MethodMeta `protobuf:"bytes,3,rep,name=methods,proto3" json:"methods,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -498,6 +527,13 @@ func (x *ProvidedInterfaceVersion) GetMajor() uint32 {
 func (x *ProvidedInterfaceVersion) GetSchemaHash() []byte {
 	if x != nil {
 		return x.SchemaHash
+	}
+	return nil
+}
+
+func (x *ProvidedInterfaceVersion) GetMethods() []*MethodMeta {
+	if x != nil {
+		return x.Methods
 	}
 	return nil
 }
@@ -772,11 +808,12 @@ const file_nervus_ipc_v1_provider_descriptor_proto_rawDesc = "" +
 	"\x19compatible_resource_types\x18\x06 \x03(\tR\x17compatibleResourceTypes\x122\n" +
 	"\x15default_resource_type\x18\a \x01(\tR\x13defaultResourceType\x122\n" +
 	"\x15default_resource_role\x18\b \x01(\tR\x13defaultResourceRole\x12V\n" +
-	"\x12interface_versions\x18\t \x03(\v2'.nervus.ipc.v1.ProvidedInterfaceVersionR\x11interfaceVersions\"Q\n" +
+	"\x12interface_versions\x18\t \x03(\v2'.nervus.ipc.v1.ProvidedInterfaceVersionR\x11interfaceVersions\"\x86\x01\n" +
 	"\x18ProvidedInterfaceVersion\x12\x14\n" +
 	"\x05major\x18\x01 \x01(\rR\x05major\x12\x1f\n" +
 	"\vschema_hash\x18\x02 \x01(\fR\n" +
-	"schemaHash\"\xd4\x01\n" +
+	"schemaHash\x123\n" +
+	"\amethods\x18\x03 \x03(\v2\x19.nervus.ipc.v1.MethodMetaR\amethods\"\xd4\x01\n" +
 	"\x0fManagedResource\x12\x1f\n" +
 	"\vstable_role\x18\x01 \x01(\tR\n" +
 	"stableRole\x12#\n" +
@@ -842,6 +879,7 @@ var file_nervus_ipc_v1_provider_descriptor_proto_goTypes = []any{
 	(*DefinedPermission)(nil),        // 7: nervus.ipc.v1.DefinedPermission
 	(*LocalizedText)(nil),            // 8: nervus.ipc.v1.LocalizedText
 	(RiskClass)(0),                   // 9: nervus.ipc.v1.RiskClass
+	(*MethodMeta)(nil),               // 10: nervus.ipc.v1.MethodMeta
 }
 var file_nervus_ipc_v1_provider_descriptor_proto_depIdxs = []int32{
 	4,  // 0: nervus.ipc.v1.ProviderDescriptor.interfaces:type_name -> nervus.ipc.v1.ProvidedInterface
@@ -849,18 +887,19 @@ var file_nervus_ipc_v1_provider_descriptor_proto_depIdxs = []int32{
 	7,  // 2: nervus.ipc.v1.ProviderDescriptor.permissions:type_name -> nervus.ipc.v1.DefinedPermission
 	9,  // 3: nervus.ipc.v1.ProvidedInterface.resource_risk_floor:type_name -> nervus.ipc.v1.RiskClass
 	5,  // 4: nervus.ipc.v1.ProvidedInterface.interface_versions:type_name -> nervus.ipc.v1.ProvidedInterfaceVersion
-	0,  // 5: nervus.ipc.v1.ManagedResource.access_mode:type_name -> nervus.ipc.v1.ResourceAccessMode
-	9,  // 6: nervus.ipc.v1.ManagedResource.risk_class:type_name -> nervus.ipc.v1.RiskClass
-	2,  // 7: nervus.ipc.v1.DefinedPermission.grant_mode:type_name -> nervus.ipc.v1.GrantMode
-	9,  // 8: nervus.ipc.v1.DefinedPermission.risk_class:type_name -> nervus.ipc.v1.RiskClass
-	8,  // 9: nervus.ipc.v1.DefinedPermission.display_name:type_name -> nervus.ipc.v1.LocalizedText
-	8,  // 10: nervus.ipc.v1.DefinedPermission.description:type_name -> nervus.ipc.v1.LocalizedText
-	1,  // 11: nervus.ipc.v1.DefinedPermission.minimum_trust:type_name -> nervus.ipc.v1.PermissionTrustFloor
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	10, // 5: nervus.ipc.v1.ProvidedInterfaceVersion.methods:type_name -> nervus.ipc.v1.MethodMeta
+	0,  // 6: nervus.ipc.v1.ManagedResource.access_mode:type_name -> nervus.ipc.v1.ResourceAccessMode
+	9,  // 7: nervus.ipc.v1.ManagedResource.risk_class:type_name -> nervus.ipc.v1.RiskClass
+	2,  // 8: nervus.ipc.v1.DefinedPermission.grant_mode:type_name -> nervus.ipc.v1.GrantMode
+	9,  // 9: nervus.ipc.v1.DefinedPermission.risk_class:type_name -> nervus.ipc.v1.RiskClass
+	8,  // 10: nervus.ipc.v1.DefinedPermission.display_name:type_name -> nervus.ipc.v1.LocalizedText
+	8,  // 11: nervus.ipc.v1.DefinedPermission.description:type_name -> nervus.ipc.v1.LocalizedText
+	1,  // 12: nervus.ipc.v1.DefinedPermission.minimum_trust:type_name -> nervus.ipc.v1.PermissionTrustFloor
+	13, // [13:13] is the sub-list for method output_type
+	13, // [13:13] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_nervus_ipc_v1_provider_descriptor_proto_init() }
