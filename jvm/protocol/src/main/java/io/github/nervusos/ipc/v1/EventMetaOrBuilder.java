@@ -104,6 +104,60 @@ public interface EventMetaOrBuilder extends
 
   /**
    * <pre>
+   * Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
+   * 带了 payload 的 Subscribe 会被拒绝。
+   *
+   * # 它解决的是「一个 endpoint 上有多个实例」
+   *
+   * 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
+   * 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
+   * 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
+   *
+   * 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
+   * 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
+   * 两条路径、两种规则，是最容易被忽略的那类漏洞。
+   *
+   * # 裁决发生在 Subscribe，不在扇出
+   *
+   * nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
+   * 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
+   * 然后一直等一个永远不来的事件。
+   * </pre>
+   *
+   * <code>string subscribe_payload_type = 8 [json_name = "subscribePayloadType"];</code>
+   * @return The subscribePayloadType.
+   */
+  java.lang.String getSubscribePayloadType();
+  /**
+   * <pre>
+   * Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
+   * 带了 payload 的 Subscribe 会被拒绝。
+   *
+   * # 它解决的是「一个 endpoint 上有多个实例」
+   *
+   * 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
+   * 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
+   * 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
+   *
+   * 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
+   * 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
+   * 两条路径、两种规则，是最容易被忽略的那类漏洞。
+   *
+   * # 裁决发生在 Subscribe，不在扇出
+   *
+   * nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
+   * 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
+   * 然后一直等一个永远不来的事件。
+   * </pre>
+   *
+   * <code>string subscribe_payload_type = 8 [json_name = "subscribePayloadType"];</code>
+   * @return The bytes for subscribePayloadType.
+   */
+  com.google.protobuf.ByteString
+      getSubscribePayloadTypeBytes();
+
+  /**
+   * <pre>
    * 单条事件载荷上限。0 表示采用 nervud 的保守默认，不表示无限。
    * </pre>
    *

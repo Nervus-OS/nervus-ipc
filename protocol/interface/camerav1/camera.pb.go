@@ -136,6 +136,21 @@ func (CameraMethod) EnumDescriptor() ([]byte, []int) {
 //
 // event_id 与 method_id 是【两个互不相干的编号空间】：本接口的 event 1 与
 // method 1 毫无关系。
+//
+// # ⚠️ 已知泄漏：事件按 endpoint 扇出，不按 stream
+//
+// 一路摄像头上可以同时开好几条 stream（导航一条、录制一条、检测一条），
+// 而订阅是按 endpoint 建的——endpoint 是按摄像头分的，不是按 stream 分的。
+// 于是订了 cam.front 的 A 会收到 B 那条 stream 的状态变化：什么时候开的、
+// 开了多久、什么时候掉的线。
+//
+// EventMeta.subscribe_payload_type 正是为这件事加的，但它需要 nervud 在
+// Subscribe 时问 endpoint 所有者「这条 stream 是不是你开的」——而对外部
+// Provider 那是一次往返，会让 Subscribe 变成异步。当前只有内建 endpoint
+// 支持这道准入（见 nervus.interface.operation.control）。
+//
+// 【所以这里刻意不声明 subscribe_payload_type】：声明一个内核强制不了的
+// 字段比不声明更糟，它读起来像个保证。Provider 侧准入落地后再补。
 type CameraEvent int32
 
 const (

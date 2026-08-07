@@ -48,7 +48,7 @@ JVM 侧的手写 SDK **不在本仓库**，在 `nervus-app-sdk`（`com.nervus.sd
 | Subscribe / Unsubscribe | 40, 42 | ✅ | 按 `(endpoint, event_id)` 订阅 |
 | SubscribeResult / UnsubscribeResult | 41, 44 | ✅ | 成功回带 `delivery_class` |
 | Event / SubscriptionClosed | 43, 45 | ✅ | nervud 扇出；背压按 `delivery_class` |
-| Dispatch / DispatchResult | 50-51 | ✅ | nervud ↔ Service；v2 起**无条件**附带 `ExecutionContext` |
+| Dispatch / DispatchResult | 50-51 | ✅ | nervud ↔ Service；v2 起**无条件**附带 `ExecutionContext`。长任务的 `operation_id` 也在里面 |
 | CancelDispatch | 52 | ⚠️ | deadline / 调用方断线会发；显式 Cancel 尚未接线。Go ServiceHost 已支持 |
 | PublishEvent | 53 | ✅ | Service → nervud 单向上报，**没有结果**；订阅方不发也不收 |
 | Ping / Pong | 60-61 | ✅ | |
@@ -65,6 +65,16 @@ JVM 侧的手写 SDK **不在本仓库**，在 `nervus-app-sdk`（`com.nervus.sd
 | `method_registry.proto` | ✅ | `MethodMeta` / `EventMeta` 是 dispatch 与订阅的权威依据 |
 | `provider_descriptor.proto` | ✅ | 内核不再有硬编码的接口/权限/资源表 |
 | `transfer.proto` | ✅ | FRAMED_RELAY 与 SHARED_MEMORY_RING 均已接线 |
+
+系统 Interface（不占 body 号，走标准 Resolve + Request）：
+
+| 接口 | nervud | 说明 |
+|---|:---:|---|
+| `nervus.interface.transfer.control@1` | ✅ | 数据面管子的 Begin / Commit / Abort |
+| `nervus.interface.resource.directory@1` | ✅ | 只读设备目录，补 ResourceSelector 的枚举缺口 |
+| `nervus.interface.operation.control@1` | ✅ | 长任务的查询/取消（调用方）与回报（Provider） |
+| `nervus.interface.safety.control@1` | ✅ | Safety 观察与 re-arm |
+| `nervus.interface.power@1` | ✅ | 有序重启/关机 |
 
 **改动纪律**：内核每接通一项，同一个 PR 里更新本表 + 对应 `.proto` 的
 `[KERNEL: NOT IMPLEMENTED]` / `[KERNEL: NOT WIRED]` 标记。两处不同步就等于没标。
@@ -121,6 +131,7 @@ nervus-ipc/
 │   ├── nervus/interface/manipulator/v1/  标准接口 Manipulator@1（机械臂）
 │   ├── nervus/interface/camera/v1/       标准接口 Camera@1 + CameraConfig@1
 │   ├── nervus/interface/resourcedir/v1/  标准接口 ResourceDirectory@1（内核内建）
+│   ├── nervus/interface/operation/v1/    OperationControl@1（内核内建，长任务）
 │   └── com/acme/dog/v1/                  OEM 私有接口样例（可拓展性验收）
 ├── protocol/                   生成的 Go 类型（提交进仓库，见下）
 ├── registry/                   动态 schema bundle / Provider Descriptor 校验

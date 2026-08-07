@@ -99,4 +99,26 @@ public interface ExecutionContextOrBuilder extends
    * @return The resourceGeneration.
    */
   long getResourceGeneration();
+
+  /**
+   * <pre>
+   * 本次 Dispatch 对应的 Operation。方法声明了 returns_operation 时恒非 0，
+   * 否则为 0。
+   *
+   * # 为什么 Provider 必须从这里拿，而不是自己生成
+   *
+   * operation_id 由 nervud 分配、由 nervud 拥有状态机。Provider 自己编一个的话，
+   * 调用方拿到的句柄与 nervud 记录的对不上——而两边都不会报错，只是取消永远
+   * 取消不到，进度永远收不到。
+   *
+   * 【Operation 在 Dispatch 之前就已存在】。这个顺序让 Provider 可以在
+   * DispatchResult 里直接回 ACCEPTED：那个码要求「Operation 必须已经存在」，
+   * 而这里正好满足。Provider 随后用这个 id 调
+   * nervus.interface.operation.control 上报进度与终态。
+   * </pre>
+   *
+   * <code>uint64 operation_id = 8 [json_name = "operationId"];</code>
+   * @return The operationId.
+   */
+  long getOperationId();
 }

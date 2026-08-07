@@ -3640,8 +3640,22 @@ type ExecutionContext struct {
 	// 两者同时为空/0；禁止只设置其中一个。
 	ResourceHandle     string `protobuf:"bytes,6,opt,name=resource_handle,json=resourceHandle,proto3" json:"resource_handle,omitempty"`
 	ResourceGeneration uint64 `protobuf:"varint,7,opt,name=resource_generation,json=resourceGeneration,proto3" json:"resource_generation,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	// 本次 Dispatch 对应的 Operation。方法声明了 returns_operation 时恒非 0，
+	// 否则为 0。
+	//
+	// # 为什么 Provider 必须从这里拿，而不是自己生成
+	//
+	// operation_id 由 nervud 分配、由 nervud 拥有状态机。Provider 自己编一个的话，
+	// 调用方拿到的句柄与 nervud 记录的对不上——而两边都不会报错，只是取消永远
+	// 取消不到，进度永远收不到。
+	//
+	// 【Operation 在 Dispatch 之前就已存在】。这个顺序让 Provider 可以在
+	// DispatchResult 里直接回 ACCEPTED：那个码要求「Operation 必须已经存在」，
+	// 而这里正好满足。Provider 随后用这个 id 调
+	// nervus.interface.operation.control 上报进度与终态。
+	OperationId   uint64 `protobuf:"varint,8,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ExecutionContext) Reset() {
@@ -3719,6 +3733,13 @@ func (x *ExecutionContext) GetResourceHandle() string {
 func (x *ExecutionContext) GetResourceGeneration() uint64 {
 	if x != nil {
 		return x.ResourceGeneration
+	}
+	return 0
+}
+
+func (x *ExecutionContext) GetOperationId() uint64 {
+	if x != nil {
+		return x.OperationId
 	}
 	return 0
 }
@@ -4999,7 +5020,7 @@ const file_nervus_ipc_v1_envelope_proto_rawDesc = "" +
 	"\fremaining_ms\x18\x04 \x01(\rR\vremainingMs\x12\x18\n" +
 	"\apayload\x18\x05 \x01(\fR\apayload\x124\n" +
 	"\x06caller\x18\x06 \x01(\v2\x1c.nervus.ipc.v1.CallerContextR\x06caller\x12L\n" +
-	"\x11execution_context\x18\a \x01(\v2\x1f.nervus.ipc.v1.ExecutionContextR\x10executionContext\"\xc7\x02\n" +
+	"\x11execution_context\x18\a \x01(\v2\x1f.nervus.ipc.v1.ExecutionContextR\x10executionContext\"\xea\x02\n" +
 	"\x10ExecutionContext\x12\x19\n" +
 	"\blease_id\x18\x01 \x01(\x04R\aleaseId\x12I\n" +
 	"\x10controller_class\x18\x02 \x01(\x0e2\x1e.nervus.ipc.v1.ControllerClassR\x0fcontrollerClass\x12!\n" +
@@ -5007,7 +5028,8 @@ const file_nervus_ipc_v1_envelope_proto_rawDesc = "" +
 	"\x0edeadline_nanos\x18\x04 \x01(\x03R\rdeadlineNanos\x12)\n" +
 	"\x10command_sequence\x18\x05 \x01(\x04R\x0fcommandSequence\x12'\n" +
 	"\x0fresource_handle\x18\x06 \x01(\tR\x0eresourceHandle\x12/\n" +
-	"\x13resource_generation\x18\a \x01(\x04R\x12resourceGeneration\"\xfa\x01\n" +
+	"\x13resource_generation\x18\a \x01(\x04R\x12resourceGeneration\x12!\n" +
+	"\foperation_id\x18\b \x01(\x04R\voperationId\"\xfa\x01\n" +
 	"\rCallerContext\x12\x1d\n" +
 	"\n" +
 	"package_id\x18\x01 \x01(\tR\tpackageId\x12!\n" +

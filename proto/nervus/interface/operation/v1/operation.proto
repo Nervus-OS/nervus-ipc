@@ -1,0 +1,408 @@
+// Nervus 系统接口 · OperationControl@1  [REWRITE-v1 / experimental]
+//
+//   interface_id = nervus.interface.operation.control ，major = 1
+//   由 nervud 以【内建 endpoint】实现。
+//
+// # 什么是 Operation
+//
+// 「要花时间、需要取消/进度/终态确认」的系统协调长任务：机械臂轨迹、回零、
+// 移到位姿、导航到点。它与普通方法调用的区别不是耗时长短，而是【调用方需要
+// 在执行过程中观察它、并且可能改主意】。
+//
+// # 它为什么不是新的 Envelope body
+//
+// envelope.proto 的规矩：想加 body 之前先问它是否属于那八件事之一。查询一个
+// operation 的状态不属于任何一件——它就是一次普通的方法调用。所以本接口与
+// Transfer Control 同形：nervud 自己实现的系统 Interface，走标准
+// Resolve + Request，不占 body 号。
+//
+// # 完整时序
+//
+//	App --Request(某个 returns_operation 的方法)--> nervud
+//	                nervud 建 Operation(PENDING)，operation_id 进 ExecutionContext
+//	                nervud --Dispatch--> Provider
+//	                nervud <--DispatchResult{ACCEPTED}-- Provider
+//	App <--Response{Success{ACCEPTED, OperationHandle}}-- nervud
+//	                nervud <--ReportProgress / CompleteOperation-- Provider（本接口）
+//	App <--OperationChanged(订阅事件)-- nervud
+//
+// 【App 拿到句柄的那一刻，Provider 已经确认接单】。反过来（先回句柄再问
+// Provider）会产生一个指向没人在做的活的 operation_id，而调用方只能靠超时
+// 才能发现。
+//
+// # 谁能调哪些方法
+//
+//	GetOperation / CancelOperation     调用方（创建它的那一个）
+//	AcceptOperation / ReportProgress /
+//	CompleteOperation                  Provider（正在执行它的那一个）
+//
+// 两组都由 nervud 按【连接身份】裁决，不看 payload 里的任何自报字段。
+// 一个 Provider 不能回报别人的 operation，一个 App 也取消不了别人的。
+//
+// [REWRITE-v1] experimental：v2 前允许破坏性调整；正式冻结后遵循 §10.12。
+
+syntax = "proto3";
+
+package nervus.interface.operation.v1;
+
+import "nervus/ipc/v1/method_registry.proto";
+import "nervus/ipc/v1/status.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/operationv1;operationv1";
+
+// Java 包名不能含连字符，也不能用保留字 "interface" —— 用 "iface" 段。
+option java_package = "io.github.nervusos.iface.operation.v1";
+option java_multiple_files = true;
+option java_outer_classname = "OperationControlProto";
+
+// =============================================================================
+// 方法
+// =============================================================================
+
+enum OperationControlMethod {
+  OPERATION_CONTROL_METHOD_UNSPECIFIED = 0;
+
+  // 读一个 operation 的当前状态。只有创建它的调用方能读。
+  //
+  // 【存在的理由不是轮询】：正常路径是订阅 OperationChanged。Get 补的是两个
+  // 订阅覆盖不到的窗口——刚拿到句柄还没来得及订阅的那一小段，以及断线重连后
+  // 「我走的时候它还在跑，现在怎么样了」。
+  OPERATION_CONTROL_METHOD_GET_OPERATION = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    risk_class: RISK_CLASS_NORMAL
+    is_read_only: true
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.operation.v1.GetOperationRequest"
+    response_type: "nervus.interface.operation.v1.OperationStatus"
+    error_detail_type: "nervus.interface.operation.v1.OperationErrorDetail"
+    default_timeout_ms: 1000
+    max_timeout_ms: 3000
+  }];
+
+  // 请求取消。
+  //
+  // 【它是「请求」不是「命令」】：返回成功只表示 nervud 已把 operation 置为
+  // CANCEL_REQUESTED 并通知了 Provider，不表示机械臂已经停下。真正的终态
+  // （CANCELLED 或者「来不及了，已经 SUCCEEDED」）由后续事件给出。
+  //
+  // 把它做成同步的「取消完成」会是一句谎话：物理动作的收敛需要时间，而在那
+  // 段时间里调用方最需要的恰恰是知道进展。
+  OPERATION_CONTROL_METHOD_CANCEL_OPERATION = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.operation.v1.CancelOperationRequest"
+    response_type: ""
+    error_detail_type: "nervus.interface.operation.v1.OperationErrorDetail"
+    default_timeout_ms: 1000
+    max_timeout_ms: 3000
+  }];
+
+  // Provider 确认已开始执行，operation 从 PENDING 进 RUNNING。
+  //
+  // 与 DispatchResult{ACCEPTED} 的区别：那一步只说明「我收下了」，本方法说明
+  // 「我已经在动了」。两者之间可能隔着一段准备时间（规划轨迹、等待姿态就绪），
+  // 而调用方需要能分辨「还在准备」和「已经在动」——尤其在决定要不要取消时。
+  //
+  // motion_epoch 必须与创建时一致：不一致说明中途发生过 Safety 接管或抢占，
+  // 这次执行是基于已经作废的授权。
+  OPERATION_CONTROL_METHOD_ACCEPT_OPERATION = 3 [(nervus.ipc.v1.method_meta) = {
+    method_id: 3
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.operation.v1.AcceptOperationRequest"
+    response_type: ""
+    error_detail_type: "nervus.interface.operation.v1.OperationErrorDetail"
+    default_timeout_ms: 1000
+    max_timeout_ms: 3000
+  }];
+
+  // 上报一次 typed 进度。不改变状态。
+  //
+  // 【走方法调用而不是 PublishEvent】：PublishEvent 是 endpoint 级的，
+  // 事件属于「这个 endpoint」；而进度属于「这一个 operation」，两个同时
+  // 在跑的轨迹必须能分开。用 endpoint 事件的话，订阅方收到一堆进度却分不清
+  // 哪条对应自己那次调用。
+  OPERATION_CONTROL_METHOD_REPORT_PROGRESS = 4 [(nervus.ipc.v1.method_meta) = {
+    method_id: 4
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.operation.v1.ReportProgressRequest"
+    response_type: ""
+    error_detail_type: "nervus.interface.operation.v1.OperationErrorDetail"
+    default_timeout_ms: 1000
+    max_timeout_ms: 3000
+  }];
+
+  // 写终态：SUCCEEDED / FAILED / CANCELLED。
+  //
+  // 【终态只写一次】，重复写返回 FAILED_PRECONDITION + ALREADY_TERMINAL。
+  // 幂等地静默接受第二次会掩盖一类真实故障：Provider 内部有两条路径都认为
+  // 自己该结束这次执行，而它们可能给出相反的结论。
+  OPERATION_CONTROL_METHOD_COMPLETE_OPERATION = 5 [(nervus.ipc.v1.method_meta) = {
+    method_id: 5
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.operation.v1.CompleteOperationRequest"
+    response_type: ""
+    error_detail_type: "nervus.interface.operation.v1.OperationErrorDetail"
+    default_timeout_ms: 1000
+    max_timeout_ms: 3000
+  }];
+}
+
+enum OperationControlEvent {
+  OPERATION_CONTROL_EVENT_UNSPECIFIED = 0;
+
+  // operation 的状态或进度发生变化。
+  //
+  // 【DELIVERY_CLASS_RELIABLE，不是 STATE】。这看起来反直觉——状态流不是天生
+  // 该合并吗？不是：本事件同时承载【进度】与【状态转移】，而进度是一串各不
+  // 相同的采样点，合并会让调用方看到轨迹从 10% 直接跳到 90%。
+  //
+  // 更要紧的是终态：合并意味着终态事件可能被后来的事件盖掉——而终态之后不会
+  // 再有事件，被盖掉就是永远收不到。「这次轨迹到底成没成」是调用方唯一必须
+  // 知道的事。
+  //
+  // 代价是慢消费者会被断开订阅。那是对的：一个连结果都收不动的调用方，
+  // 让它以为自己在观察还不如让它明确失败。
+  // 【订阅时必须带 OperationSubscription 指定 operation_id】，见那条消息的说明：
+  // 本接口只有一个内建 endpoint，不指定就等于订阅全机所有人的 operation。
+  OPERATION_CONTROL_EVENT_OPERATION_CHANGED = 1 [(nervus.ipc.v1.event_meta) = {
+    event_id: 1
+    risk_class: RISK_CLASS_NORMAL
+    delivery_class: DELIVERY_CLASS_RELIABLE
+    payload_type: "nervus.interface.operation.v1.OperationEvent"
+    subscribe_payload_type: "nervus.interface.operation.v1.OperationSubscription"
+    max_events_per_second: 100
+  }];
+}
+
+// =============================================================================
+// 句柄
+// =============================================================================
+
+// OperationHandle 是【任何 returns_operation 方法】的 ACCEPTED 响应载荷。
+//
+// 见 method_registry.proto 的 returns_operation：那条规则是协议级的，不由
+// 各接口自行约定——否则每个接口都会发明一份自己的「怎么把 operation_id
+// 告诉调用方」，而 SDK 就得为每个接口写一段特例。
+message OperationHandle {
+  // nervud 分配，host session 作用域，单调递增，【不复用】。
+  //
+  // 不复用与 endpoint_id / lease_id / subscription_id 同一条理由：复用会让
+  // 一条迟到的 OperationChanged 被错认成新 operation 的事件，而接收方没有
+  // 任何办法分辨。
+  //
+  // 【不跨 nervud 重启存活】：重启 = 新 host session，旧 operation 一律丢弃。
+  // 与 motion epoch 同一语义——重启之后没有任何东西还在动。
+  uint64 operation_id = 1;
+}
+
+// =============================================================================
+// 状态
+// =============================================================================
+
+// OperationState 是状态机的全部取值。终态无出边。
+enum OperationState {
+  OPERATION_STATE_UNSPECIFIED = 0;
+
+  // 已创建，Provider 尚未确认开始执行。
+  OPERATION_STATE_PENDING = 1;
+  // Provider 已 AcceptOperation，正在执行。
+  OPERATION_STATE_RUNNING = 2;
+  // 已收到取消请求，等待 Provider 收敛。【不是终态】——物理动作停下来需要时间。
+  OPERATION_STATE_CANCEL_REQUESTED = 3;
+
+  // 以下为终态，只写一次，写入后不可再变。
+  OPERATION_STATE_SUCCEEDED = 4;
+  OPERATION_STATE_FAILED = 5;
+  OPERATION_STATE_CANCELLED = 6;
+}
+
+// OperationOrigin 是产生这个 operation 的那次调用的类型绑定。
+//
+// # 它为什么必须在 wire 上
+//
+// progress / result / error 都是 typed bytes，而它们的 Protobuf 类型由
+// 【发起调用的那个方法】决定。SDK 断线重连后手里只有一个 operation_id，
+// 没有这份绑定就无从解码任何载荷——它会拿到一串不知道该按什么类型解析的字节。
+//
+// 【不用 google.protobuf.Any】：那等于让发送方选择接收方的解析器，
+// status.proto 明令禁止。
+message OperationOrigin {
+  string interface_id = 1;
+  uint32 interface_major = 2;
+  uint32 interface_minor = 3;
+  uint32 method_id = 4;
+
+  // 发起调用时选中的接口 schema 的确定性标识。SDK 应当校验它与本地生成代码
+  // 一致——不一致说明两侧 schema 漂移，那时按本地类型解码会读出垃圾。
+  bytes interface_schema_hash = 5;
+}
+
+// OperationStatus 是一个 operation 的完整快照。
+message OperationStatus {
+  uint64 operation_id = 1;
+  OperationState state = 2;
+  OperationOrigin origin = 3;
+
+  // 绑定的公开 Resource 句柄集合。
+  repeated string resource_handles = 4;
+
+  // 创建时的 motion epoch。0 = 非运动类。
+  //
+  // 它让调用方能判断「我这次动作是不是已经被 Safety 接管作废了」——
+  // 当前活跃 epoch 大于它，说明中间发生过停机或抢占。
+  uint64 motion_epoch = 5;
+
+  // 绝对截止时间，Linux CLOCK_MONOTONIC 纳秒域。到点未终结即
+  // FAILED + DEADLINE_EXCEEDED。
+  int64 deadline_nanos = 6;
+
+  // 终态载荷，【仅终态非空】。
+  //
+  // terminal_code ∈ {OK, CANCELLED, 其它失败码}，与 state 一一对应：
+  // OK↔SUCCEEDED、CANCELLED↔CANCELLED、其它↔FAILED。冗余是刻意的——
+  // state 回答「结束了没有」，code 回答「为什么」，客户端两者都要。
+  nervus.ipc.v1.StatusCode terminal_code = 7;
+  // 成功结果，类型由 origin 决定。
+  bytes terminal_result = 8;
+  // 失败细因，类型由 origin 决定。
+  bytes terminal_error = 9;
+}
+
+// =============================================================================
+// 事件载荷
+// =============================================================================
+
+// OperationEventKind 区分一条事件是进度还是状态转移。
+enum OperationEventKind {
+  OPERATION_EVENT_KIND_UNSPECIFIED = 0;
+  // typed 进度，不改变状态。
+  OPERATION_EVENT_KIND_PROGRESS = 1;
+  // 一次状态转移（含终态）。
+  OPERATION_EVENT_KIND_STATE = 2;
+}
+
+message OperationEvent {
+  uint64 operation_id = 1;
+  OperationEventKind kind = 2;
+
+  // 当前状态。KIND_STATE 时是转移后的新状态；KIND_PROGRESS 时是转移前的当前
+  // 状态（进度不改变状态）。
+  OperationState state = 3;
+
+  OperationOrigin origin = 4;
+
+  // KIND_PROGRESS 的 typed 进度载荷。
+  bytes progress = 5;
+
+  // 终态载荷，仅 KIND_STATE 且 state 为终态时非空。语义同 OperationStatus。
+  nervus.ipc.v1.StatusCode terminal_code = 6;
+  bytes terminal_result = 7;
+  bytes terminal_error = 8;
+}
+
+// =============================================================================
+// 订阅参数
+// =============================================================================
+
+// OperationSubscription 是订阅 OPERATION_CHANGED 时 Subscribe.payload 的类型。
+//
+// # 为什么订阅必须指定 operation_id
+//
+// 本接口只有【一个】内建 endpoint，全机所有 operation 的事件都从它出来。
+// 不指定的话，订阅方会收到别人的轨迹进度、失败细因与资源句柄——而
+// GetOperation 那条路径明明是查可见性的。同一份信息，两条路径两种规则，
+// 是最容易被忽略的那类泄漏。
+//
+// nervud 在 Subscribe 时就做可见性裁决：订一个不属于自己的 operation 直接
+// 被拒，而不是订上了再在扇出时丢弃。前者是一次明确的失败，后者会让调用方
+// 以为自己在观察。
+message OperationSubscription {
+  // 要观察哪一个 operation。0 非法——它不表示「全部」。
+  //
+  // 【留空不给「订阅全部」的语义】：那需要一条「谁有资格看全机 operation」
+  // 的权限，而那条权限一旦存在就会被顺手加进各种诊断工具的 manifest 里。
+  // 需要全局视图的运维工具应当走管理通道，不走 App 控制面。
+  uint64 operation_id = 1;
+}
+
+// =============================================================================
+// 请求
+// =============================================================================
+
+message GetOperationRequest {
+  uint64 operation_id = 1;
+}
+
+message CancelOperationRequest {
+  uint64 operation_id = 1;
+}
+
+message AcceptOperationRequest {
+  uint64 operation_id = 1;
+
+  // 创建时的 motion epoch，从 ExecutionContext 原样带回。
+  //
+  // 【必须带回来校验】：Provider 从收到 Dispatch 到真正开始动之间可能隔着
+  // 几百毫秒的准备时间，而那段时间里足以发生一次 Safety 停机。不校验的话，
+  // Provider 会基于一份已经作废的授权开始运动。
+  uint64 motion_epoch = 2;
+}
+
+message ReportProgressRequest {
+  uint64 operation_id = 1;
+
+  // typed 进度载荷，类型由发起调用的方法决定（见 OperationOrigin）。
+  bytes progress = 2;
+}
+
+message CompleteOperationRequest {
+  uint64 operation_id = 1;
+
+  // 终态码。只接受 {OK, CANCELLED} 与 Provider 被允许产生的失败码；
+  // ACCEPTED、UNAUTHENTICATED、PERMISSION_DENIED 等内核专属码一律拒绝——
+  // 那些是裁决结果，不是执行结果。
+  nervus.ipc.v1.StatusCode code = 2;
+
+  // 成功结果，仅 code == OK 时有意义。
+  bytes result = 3;
+  // 失败细因，仅失败码时有意义。
+  bytes error_detail = 4;
+}
+
+// =============================================================================
+// 错误 detail
+// =============================================================================
+
+enum OperationReason {
+  OPERATION_REASON_UNSPECIFIED = 0;
+  // operation_id 不存在，或已过终态保留期被回收。
+  OPERATION_REASON_NOT_FOUND = 1;
+  // 调用方不是这个 operation 的所有者（查询侧），或不是它的执行者（回报侧）。
+  OPERATION_REASON_NOT_OWNER = 2;
+  // 已经是终态，不能再改。
+  OPERATION_REASON_ALREADY_TERMINAL = 3;
+  // motion epoch 已过期：中途发生过 Safety 接管或租约抢占。
+  OPERATION_REASON_STALE_EPOCH = 4;
+  // 该状态下不允许这次转移（如对 PENDING 的 operation 报进度）。
+  OPERATION_REASON_INVALID_TRANSITION = 5;
+  // Provider 试图写一个它无权产生的终态码。
+  OPERATION_REASON_INVALID_TERMINAL_CODE = 6;
+}
+
+message OperationErrorDetail {
+  OperationReason reason = 1;
+}

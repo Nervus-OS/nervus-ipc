@@ -100,27 +100,29 @@ public final class MethodRegistryProto {
       "x_response_bytes\030\016 \001(\rR\020maxResponseBytes" +
       "\0229\n\010transfer\030\017 \001(\0132\035.nervus.ipc.v1.Trans" +
       "ferPolicyR\010transfer\022*\n\021error_detail_type" +
-      "\030\020 \001(\tR\017errorDetailType\"\327\002\n\tEventMeta\022\031\n" +
+      "\030\020 \001(\tR\017errorDetailType\"\215\003\n\tEventMeta\022\031\n" +
       "\010event_id\030\001 \001(\rR\007eventId\022/\n\023required_per" +
       "mission\030\002 \001(\tR\022requiredPermission\0227\n\nris" +
       "k_class\030\003 \001(\0162\030.nervus.ipc.v1.RiskClassR" +
       "\triskClass\022C\n\016delivery_class\030\004 \001(\0162\034.ner" +
       "vus.ipc.v1.DeliveryClassR\rdeliveryClass\022" +
-      "!\n\014payload_type\030\005 \001(\tR\013payloadType\022*\n\021ma" +
-      "x_payload_bytes\030\006 \001(\rR\017maxPayloadBytes\0221" +
-      "\n\025max_events_per_second\030\007 \001(\rR\022maxEvents" +
-      "PerSecond*\241\001\n\tRiskClass\022\032\n\026RISK_CLASS_UN" +
-      "SPECIFIED\020\000\022\025\n\021RISK_CLASS_NORMAL\020\001\022 \n\034RI" +
-      "SK_CLASS_PRIVACY_SENSITIVE\020\002\022\037\n\033RISK_CLA" +
-      "SS_PHYSICAL_CONTROL\020\003\022\036\n\032RISK_CLASS_CRIT" +
-      "ICAL_SAFETY\020\004:_\n\013method_meta\022!.google.pr" +
-      "otobuf.EnumValueOptions\030\341\324\003 \001(\0132\031.nervus" +
-      ".ipc.v1.MethodMetaR\nmethodMeta:\\\n\nevent_" +
-      "meta\022!.google.protobuf.EnumValueOptions\030" +
-      "\342\324\003 \001(\0132\030.nervus.ipc.v1.EventMetaR\tevent" +
-      "MetaBh\n\031io.github.nervusos.ipc.v1B\023Metho" +
-      "dRegistryProtoP\001Z4github.com/nervus-os/n" +
-      "ervus-ipc/protocol/ipcv1;ipcv1b\006proto3"
+      "!\n\014payload_type\030\005 \001(\tR\013payloadType\0224\n\026su" +
+      "bscribe_payload_type\030\010 \001(\tR\024subscribePay" +
+      "loadType\022*\n\021max_payload_bytes\030\006 \001(\rR\017max" +
+      "PayloadBytes\0221\n\025max_events_per_second\030\007 " +
+      "\001(\rR\022maxEventsPerSecond*\241\001\n\tRiskClass\022\032\n" +
+      "\026RISK_CLASS_UNSPECIFIED\020\000\022\025\n\021RISK_CLASS_" +
+      "NORMAL\020\001\022 \n\034RISK_CLASS_PRIVACY_SENSITIVE" +
+      "\020\002\022\037\n\033RISK_CLASS_PHYSICAL_CONTROL\020\003\022\036\n\032R" +
+      "ISK_CLASS_CRITICAL_SAFETY\020\004:_\n\013method_me" +
+      "ta\022!.google.protobuf.EnumValueOptions\030\341\324" +
+      "\003 \001(\0132\031.nervus.ipc.v1.MethodMetaR\nmethod" +
+      "Meta:\\\n\nevent_meta\022!.google.protobuf.Enu" +
+      "mValueOptions\030\342\324\003 \001(\0132\030.nervus.ipc.v1.Ev" +
+      "entMetaR\teventMetaBh\n\031io.github.nervusos" +
+      ".ipc.v1B\023MethodRegistryProtoP\001Z4github.c" +
+      "om/nervus-os/nervus-ipc/protocol/ipcv1;i" +
+      "pcv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -140,7 +142,7 @@ public final class MethodRegistryProto {
     internal_static_nervus_ipc_v1_EventMeta_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_EventMeta_descriptor,
-        new java.lang.String[] { "EventId", "RequiredPermission", "RiskClass", "DeliveryClass", "PayloadType", "MaxPayloadBytes", "MaxEventsPerSecond", });
+        new java.lang.String[] { "EventId", "RequiredPermission", "RiskClass", "DeliveryClass", "PayloadType", "SubscribePayloadType", "MaxPayloadBytes", "MaxEventsPerSecond", });
     methodMeta.internalInit(descriptor.getExtensions().get(0));
     eventMeta.internalInit(descriptor.getExtensions().get(1));
     descriptor.resolveAllFeaturesImmutable();

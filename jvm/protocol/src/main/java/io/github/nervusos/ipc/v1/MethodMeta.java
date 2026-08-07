@@ -174,9 +174,28 @@ private static final long serialVersionUID = 0L;
   private boolean returnsOperation_ = false;
   /**
    * <pre>
-   * true → 该方法是长任务，dispatch 走 operation.Create（B5 Operation Manager），
-   * 成功以 STATUS_CODE_ACCEPTED + operation_id 应答，终态另行查询/订阅。
+   * true → 该方法是长任务，由 nervud 的 Operation Manager 拥有状态机。
    * false → 普通 request/response，成功以 OK 应答。
+   *
+   * # 协议级规则：ACCEPTED 的 payload 恒为 OperationHandle
+   *
+   * returns_operation = true 时，nervud 的 Success 恒为
+   *
+   * code    = STATUS_CODE_ACCEPTED
+   * payload = nervus.interface.operation.v1.OperationHandle
+   *
+   * 【这一条不由各接口自行约定】。让每个接口自己决定「怎么把 operation_id
+   * 告诉调用方」的话，SDK 就得为每个接口写一段特例，而写漏一个的表现是
+   * 「这个接口的长任务拿不到句柄」——一个只在某个接口上出现的 bug。
+   *
+   * 注意 response_type 描述的【不是】这个句柄，而是 operation 最终成功时
+   * 的结果类型（见下）。两者是不同时刻的两样东西。
+   *
+   * # 后续交互
+   *
+   * 调用方用 operation_id 走 nervus.interface.operation.control：
+   * GetOperation 查一次、订阅 OperationChanged 持续观察、CancelOperation
+   * 请求取消。Provider 用同一个接口上报 Accept / Progress / Complete。
    * </pre>
    *
    * <code>bool returns_operation = 5 [json_name = "returnsOperation"];</code>
@@ -1442,9 +1461,28 @@ private static final long serialVersionUID = 0L;
     private boolean returnsOperation_ ;
     /**
      * <pre>
-     * true → 该方法是长任务，dispatch 走 operation.Create（B5 Operation Manager），
-     * 成功以 STATUS_CODE_ACCEPTED + operation_id 应答，终态另行查询/订阅。
+     * true → 该方法是长任务，由 nervud 的 Operation Manager 拥有状态机。
      * false → 普通 request/response，成功以 OK 应答。
+     *
+     * # 协议级规则：ACCEPTED 的 payload 恒为 OperationHandle
+     *
+     * returns_operation = true 时，nervud 的 Success 恒为
+     *
+     * code    = STATUS_CODE_ACCEPTED
+     * payload = nervus.interface.operation.v1.OperationHandle
+     *
+     * 【这一条不由各接口自行约定】。让每个接口自己决定「怎么把 operation_id
+     * 告诉调用方」的话，SDK 就得为每个接口写一段特例，而写漏一个的表现是
+     * 「这个接口的长任务拿不到句柄」——一个只在某个接口上出现的 bug。
+     *
+     * 注意 response_type 描述的【不是】这个句柄，而是 operation 最终成功时
+     * 的结果类型（见下）。两者是不同时刻的两样东西。
+     *
+     * # 后续交互
+     *
+     * 调用方用 operation_id 走 nervus.interface.operation.control：
+     * GetOperation 查一次、订阅 OperationChanged 持续观察、CancelOperation
+     * 请求取消。Provider 用同一个接口上报 Accept / Progress / Complete。
      * </pre>
      *
      * <code>bool returns_operation = 5 [json_name = "returnsOperation"];</code>
@@ -1456,9 +1494,28 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * true → 该方法是长任务，dispatch 走 operation.Create（B5 Operation Manager），
-     * 成功以 STATUS_CODE_ACCEPTED + operation_id 应答，终态另行查询/订阅。
+     * true → 该方法是长任务，由 nervud 的 Operation Manager 拥有状态机。
      * false → 普通 request/response，成功以 OK 应答。
+     *
+     * # 协议级规则：ACCEPTED 的 payload 恒为 OperationHandle
+     *
+     * returns_operation = true 时，nervud 的 Success 恒为
+     *
+     * code    = STATUS_CODE_ACCEPTED
+     * payload = nervus.interface.operation.v1.OperationHandle
+     *
+     * 【这一条不由各接口自行约定】。让每个接口自己决定「怎么把 operation_id
+     * 告诉调用方」的话，SDK 就得为每个接口写一段特例，而写漏一个的表现是
+     * 「这个接口的长任务拿不到句柄」——一个只在某个接口上出现的 bug。
+     *
+     * 注意 response_type 描述的【不是】这个句柄，而是 operation 最终成功时
+     * 的结果类型（见下）。两者是不同时刻的两样东西。
+     *
+     * # 后续交互
+     *
+     * 调用方用 operation_id 走 nervus.interface.operation.control：
+     * GetOperation 查一次、订阅 OperationChanged 持续观察、CancelOperation
+     * 请求取消。Provider 用同一个接口上报 Accept / Progress / Complete。
      * </pre>
      *
      * <code>bool returns_operation = 5 [json_name = "returnsOperation"];</code>
@@ -1474,9 +1531,28 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * true → 该方法是长任务，dispatch 走 operation.Create（B5 Operation Manager），
-     * 成功以 STATUS_CODE_ACCEPTED + operation_id 应答，终态另行查询/订阅。
+     * true → 该方法是长任务，由 nervud 的 Operation Manager 拥有状态机。
      * false → 普通 request/response，成功以 OK 应答。
+     *
+     * # 协议级规则：ACCEPTED 的 payload 恒为 OperationHandle
+     *
+     * returns_operation = true 时，nervud 的 Success 恒为
+     *
+     * code    = STATUS_CODE_ACCEPTED
+     * payload = nervus.interface.operation.v1.OperationHandle
+     *
+     * 【这一条不由各接口自行约定】。让每个接口自己决定「怎么把 operation_id
+     * 告诉调用方」的话，SDK 就得为每个接口写一段特例，而写漏一个的表现是
+     * 「这个接口的长任务拿不到句柄」——一个只在某个接口上出现的 bug。
+     *
+     * 注意 response_type 描述的【不是】这个句柄，而是 operation 最终成功时
+     * 的结果类型（见下）。两者是不同时刻的两样东西。
+     *
+     * # 后续交互
+     *
+     * 调用方用 operation_id 走 nervus.interface.operation.control：
+     * GetOperation 查一次、订阅 OperationChanged 持续观察、CancelOperation
+     * 请求取消。Provider 用同一个接口上报 Accept / Progress / Complete。
      * </pre>
      *
      * <code>bool returns_operation = 5 [json_name = "returnsOperation"];</code>

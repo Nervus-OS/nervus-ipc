@@ -143,9 +143,28 @@ type MethodMeta struct {
 	// 是否要求调用方持有该 Resource 的 ControlLease 才能调用。
 	// 只读方法为 false；驱动执行器的方法为 true。
 	RequiresControlLease bool `protobuf:"varint,4,opt,name=requires_control_lease,json=requiresControlLease,proto3" json:"requires_control_lease,omitempty"`
-	// true → 该方法是长任务，dispatch 走 operation.Create（B5 Operation Manager），
-	// 成功以 STATUS_CODE_ACCEPTED + operation_id 应答，终态另行查询/订阅。
+	// true → 该方法是长任务，由 nervud 的 Operation Manager 拥有状态机。
 	// false → 普通 request/response，成功以 OK 应答。
+	//
+	// # 协议级规则：ACCEPTED 的 payload 恒为 OperationHandle
+	//
+	// returns_operation = true 时，nervud 的 Success 恒为
+	//
+	//	code    = STATUS_CODE_ACCEPTED
+	//	payload = nervus.interface.operation.v1.OperationHandle
+	//
+	// 【这一条不由各接口自行约定】。让每个接口自己决定「怎么把 operation_id
+	// 告诉调用方」的话，SDK 就得为每个接口写一段特例，而写漏一个的表现是
+	// 「这个接口的长任务拿不到句柄」——一个只在某个接口上出现的 bug。
+	//
+	// 注意 response_type 描述的【不是】这个句柄，而是 operation 最终成功时
+	// 的结果类型（见下）。两者是不同时刻的两样东西。
+	//
+	// # 后续交互
+	//
+	// 调用方用 operation_id 走 nervus.interface.operation.control：
+	// GetOperation 查一次、订阅 OperationChanged 持续观察、CancelOperation
+	// 请求取消。Provider 用同一个接口上报 Accept / Progress / Complete。
 	ReturnsOperation bool `protobuf:"varint,5,opt,name=returns_operation,json=returnsOperation,proto3" json:"returns_operation,omitempty"`
 	// Agent 工具元数据：调用前是否需要【系统持有的】用户确认框。
 	//
@@ -358,6 +377,25 @@ type EventMeta struct {
 	DeliveryClass DeliveryClass `protobuf:"varint,4,opt,name=delivery_class,json=deliveryClass,proto3,enum=nervus.ipc.v1.DeliveryClass" json:"delivery_class,omitempty"`
 	// 事件载荷的 Protobuf 全名。空表示无载荷（纯信号事件）。
 	PayloadType string `protobuf:"bytes,5,opt,name=payload_type,json=payloadType,proto3" json:"payload_type,omitempty"`
+	// Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
+	// 带了 payload 的 Subscribe 会被拒绝。
+	//
+	// # 它解决的是「一个 endpoint 上有多个实例」
+	//
+	// 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
+	// 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
+	// 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
+	//
+	// 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
+	// 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
+	// 两条路径、两种规则，是最容易被忽略的那类漏洞。
+	//
+	// # 裁决发生在 Subscribe，不在扇出
+	//
+	// nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
+	// 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
+	// 然后一直等一个永远不来的事件。
+	SubscribePayloadType string `protobuf:"bytes,8,opt,name=subscribe_payload_type,json=subscribePayloadType,proto3" json:"subscribe_payload_type,omitempty"`
 	// 单条事件载荷上限。0 表示采用 nervud 的保守默认，不表示无限。
 	MaxPayloadBytes uint32 `protobuf:"varint,6,opt,name=max_payload_bytes,json=maxPayloadBytes,proto3" json:"max_payload_bytes,omitempty"`
 	// 每秒最大推送条数。0 表示采用 nervud 的保守默认，不表示无限。
@@ -429,6 +467,13 @@ func (x *EventMeta) GetDeliveryClass() DeliveryClass {
 func (x *EventMeta) GetPayloadType() string {
 	if x != nil {
 		return x.PayloadType
+	}
+	return ""
+}
+
+func (x *EventMeta) GetSubscribePayloadType() string {
+	if x != nil {
+		return x.SubscribePayloadType
 	}
 	return ""
 }
@@ -508,14 +553,15 @@ const file_nervus_ipc_v1_method_registry_proto_rawDesc = "" +
 	"\x11max_request_bytes\x18\r \x01(\rR\x0fmaxRequestBytes\x12,\n" +
 	"\x12max_response_bytes\x18\x0e \x01(\rR\x10maxResponseBytes\x129\n" +
 	"\btransfer\x18\x0f \x01(\v2\x1d.nervus.ipc.v1.TransferPolicyR\btransfer\x12*\n" +
-	"\x11error_detail_type\x18\x10 \x01(\tR\x0ferrorDetailType\"\xd7\x02\n" +
+	"\x11error_detail_type\x18\x10 \x01(\tR\x0ferrorDetailType\"\x8d\x03\n" +
 	"\tEventMeta\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\rR\aeventId\x12/\n" +
 	"\x13required_permission\x18\x02 \x01(\tR\x12requiredPermission\x127\n" +
 	"\n" +
 	"risk_class\x18\x03 \x01(\x0e2\x18.nervus.ipc.v1.RiskClassR\triskClass\x12C\n" +
 	"\x0edelivery_class\x18\x04 \x01(\x0e2\x1c.nervus.ipc.v1.DeliveryClassR\rdeliveryClass\x12!\n" +
-	"\fpayload_type\x18\x05 \x01(\tR\vpayloadType\x12*\n" +
+	"\fpayload_type\x18\x05 \x01(\tR\vpayloadType\x124\n" +
+	"\x16subscribe_payload_type\x18\b \x01(\tR\x14subscribePayloadType\x12*\n" +
 	"\x11max_payload_bytes\x18\x06 \x01(\rR\x0fmaxPayloadBytes\x121\n" +
 	"\x15max_events_per_second\x18\a \x01(\rR\x12maxEventsPerSecond*\xa1\x01\n" +
 	"\tRiskClass\x12\x1a\n" +

@@ -203,6 +203,33 @@ private static final long serialVersionUID = 0L;
     return resourceGeneration_;
   }
 
+  public static final int OPERATION_ID_FIELD_NUMBER = 8;
+  private long operationId_ = 0L;
+  /**
+   * <pre>
+   * 本次 Dispatch 对应的 Operation。方法声明了 returns_operation 时恒非 0，
+   * 否则为 0。
+   *
+   * # 为什么 Provider 必须从这里拿，而不是自己生成
+   *
+   * operation_id 由 nervud 分配、由 nervud 拥有状态机。Provider 自己编一个的话，
+   * 调用方拿到的句柄与 nervud 记录的对不上——而两边都不会报错，只是取消永远
+   * 取消不到，进度永远收不到。
+   *
+   * 【Operation 在 Dispatch 之前就已存在】。这个顺序让 Provider 可以在
+   * DispatchResult 里直接回 ACCEPTED：那个码要求「Operation 必须已经存在」，
+   * 而这里正好满足。Provider 随后用这个 id 调
+   * nervus.interface.operation.control 上报进度与终态。
+   * </pre>
+   *
+   * <code>uint64 operation_id = 8 [json_name = "operationId"];</code>
+   * @return The operationId.
+   */
+  @java.lang.Override
+  public long getOperationId() {
+    return operationId_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -237,6 +264,9 @@ private static final long serialVersionUID = 0L;
     }
     if (resourceGeneration_ != 0L) {
       output.writeUInt64(7, resourceGeneration_);
+    }
+    if (operationId_ != 0L) {
+      output.writeUInt64(8, operationId_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -274,6 +304,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(7, resourceGeneration_);
     }
+    if (operationId_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeUInt64Size(8, operationId_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -302,6 +336,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getResourceHandle())) return false;
     if (getResourceGeneration()
         != other.getResourceGeneration()) return false;
+    if (getOperationId()
+        != other.getOperationId()) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -332,6 +368,9 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + RESOURCE_GENERATION_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         getResourceGeneration());
+    hash = (37 * hash) + OPERATION_ID_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getOperationId());
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -479,6 +518,7 @@ private static final long serialVersionUID = 0L;
       commandSequence_ = 0L;
       resourceHandle_ = "";
       resourceGeneration_ = 0L;
+      operationId_ = 0L;
       return this;
     }
 
@@ -533,6 +573,9 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000040) != 0)) {
         result.resourceGeneration_ = resourceGeneration_;
       }
+      if (((from_bitField0_ & 0x00000080) != 0)) {
+        result.operationId_ = operationId_;
+      }
     }
 
     @java.lang.Override
@@ -569,6 +612,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getResourceGeneration() != 0L) {
         setResourceGeneration(other.getResourceGeneration());
+      }
+      if (other.getOperationId() != 0L) {
+        setOperationId(other.getOperationId());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -631,6 +677,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000040;
               break;
             } // case 56
+            case 64: {
+              operationId_ = input.readUInt64();
+              bitField0_ |= 0x00000080;
+              break;
+            } // case 64
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1033,6 +1084,86 @@ private static final long serialVersionUID = 0L;
     public Builder clearResourceGeneration() {
       bitField0_ = (bitField0_ & ~0x00000040);
       resourceGeneration_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long operationId_ ;
+    /**
+     * <pre>
+     * 本次 Dispatch 对应的 Operation。方法声明了 returns_operation 时恒非 0，
+     * 否则为 0。
+     *
+     * # 为什么 Provider 必须从这里拿，而不是自己生成
+     *
+     * operation_id 由 nervud 分配、由 nervud 拥有状态机。Provider 自己编一个的话，
+     * 调用方拿到的句柄与 nervud 记录的对不上——而两边都不会报错，只是取消永远
+     * 取消不到，进度永远收不到。
+     *
+     * 【Operation 在 Dispatch 之前就已存在】。这个顺序让 Provider 可以在
+     * DispatchResult 里直接回 ACCEPTED：那个码要求「Operation 必须已经存在」，
+     * 而这里正好满足。Provider 随后用这个 id 调
+     * nervus.interface.operation.control 上报进度与终态。
+     * </pre>
+     *
+     * <code>uint64 operation_id = 8 [json_name = "operationId"];</code>
+     * @return The operationId.
+     */
+    @java.lang.Override
+    public long getOperationId() {
+      return operationId_;
+    }
+    /**
+     * <pre>
+     * 本次 Dispatch 对应的 Operation。方法声明了 returns_operation 时恒非 0，
+     * 否则为 0。
+     *
+     * # 为什么 Provider 必须从这里拿，而不是自己生成
+     *
+     * operation_id 由 nervud 分配、由 nervud 拥有状态机。Provider 自己编一个的话，
+     * 调用方拿到的句柄与 nervud 记录的对不上——而两边都不会报错，只是取消永远
+     * 取消不到，进度永远收不到。
+     *
+     * 【Operation 在 Dispatch 之前就已存在】。这个顺序让 Provider 可以在
+     * DispatchResult 里直接回 ACCEPTED：那个码要求「Operation 必须已经存在」，
+     * 而这里正好满足。Provider 随后用这个 id 调
+     * nervus.interface.operation.control 上报进度与终态。
+     * </pre>
+     *
+     * <code>uint64 operation_id = 8 [json_name = "operationId"];</code>
+     * @param value The operationId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setOperationId(long value) {
+
+      operationId_ = value;
+      bitField0_ |= 0x00000080;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 本次 Dispatch 对应的 Operation。方法声明了 returns_operation 时恒非 0，
+     * 否则为 0。
+     *
+     * # 为什么 Provider 必须从这里拿，而不是自己生成
+     *
+     * operation_id 由 nervud 分配、由 nervud 拥有状态机。Provider 自己编一个的话，
+     * 调用方拿到的句柄与 nervud 记录的对不上——而两边都不会报错，只是取消永远
+     * 取消不到，进度永远收不到。
+     *
+     * 【Operation 在 Dispatch 之前就已存在】。这个顺序让 Provider 可以在
+     * DispatchResult 里直接回 ACCEPTED：那个码要求「Operation 必须已经存在」，
+     * 而这里正好满足。Provider 随后用这个 id 调
+     * nervus.interface.operation.control 上报进度与终态。
+     * </pre>
+     *
+     * <code>uint64 operation_id = 8 [json_name = "operationId"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearOperationId() {
+      bitField0_ = (bitField0_ & ~0x00000080);
+      operationId_ = 0L;
       onChanged();
       return this;
     }
