@@ -9,9 +9,8 @@ package io.github.nervusos.ipc.v1;
  * <pre>
  * ResourceSelector 使用结构化形状而非点分字符串（NRCP §8.3）。
  *
- * [v2+] 最终字符语法、公开/私有 label 目录、REQUIRE_UNIQUE/SYSTEM_PREFERRED
- * 枚举与多候选选择 Policy 尚待冻结（NRCP §25.2）——本消息目前只固定
- * type/role 两个必然存在的维度，其余维度留待冻结后新增字段，不预先猜测。
+ * labels 让调用方按【语义】而不是按名字选设备："给我一个前视摄像头" 不需要
+ * 知道这块板子上它叫 cam.front 还是 camera0——那是板级配置的事，App 不该依赖。
  * </pre>
  *
  * Protobuf type {@code nervus.ipc.v1.ResourceSelector}
@@ -37,6 +36,7 @@ private static final long serialVersionUID = 0L;
   private ResourceSelector() {
     type_ = "";
     role_ = "";
+    policy_ = 0;
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -44,6 +44,18 @@ private static final long serialVersionUID = 0L;
     return io.github.nervusos.ipc.v1.EnvelopeProto.internal_static_nervus_ipc_v1_ResourceSelector_descriptor;
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @java.lang.Override
+  protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+      int number) {
+    switch (number) {
+      case 3:
+        return internalGetLabels();
+      default:
+        throw new RuntimeException(
+            "Invalid map field number: " + number);
+    }
+  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -104,7 +116,7 @@ private static final long serialVersionUID = 0L;
   private volatile java.lang.Object role_ = "";
   /**
    * <pre>
-   * 稳定角色，如 "main" / "front"。
+   * 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
    * </pre>
    *
    * <code>string role = 2 [json_name = "role"];</code>
@@ -125,7 +137,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 稳定角色，如 "main" / "front"。
+   * 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
    * </pre>
    *
    * <code>string role = 2 [json_name = "role"];</code>
@@ -144,6 +156,143 @@ private static final long serialVersionUID = 0L;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
+  }
+
+  public static final int LABELS_FIELD_NUMBER = 3;
+  private static final class LabelsDefaultEntryHolder {
+    static final com.google.protobuf.MapEntry<
+        java.lang.String, java.lang.String> defaultEntry =
+            com.google.protobuf.MapEntry
+            .<java.lang.String, java.lang.String>newDefaultInstance(
+                io.github.nervusos.ipc.v1.EnvelopeProto.internal_static_nervus_ipc_v1_ResourceSelector_LabelsEntry_descriptor, 
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "",
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "");
+  }
+  @SuppressWarnings("serial")
+  private com.google.protobuf.MapField<
+      java.lang.String, java.lang.String> labels_;
+  private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+  internalGetLabels() {
+    if (labels_ == null) {
+      return com.google.protobuf.MapField.emptyMapField(
+          LabelsDefaultEntryHolder.defaultEntry);
+    }
+    return labels_;
+  }
+  public int getLabelsCount() {
+    return internalGetLabels().getMap().size();
+  }
+  /**
+   * <pre>
+   * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+   *
+   * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+   * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+   * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+   */
+  @java.lang.Override
+  public boolean containsLabels(
+      java.lang.String key) {
+    if (key == null) { throw new NullPointerException("map key"); }
+    return internalGetLabels().getMap().containsKey(key);
+  }
+  /**
+   * Use {@link #getLabelsMap()} instead.
+   */
+  @java.lang.Override
+  @java.lang.Deprecated
+  public java.util.Map<java.lang.String, java.lang.String> getLabels() {
+    return getLabelsMap();
+  }
+  /**
+   * <pre>
+   * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+   *
+   * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+   * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+   * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+   */
+  @java.lang.Override
+  public java.util.Map<java.lang.String, java.lang.String> getLabelsMap() {
+    return internalGetLabels().getMap();
+  }
+  /**
+   * <pre>
+   * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+   *
+   * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+   * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+   * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+   */
+  @java.lang.Override
+  public /* nullable */
+java.lang.String getLabelsOrDefault(
+      java.lang.String key,
+      /* nullable */
+java.lang.String defaultValue) {
+    if (key == null) { throw new NullPointerException("map key"); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetLabels().getMap();
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+  /**
+   * <pre>
+   * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+   *
+   * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+   * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+   * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+   */
+  @java.lang.Override
+  public java.lang.String getLabelsOrThrow(
+      java.lang.String key) {
+    if (key == null) { throw new NullPointerException("map key"); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetLabels().getMap();
+    if (!map.containsKey(key)) {
+      throw new java.lang.IllegalArgumentException();
+    }
+    return map.get(key);
+  }
+
+  public static final int POLICY_FIELD_NUMBER = 4;
+  private int policy_ = 0;
+  /**
+   * <pre>
+   * 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ResourceSelectionPolicy policy = 4 [json_name = "policy"];</code>
+   * @return The enum numeric value on the wire for policy.
+   */
+  @java.lang.Override public int getPolicyValue() {
+    return policy_;
+  }
+  /**
+   * <pre>
+   * 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ResourceSelectionPolicy policy = 4 [json_name = "policy"];</code>
+   * @return The policy.
+   */
+  @java.lang.Override public io.github.nervusos.ipc.v1.ResourceSelectionPolicy getPolicy() {
+    io.github.nervusos.ipc.v1.ResourceSelectionPolicy result = io.github.nervusos.ipc.v1.ResourceSelectionPolicy.forNumber(policy_);
+    return result == null ? io.github.nervusos.ipc.v1.ResourceSelectionPolicy.UNRECOGNIZED : result;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -166,6 +315,15 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(role_)) {
       com.google.protobuf.GeneratedMessage.writeString(output, 2, role_);
     }
+    com.google.protobuf.GeneratedMessage
+      .serializeStringMapTo(
+        output,
+        internalGetLabels(),
+        LabelsDefaultEntryHolder.defaultEntry,
+        3);
+    if (policy_ != io.github.nervusos.ipc.v1.ResourceSelectionPolicy.RESOURCE_SELECTION_POLICY_UNSPECIFIED.getNumber()) {
+      output.writeEnum(4, policy_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -180,6 +338,20 @@ private static final long serialVersionUID = 0L;
     }
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(role_)) {
       size += com.google.protobuf.GeneratedMessage.computeStringSize(2, role_);
+    }
+    for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+         : internalGetLabels().getMap().entrySet()) {
+      com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+      labels__ = LabelsDefaultEntryHolder.defaultEntry.newBuilderForType()
+          .setKey(entry.getKey())
+          .setValue(entry.getValue())
+          .build();
+      size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, labels__);
+    }
+    if (policy_ != io.github.nervusos.ipc.v1.ResourceSelectionPolicy.RESOURCE_SELECTION_POLICY_UNSPECIFIED.getNumber()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeEnumSize(4, policy_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -200,6 +372,9 @@ private static final long serialVersionUID = 0L;
         .equals(other.getType())) return false;
     if (!getRole()
         .equals(other.getRole())) return false;
+    if (!internalGetLabels().equals(
+        other.internalGetLabels())) return false;
+    if (policy_ != other.policy_) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -215,6 +390,12 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getType().hashCode();
     hash = (37 * hash) + ROLE_FIELD_NUMBER;
     hash = (53 * hash) + getRole().hashCode();
+    if (!internalGetLabels().getMap().isEmpty()) {
+      hash = (37 * hash) + LABELS_FIELD_NUMBER;
+      hash = (53 * hash) + internalGetLabels().hashCode();
+    }
+    hash = (37 * hash) + POLICY_FIELD_NUMBER;
+    hash = (53 * hash) + policy_;
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -316,9 +497,8 @@ private static final long serialVersionUID = 0L;
    * <pre>
    * ResourceSelector 使用结构化形状而非点分字符串（NRCP §8.3）。
    *
-   * [v2+] 最终字符语法、公开/私有 label 目录、REQUIRE_UNIQUE/SYSTEM_PREFERRED
-   * 枚举与多候选选择 Policy 尚待冻结（NRCP §25.2）——本消息目前只固定
-   * type/role 两个必然存在的维度，其余维度留待冻结后新增字段，不预先猜测。
+   * labels 让调用方按【语义】而不是按名字选设备："给我一个前视摄像头" 不需要
+   * 知道这块板子上它叫 cam.front 还是 camera0——那是板级配置的事，App 不该依赖。
    * </pre>
    *
    * Protobuf type {@code nervus.ipc.v1.ResourceSelector}
@@ -332,6 +512,28 @@ private static final long serialVersionUID = 0L;
       return io.github.nervusos.ipc.v1.EnvelopeProto.internal_static_nervus_ipc_v1_ResourceSelector_descriptor;
     }
 
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetLabels();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapFieldReflectionAccessor internalGetMutableMapFieldReflection(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetMutableLabels();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -356,6 +558,8 @@ private static final long serialVersionUID = 0L;
       bitField0_ = 0;
       type_ = "";
       role_ = "";
+      internalGetMutableLabels().clear();
+      policy_ = 0;
       return this;
     }
 
@@ -395,6 +599,13 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000002) != 0)) {
         result.role_ = role_;
       }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.labels_ = internalGetLabels();
+        result.labels_.makeImmutable();
+      }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.policy_ = policy_;
+      }
     }
 
     @java.lang.Override
@@ -418,6 +629,12 @@ private static final long serialVersionUID = 0L;
         role_ = other.role_;
         bitField0_ |= 0x00000002;
         onChanged();
+      }
+      internalGetMutableLabels().mergeFrom(
+          other.internalGetLabels());
+      bitField0_ |= 0x00000004;
+      if (other.policy_ != 0) {
+        setPolicyValue(other.getPolicyValue());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -455,6 +672,20 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000002;
               break;
             } // case 18
+            case 26: {
+              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+              labels__ = input.readMessage(
+                  LabelsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              internalGetMutableLabels().getMutableMap().put(
+                  labels__.getKey(), labels__.getValue());
+              bitField0_ |= 0x00000004;
+              break;
+            } // case 26
+            case 32: {
+              policy_ = input.readEnum();
+              bitField0_ |= 0x00000008;
+              break;
+            } // case 32
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -567,7 +798,7 @@ private static final long serialVersionUID = 0L;
     private java.lang.Object role_ = "";
     /**
      * <pre>
-     * 稳定角色，如 "main" / "front"。
+     * 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
      * </pre>
      *
      * <code>string role = 2 [json_name = "role"];</code>
@@ -587,7 +818,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 稳定角色，如 "main" / "front"。
+     * 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
      * </pre>
      *
      * <code>string role = 2 [json_name = "role"];</code>
@@ -608,7 +839,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 稳定角色，如 "main" / "front"。
+     * 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
      * </pre>
      *
      * <code>string role = 2 [json_name = "role"];</code>
@@ -625,7 +856,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 稳定角色，如 "main" / "front"。
+     * 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
      * </pre>
      *
      * <code>string role = 2 [json_name = "role"];</code>
@@ -639,7 +870,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 稳定角色，如 "main" / "front"。
+     * 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
      * </pre>
      *
      * <code>string role = 2 [json_name = "role"];</code>
@@ -652,6 +883,262 @@ private static final long serialVersionUID = 0L;
       checkByteStringIsUtf8(value);
       role_ = value;
       bitField0_ |= 0x00000002;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> labels_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+        internalGetLabels() {
+      if (labels_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            LabelsDefaultEntryHolder.defaultEntry);
+      }
+      return labels_;
+    }
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+        internalGetMutableLabels() {
+      if (labels_ == null) {
+        labels_ = com.google.protobuf.MapField.newMapField(
+            LabelsDefaultEntryHolder.defaultEntry);
+      }
+      if (!labels_.isMutable()) {
+        labels_ = labels_.copy();
+      }
+      bitField0_ |= 0x00000004;
+      onChanged();
+      return labels_;
+    }
+    public int getLabelsCount() {
+      return internalGetLabels().getMap().size();
+    }
+    /**
+     * <pre>
+     * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+     *
+     * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+     * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+     * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+     */
+    @java.lang.Override
+    public boolean containsLabels(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetLabels().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getLabelsMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getLabels() {
+      return getLabelsMap();
+    }
+    /**
+     * <pre>
+     * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+     *
+     * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+     * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+     * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, java.lang.String> getLabelsMap() {
+      return internalGetLabels().getMap();
+    }
+    /**
+     * <pre>
+     * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+     *
+     * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+     * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+     * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+java.lang.String getLabelsOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetLabels().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+     *
+     * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+     * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+     * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+     */
+    @java.lang.Override
+    public java.lang.String getLabelsOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetLabels().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+    public Builder clearLabels() {
+      bitField0_ = (bitField0_ & ~0x00000004);
+      internalGetMutableLabels().getMutableMap()
+          .clear();
+      return this;
+    }
+    /**
+     * <pre>
+     * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+     *
+     * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+     * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+     * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+     */
+    public Builder removeLabels(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      internalGetMutableLabels().getMutableMap()
+          .remove(key);
+      return this;
+    }
+    /**
+     * Use alternate mutation accessors instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String>
+        getMutableLabels() {
+      bitField0_ |= 0x00000004;
+      return internalGetMutableLabels().getMutableMap();
+    }
+    /**
+     * <pre>
+     * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+     *
+     * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+     * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+     * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+     */
+    public Builder putLabels(
+        java.lang.String key,
+        java.lang.String value) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      if (value == null) { throw new NullPointerException("map value"); }
+      internalGetMutableLabels().getMutableMap()
+          .put(key, value);
+      bitField0_ |= 0x00000004;
+      return this;
+    }
+    /**
+     * <pre>
+     * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+     *
+     * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+     * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+     * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+     */
+    public Builder putAllLabels(
+        java.util.Map<java.lang.String, java.lang.String> values) {
+      internalGetMutableLabels().getMutableMap()
+          .putAll(values);
+      bitField0_ |= 0x00000004;
+      return this;
+    }
+
+    private int policy_ = 0;
+    /**
+     * <pre>
+     * 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ResourceSelectionPolicy policy = 4 [json_name = "policy"];</code>
+     * @return The enum numeric value on the wire for policy.
+     */
+    @java.lang.Override public int getPolicyValue() {
+      return policy_;
+    }
+    /**
+     * <pre>
+     * 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ResourceSelectionPolicy policy = 4 [json_name = "policy"];</code>
+     * @param value The enum numeric value on the wire for policy to set.
+     * @return This builder for chaining.
+     */
+    public Builder setPolicyValue(int value) {
+      policy_ = value;
+      bitField0_ |= 0x00000008;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ResourceSelectionPolicy policy = 4 [json_name = "policy"];</code>
+     * @return The policy.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.ResourceSelectionPolicy getPolicy() {
+      io.github.nervusos.ipc.v1.ResourceSelectionPolicy result = io.github.nervusos.ipc.v1.ResourceSelectionPolicy.forNumber(policy_);
+      return result == null ? io.github.nervusos.ipc.v1.ResourceSelectionPolicy.UNRECOGNIZED : result;
+    }
+    /**
+     * <pre>
+     * 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ResourceSelectionPolicy policy = 4 [json_name = "policy"];</code>
+     * @param value The policy to set.
+     * @return This builder for chaining.
+     */
+    public Builder setPolicy(io.github.nervusos.ipc.v1.ResourceSelectionPolicy value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      bitField0_ |= 0x00000008;
+      policy_ = value.getNumber();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.ResourceSelectionPolicy policy = 4 [json_name = "policy"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearPolicy() {
+      bitField0_ = (bitField0_ & ~0x00000008);
+      policy_ = 0;
       onChanged();
       return this;
     }

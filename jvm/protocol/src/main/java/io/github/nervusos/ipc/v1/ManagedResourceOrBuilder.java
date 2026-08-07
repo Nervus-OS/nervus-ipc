@@ -86,4 +86,93 @@ public interface ManagedResourceOrBuilder extends
    * @return The riskClass.
    */
   io.github.nervusos.ipc.v1.RiskClass getRiskClass();
+
+  /**
+   * <pre>
+   * 该资源的语义标签，供 ResourceSelector.labels 匹配。
+   *
+   * 存在的理由：stable_role 是【板级配置】的产物（这块板子上前视摄像头叫
+   * cam.front 还是 camera0），App 不该依赖它。标签让 App 说「我要前视摄像头」
+   * 而不是「我要 cam.front」，换一块板子不用改 App。
+   *
+   * 命名空间与接口/权限同规：平台标准标签 nervus.*（如 nervus.camera.facing），
+   * OEM 私有标签必须在定义者包命名空间下。nervud 在 Catalog 构建期校验。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 5 [json_name = "labels"];</code>
+   */
+  int getLabelsCount();
+  /**
+   * <pre>
+   * 该资源的语义标签，供 ResourceSelector.labels 匹配。
+   *
+   * 存在的理由：stable_role 是【板级配置】的产物（这块板子上前视摄像头叫
+   * cam.front 还是 camera0），App 不该依赖它。标签让 App 说「我要前视摄像头」
+   * 而不是「我要 cam.front」，换一块板子不用改 App。
+   *
+   * 命名空间与接口/权限同规：平台标准标签 nervus.*（如 nervus.camera.facing），
+   * OEM 私有标签必须在定义者包命名空间下。nervud 在 Catalog 构建期校验。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 5 [json_name = "labels"];</code>
+   */
+  boolean containsLabels(
+      java.lang.String key);
+  /**
+   * Use {@link #getLabelsMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getLabels();
+  /**
+   * <pre>
+   * 该资源的语义标签，供 ResourceSelector.labels 匹配。
+   *
+   * 存在的理由：stable_role 是【板级配置】的产物（这块板子上前视摄像头叫
+   * cam.front 还是 camera0），App 不该依赖它。标签让 App 说「我要前视摄像头」
+   * 而不是「我要 cam.front」，换一块板子不用改 App。
+   *
+   * 命名空间与接口/权限同规：平台标准标签 nervus.*（如 nervus.camera.facing），
+   * OEM 私有标签必须在定义者包命名空间下。nervud 在 Catalog 构建期校验。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 5 [json_name = "labels"];</code>
+   */
+  java.util.Map<java.lang.String, java.lang.String>
+  getLabelsMap();
+  /**
+   * <pre>
+   * 该资源的语义标签，供 ResourceSelector.labels 匹配。
+   *
+   * 存在的理由：stable_role 是【板级配置】的产物（这块板子上前视摄像头叫
+   * cam.front 还是 camera0），App 不该依赖它。标签让 App 说「我要前视摄像头」
+   * 而不是「我要 cam.front」，换一块板子不用改 App。
+   *
+   * 命名空间与接口/权限同规：平台标准标签 nervus.*（如 nervus.camera.facing），
+   * OEM 私有标签必须在定义者包命名空间下。nervud 在 Catalog 构建期校验。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 5 [json_name = "labels"];</code>
+   */
+  /* nullable */
+java.lang.String getLabelsOrDefault(
+      java.lang.String key,
+      /* nullable */
+java.lang.String defaultValue);
+  /**
+   * <pre>
+   * 该资源的语义标签，供 ResourceSelector.labels 匹配。
+   *
+   * 存在的理由：stable_role 是【板级配置】的产物（这块板子上前视摄像头叫
+   * cam.front 还是 camera0），App 不该依赖它。标签让 App 说「我要前视摄像头」
+   * 而不是「我要 cam.front」，换一块板子不用改 App。
+   *
+   * 命名空间与接口/权限同规：平台标准标签 nervus.*（如 nervus.camera.facing），
+   * OEM 私有标签必须在定义者包命名空间下。nervud 在 Catalog 构建期校验。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 5 [json_name = "labels"];</code>
+   */
+  java.lang.String getLabelsOrThrow(
+      java.lang.String key);
 }

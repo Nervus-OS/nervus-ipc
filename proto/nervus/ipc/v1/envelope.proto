@@ -271,16 +271,42 @@ message ResolveEndpoint {
   string explicit_component = 6;
 }
 
+// ResourceSelectionPolicy 决定「匹配到多个资源时怎么办」。
+//
+// 【未指定 fail closed 为 REQUIRE_UNIQUE】。对机器人来说「我要一个摄像头，
+// 系统随便给了一个」比一个明确的错误危险得多——尤其当候选里混着前视和后视，
+// 或者左臂和右臂。要系统替你挑，必须显式说出来。
+enum ResourceSelectionPolicy {
+  // fail closed：按 REQUIRE_UNIQUE 处理。
+  RESOURCE_SELECTION_POLICY_UNSPECIFIED = 0;
+
+  // 必须恰好命中一个，否则 FAILED_PRECONDITION。默认语义。
+  RESOURCE_SELECTION_POLICY_REQUIRE_UNIQUE = 1;
+
+  // 允许多个候选，由系统按平台策略挑一个（当前实现取 stable_role 字典序最小者，
+  // 保证同一份 Catalog 下的选择是确定的、可复现的）。
+  RESOURCE_SELECTION_POLICY_SYSTEM_PREFERRED = 2;
+}
+
 // ResourceSelector 使用结构化形状而非点分字符串（NRCP §8.3）。
 //
-// [v2+] 最终字符语法、公开/私有 label 目录、REQUIRE_UNIQUE/SYSTEM_PREFERRED
-// 枚举与多候选选择 Policy 尚待冻结（NRCP §25.2）——本消息目前只固定
-// type/role 两个必然存在的维度，其余维度留待冻结后新增字段，不预先猜测。
+// labels 让调用方按【语义】而不是按名字选设备："给我一个前视摄像头" 不需要
+// 知道这块板子上它叫 cam.front 还是 camera0——那是板级配置的事，App 不该依赖。
 message ResourceSelector {
   // 资源类型，如 "nervus.resource.motion.base"。
   string type = 1;
-  // 稳定角色，如 "main" / "front"。
+  // 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
   string role = 2;
+
+  // 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+  //
+  // 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+  // nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+  // （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+  map<string, string> labels = 3;
+
+  // 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+  ResourceSelectionPolicy policy = 4;
 }
 
 message ResolveEndpointResult {

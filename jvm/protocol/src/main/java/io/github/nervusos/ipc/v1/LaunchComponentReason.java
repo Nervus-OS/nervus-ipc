@@ -178,7 +178,7 @@ public enum LaunchComponentReason
   }
   public static final com.google.protobuf.Descriptors.EnumDescriptor
       getDescriptor() {
-    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(8);
+    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(9);
   }
 
   private static final LaunchComponentReason[] VALUES = values();

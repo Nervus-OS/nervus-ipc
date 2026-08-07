@@ -177,6 +177,16 @@ message ManagedResource {
 
   // 资源风险级。nervud 据此校验最低保护级、决定 Lease/仲裁强度。
   RiskClass risk_class = 4;
+
+  // 该资源的语义标签，供 ResourceSelector.labels 匹配。
+  //
+  // 存在的理由：stable_role 是【板级配置】的产物（这块板子上前视摄像头叫
+  // cam.front 还是 camera0），App 不该依赖它。标签让 App 说「我要前视摄像头」
+  // 而不是「我要 cam.front」，换一块板子不用改 App。
+  //
+  // 命名空间与接口/权限同规：平台标准标签 nervus.*（如 nervus.camera.facing），
+  // OEM 私有标签必须在定义者包命名空间下。nervud 在 Catalog 构建期校验。
+  map<string, string> labels = 5;
 }
 
 // ResourceAccessMode 是资源的访问语义。做成枚举而非自由字符串：访问模式驱动

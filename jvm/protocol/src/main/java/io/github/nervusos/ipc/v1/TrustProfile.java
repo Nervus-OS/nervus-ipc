@@ -122,7 +122,7 @@ public enum TrustProfile
   }
   public static final com.google.protobuf.Descriptors.EnumDescriptor
       getDescriptor() {
-    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(4);
+    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(5);
   }
 
   private static final TrustProfile[] VALUES = values();

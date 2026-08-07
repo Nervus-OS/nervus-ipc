@@ -31,7 +31,7 @@ public interface ResourceSelectorOrBuilder extends
 
   /**
    * <pre>
-   * 稳定角色，如 "main" / "front"。
+   * 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
    * </pre>
    *
    * <code>string role = 2 [json_name = "role"];</code>
@@ -40,7 +40,7 @@ public interface ResourceSelectorOrBuilder extends
   java.lang.String getRole();
   /**
    * <pre>
-   * 稳定角色，如 "main" / "front"。
+   * 稳定角色，如 "main" / "front"。给定时是精确匹配，labels 仍会叠加过滤。
    * </pre>
    *
    * <code>string role = 2 [json_name = "role"];</code>
@@ -48,4 +48,97 @@ public interface ResourceSelectorOrBuilder extends
    */
   com.google.protobuf.ByteString
       getRoleBytes();
+
+  /**
+   * <pre>
+   * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+   *
+   * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+   * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+   * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+   */
+  int getLabelsCount();
+  /**
+   * <pre>
+   * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+   *
+   * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+   * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+   * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+   */
+  boolean containsLabels(
+      java.lang.String key);
+  /**
+   * Use {@link #getLabelsMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getLabels();
+  /**
+   * <pre>
+   * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+   *
+   * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+   * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+   * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+   */
+  java.util.Map<java.lang.String, java.lang.String>
+  getLabelsMap();
+  /**
+   * <pre>
+   * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+   *
+   * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+   * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+   * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+   */
+  /* nullable */
+java.lang.String getLabelsOrDefault(
+      java.lang.String key,
+      /* nullable */
+java.lang.String defaultValue);
+  /**
+   * <pre>
+   * 标签过滤：全部键值都匹配才算命中（AND 语义）。空 map 不过滤。
+   *
+   * 键的命名空间与接口/权限同规：平台标准标签用 nervus.* 前缀（如
+   * nervus.camera.facing）；OEM 私有标签必须在定义者包命名空间下
+   * （com.acme.cam.night_capable）。nervud 按同一套规则校验声明方。
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; labels = 3 [json_name = "labels"];</code>
+   */
+  java.lang.String getLabelsOrThrow(
+      java.lang.String key);
+
+  /**
+   * <pre>
+   * 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ResourceSelectionPolicy policy = 4 [json_name = "policy"];</code>
+   * @return The enum numeric value on the wire for policy.
+   */
+  int getPolicyValue();
+  /**
+   * <pre>
+   * 多候选时的选择策略。未指定 = REQUIRE_UNIQUE（见枚举注释）。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.ResourceSelectionPolicy policy = 4 [json_name = "policy"];</code>
+   * @return The policy.
+   */
+  io.github.nervusos.ipc.v1.ResourceSelectionPolicy getPolicy();
 }

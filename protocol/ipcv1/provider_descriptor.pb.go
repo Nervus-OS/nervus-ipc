@@ -550,7 +550,16 @@ type ManagedResource struct {
 	// 访问模式（独占控制 / 共享观察 …）。见 ResourceAccessMode。
 	AccessMode ResourceAccessMode `protobuf:"varint,3,opt,name=access_mode,json=accessMode,proto3,enum=nervus.ipc.v1.ResourceAccessMode" json:"access_mode,omitempty"`
 	// 资源风险级。nervud 据此校验最低保护级、决定 Lease/仲裁强度。
-	RiskClass     RiskClass `protobuf:"varint,4,opt,name=risk_class,json=riskClass,proto3,enum=nervus.ipc.v1.RiskClass" json:"risk_class,omitempty"`
+	RiskClass RiskClass `protobuf:"varint,4,opt,name=risk_class,json=riskClass,proto3,enum=nervus.ipc.v1.RiskClass" json:"risk_class,omitempty"`
+	// 该资源的语义标签，供 ResourceSelector.labels 匹配。
+	//
+	// 存在的理由：stable_role 是【板级配置】的产物（这块板子上前视摄像头叫
+	// cam.front 还是 camera0），App 不该依赖它。标签让 App 说「我要前视摄像头」
+	// 而不是「我要 cam.front」，换一块板子不用改 App。
+	//
+	// 命名空间与接口/权限同规：平台标准标签 nervus.*（如 nervus.camera.facing），
+	// OEM 私有标签必须在定义者包命名空间下。nervud 在 Catalog 构建期校验。
+	Labels        map[string]string `protobuf:"bytes,5,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -611,6 +620,13 @@ func (x *ManagedResource) GetRiskClass() RiskClass {
 		return x.RiskClass
 	}
 	return RiskClass_RISK_CLASS_UNSPECIFIED
+}
+
+func (x *ManagedResource) GetLabels() map[string]string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
 }
 
 // DefinedPermission 是 Provider 携带的一条权限定义（NRCP §9.2）。OEM 使用自己
@@ -813,7 +829,7 @@ const file_nervus_ipc_v1_provider_descriptor_proto_rawDesc = "" +
 	"\x05major\x18\x01 \x01(\rR\x05major\x12\x1f\n" +
 	"\vschema_hash\x18\x02 \x01(\fR\n" +
 	"schemaHash\x123\n" +
-	"\amethods\x18\x03 \x03(\v2\x19.nervus.ipc.v1.MethodMetaR\amethods\"\xd4\x01\n" +
+	"\amethods\x18\x03 \x03(\v2\x19.nervus.ipc.v1.MethodMetaR\amethods\"\xd3\x02\n" +
 	"\x0fManagedResource\x12\x1f\n" +
 	"\vstable_role\x18\x01 \x01(\tR\n" +
 	"stableRole\x12#\n" +
@@ -821,7 +837,11 @@ const file_nervus_ipc_v1_provider_descriptor_proto_rawDesc = "" +
 	"\vaccess_mode\x18\x03 \x01(\x0e2!.nervus.ipc.v1.ResourceAccessModeR\n" +
 	"accessMode\x127\n" +
 	"\n" +
-	"risk_class\x18\x04 \x01(\x0e2\x18.nervus.ipc.v1.RiskClassR\triskClass\"\xa8\x03\n" +
+	"risk_class\x18\x04 \x01(\x0e2\x18.nervus.ipc.v1.RiskClassR\triskClass\x12B\n" +
+	"\x06labels\x18\x05 \x03(\v2*.nervus.ipc.v1.ManagedResource.LabelsEntryR\x06labels\x1a9\n" +
+	"\vLabelsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa8\x03\n" +
 	"\x11DefinedPermission\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x127\n" +
 	"\n" +
@@ -867,7 +887,7 @@ func file_nervus_ipc_v1_provider_descriptor_proto_rawDescGZIP() []byte {
 }
 
 var file_nervus_ipc_v1_provider_descriptor_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_nervus_ipc_v1_provider_descriptor_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_nervus_ipc_v1_provider_descriptor_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_nervus_ipc_v1_provider_descriptor_proto_goTypes = []any{
 	(ResourceAccessMode)(0),          // 0: nervus.ipc.v1.ResourceAccessMode
 	(PermissionTrustFloor)(0),        // 1: nervus.ipc.v1.PermissionTrustFloor
@@ -878,28 +898,30 @@ var file_nervus_ipc_v1_provider_descriptor_proto_goTypes = []any{
 	(*ManagedResource)(nil),          // 6: nervus.ipc.v1.ManagedResource
 	(*DefinedPermission)(nil),        // 7: nervus.ipc.v1.DefinedPermission
 	(*LocalizedText)(nil),            // 8: nervus.ipc.v1.LocalizedText
-	(RiskClass)(0),                   // 9: nervus.ipc.v1.RiskClass
-	(*MethodMeta)(nil),               // 10: nervus.ipc.v1.MethodMeta
+	nil,                              // 9: nervus.ipc.v1.ManagedResource.LabelsEntry
+	(RiskClass)(0),                   // 10: nervus.ipc.v1.RiskClass
+	(*MethodMeta)(nil),               // 11: nervus.ipc.v1.MethodMeta
 }
 var file_nervus_ipc_v1_provider_descriptor_proto_depIdxs = []int32{
 	4,  // 0: nervus.ipc.v1.ProviderDescriptor.interfaces:type_name -> nervus.ipc.v1.ProvidedInterface
 	6,  // 1: nervus.ipc.v1.ProviderDescriptor.resources:type_name -> nervus.ipc.v1.ManagedResource
 	7,  // 2: nervus.ipc.v1.ProviderDescriptor.permissions:type_name -> nervus.ipc.v1.DefinedPermission
-	9,  // 3: nervus.ipc.v1.ProvidedInterface.resource_risk_floor:type_name -> nervus.ipc.v1.RiskClass
+	10, // 3: nervus.ipc.v1.ProvidedInterface.resource_risk_floor:type_name -> nervus.ipc.v1.RiskClass
 	5,  // 4: nervus.ipc.v1.ProvidedInterface.interface_versions:type_name -> nervus.ipc.v1.ProvidedInterfaceVersion
-	10, // 5: nervus.ipc.v1.ProvidedInterfaceVersion.methods:type_name -> nervus.ipc.v1.MethodMeta
+	11, // 5: nervus.ipc.v1.ProvidedInterfaceVersion.methods:type_name -> nervus.ipc.v1.MethodMeta
 	0,  // 6: nervus.ipc.v1.ManagedResource.access_mode:type_name -> nervus.ipc.v1.ResourceAccessMode
-	9,  // 7: nervus.ipc.v1.ManagedResource.risk_class:type_name -> nervus.ipc.v1.RiskClass
-	2,  // 8: nervus.ipc.v1.DefinedPermission.grant_mode:type_name -> nervus.ipc.v1.GrantMode
-	9,  // 9: nervus.ipc.v1.DefinedPermission.risk_class:type_name -> nervus.ipc.v1.RiskClass
-	8,  // 10: nervus.ipc.v1.DefinedPermission.display_name:type_name -> nervus.ipc.v1.LocalizedText
-	8,  // 11: nervus.ipc.v1.DefinedPermission.description:type_name -> nervus.ipc.v1.LocalizedText
-	1,  // 12: nervus.ipc.v1.DefinedPermission.minimum_trust:type_name -> nervus.ipc.v1.PermissionTrustFloor
-	13, // [13:13] is the sub-list for method output_type
-	13, // [13:13] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	10, // 7: nervus.ipc.v1.ManagedResource.risk_class:type_name -> nervus.ipc.v1.RiskClass
+	9,  // 8: nervus.ipc.v1.ManagedResource.labels:type_name -> nervus.ipc.v1.ManagedResource.LabelsEntry
+	2,  // 9: nervus.ipc.v1.DefinedPermission.grant_mode:type_name -> nervus.ipc.v1.GrantMode
+	10, // 10: nervus.ipc.v1.DefinedPermission.risk_class:type_name -> nervus.ipc.v1.RiskClass
+	8,  // 11: nervus.ipc.v1.DefinedPermission.display_name:type_name -> nervus.ipc.v1.LocalizedText
+	8,  // 12: nervus.ipc.v1.DefinedPermission.description:type_name -> nervus.ipc.v1.LocalizedText
+	1,  // 13: nervus.ipc.v1.DefinedPermission.minimum_trust:type_name -> nervus.ipc.v1.PermissionTrustFloor
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_nervus_ipc_v1_provider_descriptor_proto_init() }
@@ -914,7 +936,7 @@ func file_nervus_ipc_v1_provider_descriptor_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nervus_ipc_v1_provider_descriptor_proto_rawDesc), len(file_nervus_ipc_v1_provider_descriptor_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

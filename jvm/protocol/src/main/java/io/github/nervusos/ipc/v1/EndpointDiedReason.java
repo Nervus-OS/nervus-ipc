@@ -155,7 +155,7 @@ public enum EndpointDiedReason
   }
   public static final com.google.protobuf.Descriptors.EnumDescriptor
       getDescriptor() {
-    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(0);
+    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(1);
   }
 
   private static final EndpointDiedReason[] VALUES = values();

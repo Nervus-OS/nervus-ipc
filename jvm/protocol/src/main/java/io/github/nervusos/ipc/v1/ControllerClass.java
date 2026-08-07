@@ -136,7 +136,7 @@ public enum ControllerClass
   }
   public static final com.google.protobuf.Descriptors.EnumDescriptor
       getDescriptor() {
-    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(6);
+    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(7);
   }
 
   private static final ControllerClass[] VALUES = values();

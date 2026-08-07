@@ -186,7 +186,7 @@ public enum ControlLeaseErrorReason
   }
   public static final com.google.protobuf.Descriptors.EnumDescriptor
       getDescriptor() {
-    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(7);
+    return io.github.nervusos.ipc.v1.EnvelopeProto.getDescriptor().getEnumTypes().get(8);
   }
 
   private static final ControlLeaseErrorReason[] VALUES = values();
