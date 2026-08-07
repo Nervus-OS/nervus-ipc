@@ -164,86 +164,86 @@ public final class CameraProto {
       "rDetail\022@\n\006reason\030\001 \001(\0162(.nervus.interfa" +
       "ce.camera.v1.CameraReasonR\006reason\022A\n\007con" +
       "trol\030\002 \001(\0162\'.nervus.interface.camera.v1." +
-      "ControlKindR\007control*\340\004\n\014CameraMethod\022\035\n" +
+      "ControlKindR\007control*\353\004\n\014CameraMethod\022\035\n" +
       "\031CAMERA_METHOD_UNSPECIFIED\020\000\022\274\001\n\035CAMERA_" +
       "METHOD_DESCRIBE_STREAM\020\001\032\230\001\212\246\035\223\001\010\001\030\001:0ne" +
       "rvus.interface.camera.v1.DescribeStreamR" +
       "equestB,nervus.interface.camera.v1.Strea" +
       "mDescription\202\001,nervus.interface.camera.v" +
-      "1.CameraErrorDetail\022\323\001\n\031CAMERA_METHOD_OP" +
-      "EN_STREAM\020\002\032\263\001\212\246\035\256\001\010\002\022\023perm.camera.captu" +
+      "1.CameraErrorDetail\022\336\001\n\031CAMERA_METHOD_OP" +
+      "EN_STREAM\020\002\032\276\001\212\246\035\271\001\010\002\022\023perm.camera.captu" +
       "re\030\002:,nervus.interface.camera.v1.OpenStr" +
       "eamRequestB-nervus.interface.camera.v1.O" +
-      "penStreamResponsez\007\010\001\020\004*\001\002\202\001,nervus.inte" +
-      "rface.camera.v1.CameraErrorDetail\022\233\001\n\032CA" +
-      "MERA_METHOD_CLOSE_STREAM\020\003\032{\212\246\035w\010\003\022\023perm" +
-      ".camera.capture\030\001:-nervus.interface.came" +
-      "ra.v1.CloseStreamRequest\202\001,nervus.interf" +
-      "ace.camera.v1.CameraErrorDetail*\215\002\n\013Came" +
-      "raEvent\022\034\n\030CAMERA_EVENT_UNSPECIFIED\020\000\022p\n" +
-      "!CAMERA_EVENT_STREAM_STATE_CHANGED\020\001\032I\222\246" +
-      "\035E\010\001\022\023perm.camera.capture\030\001 \002*&nervus.in" +
-      "terface.camera.v1.StreamState8\024\022n\n\031CAMER" +
-      "A_EVENT_DEVICE_ERROR\020\002\032O\222\246\035K\010\002\022\023perm.cam" +
-      "era.capture\030\001 \001*,nervus.interface.camera" +
-      ".v1.CameraDeviceError8\n*\275\005\n\022CameraConfig" +
-      "Method\022$\n CAMERA_CONFIG_METHOD_UNSPECIFI" +
-      "ED\020\000\022\330\001\n\"CAMERA_CONFIG_METHOD_LIST_CONTR" +
-      "OLS\020\001\032\257\001\212\246\035\252\001\010\001\022\025perm.camera.configure\030\001" +
-      ":.nervus.interface.camera.v1.ListControl" +
-      "sRequestB.nervus.interface.camera.v1.Con" +
-      "trolDescriptions\202\001,nervus.interface.came" +
-      "ra.v1.CameraErrorDetail\022\320\001\n!CAMERA_CONFI" +
-      "G_METHOD_GET_CONTROLS\020\002\032\250\001\212\246\035\243\001\010\002\022\025perm." +
-      "camera.configure\030\001:-nervus.interface.cam" +
-      "era.v1.GetControlsRequestB(nervus.interf" +
-      "ace.camera.v1.ControlValues\202\001,nervus.int" +
-      "erface.camera.v1.CameraErrorDetail\022\322\001\n!C" +
-      "AMERA_CONFIG_METHOD_SET_CONTROLS\020\003\032\252\001\212\246\035" +
-      "\245\001\010\003\022\025perm.camera.configure\030\001 \001:-nervus." +
-      "interface.camera.v1.SetControlsRequestB(" +
-      "nervus.interface.camera.v1.ControlValues" +
-      "\202\001,nervus.interface.camera.v1.CameraErro" +
-      "rDetail*\261\001\n\021CameraConfigEvent\022#\n\037CAMERA_" +
-      "CONFIG_EVENT_UNSPECIFIED\020\000\022w\n$CAMERA_CON" +
-      "FIG_EVENT_CONTROLS_CHANGED\020\001\032M\222\246\035I\010\001\022\025pe" +
-      "rm.camera.configure\030\001 \002*(nervus.interfac" +
-      "e.camera.v1.ControlValues8\036*\244\001\n\013PixelFor" +
-      "mat\022\034\n\030PIXEL_FORMAT_UNSPECIFIED\020\000\022\025\n\021PIX" +
-      "EL_FORMAT_NV12\020\001\022\025\n\021PIXEL_FORMAT_YUYV\020\002\022" +
-      "\026\n\022PIXEL_FORMAT_MJPEG\020\003\022\027\n\023PIXEL_FORMAT_" +
-      "RGB888\020\004\022\030\n\024PIXEL_FORMAT_DEPTH16\020\005*\224\001\n\013S" +
-      "treamPhase\022\034\n\030STREAM_PHASE_UNSPECIFIED\020\000" +
-      "\022\031\n\025STREAM_PHASE_STARTING\020\001\022\032\n\026STREAM_PH" +
-      "ASE_STREAMING\020\002\022\030\n\024STREAM_PHASE_STOPPED\020" +
-      "\003\022\026\n\022STREAM_PHASE_FAULT\020\004*\352\001\n\025CameraDevi" +
-      "ceErrorKind\022(\n$CAMERA_DEVICE_ERROR_KIND_" +
-      "UNSPECIFIED\020\000\022)\n%CAMERA_DEVICE_ERROR_KIN" +
-      "D_DISCONNECTED\020\001\022+\n\'CAMERA_DEVICE_ERROR_" +
-      "KIND_BUFFER_OVERRUN\020\002\022$\n CAMERA_DEVICE_E" +
-      "RROR_KIND_TIMEOUT\020\003\022)\n%CAMERA_DEVICE_ERR" +
-      "OR_KIND_DRIVER_FAULT\020\004*\354\002\n\013ControlKind\022\034" +
-      "\n\030CONTROL_KIND_UNSPECIFIED\020\000\022\033\n\027CONTROL_" +
-      "KIND_BRIGHTNESS\020\001\022\031\n\025CONTROL_KIND_CONTRA" +
-      "ST\020\002\022\033\n\027CONTROL_KIND_SATURATION\020\003\022\036\n\032CON" +
-      "TROL_KIND_EXPOSURE_TIME\020\004\022\036\n\032CONTROL_KIN" +
-      "D_AUTO_EXPOSURE\020\005\022\025\n\021CONTROL_KIND_GAIN\020\006" +
-      "\022\036\n\032CONTROL_KIND_WHITE_BALANCE\020\007\022#\n\037CONT" +
-      "ROL_KIND_AUTO_WHITE_BALANCE\020\010\022\026\n\022CONTROL" +
-      "_KIND_FOCUS\020\t\022\033\n\027CONTROL_KIND_AUTO_FOCUS" +
-      "\020\n\022\031\n\025CONTROL_KIND_ROTATION\020\013*\331\002\n\014Camera" +
-      "Reason\022\035\n\031CAMERA_REASON_UNSPECIFIED\020\000\022&\n" +
-      "\"CAMERA_REASON_FORMAT_NOT_SUPPORTED\020\001\022$\n" +
-      " CAMERA_REASON_DEVICE_UNAVAILABLE\020\002\022\"\n\036C" +
-      "AMERA_REASON_TOO_MANY_STREAMS\020\003\022\"\n\036CAMER" +
-      "A_REASON_STREAM_NOT_FOUND\020\004\022\'\n#CAMERA_RE" +
-      "ASON_CONTROL_NOT_SUPPORTED\020\005\022#\n\037CAMERA_R" +
-      "EASON_CONTROL_READ_ONLY\020\006\022&\n\"CAMERA_REAS" +
-      "ON_CONTROL_OUT_OF_RANGE\020\007\022\036\n\032CAMERA_REAS" +
-      "ON_DRIVER_FAULT\020\010By\n\"io.github.nervusos." +
-      "iface.camera.v1B\013CameraProtoP\001ZDgithub.c" +
-      "om/nervus-os/nervus-ipc/protocol/interfa" +
-      "ce/camerav1;camerav1b\006proto3"
+      "penStreamResponsez\022\010\001\020\004\030\200\200\200\010 \200\200\200\200\002*\001\002\202\001," +
+      "nervus.interface.camera.v1.CameraErrorDe" +
+      "tail\022\233\001\n\032CAMERA_METHOD_CLOSE_STREAM\020\003\032{\212" +
+      "\246\035w\010\003\022\023perm.camera.capture\030\001:-nervus.int" +
+      "erface.camera.v1.CloseStreamRequest\202\001,ne" +
+      "rvus.interface.camera.v1.CameraErrorDeta" +
+      "il*\215\002\n\013CameraEvent\022\034\n\030CAMERA_EVENT_UNSPE" +
+      "CIFIED\020\000\022p\n!CAMERA_EVENT_STREAM_STATE_CH" +
+      "ANGED\020\001\032I\222\246\035E\010\001\022\023perm.camera.capture\030\001 \002" +
+      "*&nervus.interface.camera.v1.StreamState" +
+      "8\024\022n\n\031CAMERA_EVENT_DEVICE_ERROR\020\002\032O\222\246\035K\010" +
+      "\002\022\023perm.camera.capture\030\001 \001*,nervus.inter" +
+      "face.camera.v1.CameraDeviceError8\n*\275\005\n\022C" +
+      "ameraConfigMethod\022$\n CAMERA_CONFIG_METHO" +
+      "D_UNSPECIFIED\020\000\022\330\001\n\"CAMERA_CONFIG_METHOD" +
+      "_LIST_CONTROLS\020\001\032\257\001\212\246\035\252\001\010\001\022\025perm.camera." +
+      "configure\030\001:.nervus.interface.camera.v1." +
+      "ListControlsRequestB.nervus.interface.ca" +
+      "mera.v1.ControlDescriptions\202\001,nervus.int" +
+      "erface.camera.v1.CameraErrorDetail\022\320\001\n!C" +
+      "AMERA_CONFIG_METHOD_GET_CONTROLS\020\002\032\250\001\212\246\035" +
+      "\243\001\010\002\022\025perm.camera.configure\030\001:-nervus.in" +
+      "terface.camera.v1.GetControlsRequestB(ne" +
+      "rvus.interface.camera.v1.ControlValues\202\001" +
+      ",nervus.interface.camera.v1.CameraErrorD" +
+      "etail\022\322\001\n!CAMERA_CONFIG_METHOD_SET_CONTR" +
+      "OLS\020\003\032\252\001\212\246\035\245\001\010\003\022\025perm.camera.configure\030\001" +
+      " \001:-nervus.interface.camera.v1.SetContro" +
+      "lsRequestB(nervus.interface.camera.v1.Co" +
+      "ntrolValues\202\001,nervus.interface.camera.v1" +
+      ".CameraErrorDetail*\261\001\n\021CameraConfigEvent" +
+      "\022#\n\037CAMERA_CONFIG_EVENT_UNSPECIFIED\020\000\022w\n" +
+      "$CAMERA_CONFIG_EVENT_CONTROLS_CHANGED\020\001\032" +
+      "M\222\246\035I\010\001\022\025perm.camera.configure\030\001 \002*(nerv" +
+      "us.interface.camera.v1.ControlValues8\036*\244" +
+      "\001\n\013PixelFormat\022\034\n\030PIXEL_FORMAT_UNSPECIFI" +
+      "ED\020\000\022\025\n\021PIXEL_FORMAT_NV12\020\001\022\025\n\021PIXEL_FOR" +
+      "MAT_YUYV\020\002\022\026\n\022PIXEL_FORMAT_MJPEG\020\003\022\027\n\023PI" +
+      "XEL_FORMAT_RGB888\020\004\022\030\n\024PIXEL_FORMAT_DEPT" +
+      "H16\020\005*\224\001\n\013StreamPhase\022\034\n\030STREAM_PHASE_UN" +
+      "SPECIFIED\020\000\022\031\n\025STREAM_PHASE_STARTING\020\001\022\032" +
+      "\n\026STREAM_PHASE_STREAMING\020\002\022\030\n\024STREAM_PHA" +
+      "SE_STOPPED\020\003\022\026\n\022STREAM_PHASE_FAULT\020\004*\352\001\n" +
+      "\025CameraDeviceErrorKind\022(\n$CAMERA_DEVICE_" +
+      "ERROR_KIND_UNSPECIFIED\020\000\022)\n%CAMERA_DEVIC" +
+      "E_ERROR_KIND_DISCONNECTED\020\001\022+\n\'CAMERA_DE" +
+      "VICE_ERROR_KIND_BUFFER_OVERRUN\020\002\022$\n CAME" +
+      "RA_DEVICE_ERROR_KIND_TIMEOUT\020\003\022)\n%CAMERA" +
+      "_DEVICE_ERROR_KIND_DRIVER_FAULT\020\004*\354\002\n\013Co" +
+      "ntrolKind\022\034\n\030CONTROL_KIND_UNSPECIFIED\020\000\022" +
+      "\033\n\027CONTROL_KIND_BRIGHTNESS\020\001\022\031\n\025CONTROL_" +
+      "KIND_CONTRAST\020\002\022\033\n\027CONTROL_KIND_SATURATI" +
+      "ON\020\003\022\036\n\032CONTROL_KIND_EXPOSURE_TIME\020\004\022\036\n\032" +
+      "CONTROL_KIND_AUTO_EXPOSURE\020\005\022\025\n\021CONTROL_" +
+      "KIND_GAIN\020\006\022\036\n\032CONTROL_KIND_WHITE_BALANC" +
+      "E\020\007\022#\n\037CONTROL_KIND_AUTO_WHITE_BALANCE\020\010" +
+      "\022\026\n\022CONTROL_KIND_FOCUS\020\t\022\033\n\027CONTROL_KIND" +
+      "_AUTO_FOCUS\020\n\022\031\n\025CONTROL_KIND_ROTATION\020\013" +
+      "*\331\002\n\014CameraReason\022\035\n\031CAMERA_REASON_UNSPE" +
+      "CIFIED\020\000\022&\n\"CAMERA_REASON_FORMAT_NOT_SUP" +
+      "PORTED\020\001\022$\n CAMERA_REASON_DEVICE_UNAVAIL" +
+      "ABLE\020\002\022\"\n\036CAMERA_REASON_TOO_MANY_STREAMS" +
+      "\020\003\022\"\n\036CAMERA_REASON_STREAM_NOT_FOUND\020\004\022\'" +
+      "\n#CAMERA_REASON_CONTROL_NOT_SUPPORTED\020\005\022" +
+      "#\n\037CAMERA_REASON_CONTROL_READ_ONLY\020\006\022&\n\"" +
+      "CAMERA_REASON_CONTROL_OUT_OF_RANGE\020\007\022\036\n\032" +
+      "CAMERA_REASON_DRIVER_FAULT\020\010By\n\"io.githu" +
+      "b.nervusos.iface.camera.v1B\013CameraProtoP" +
+      "\001ZDgithub.com/nervus-os/nervus-ipc/proto" +
+      "col/interface/camerav1;camerav1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

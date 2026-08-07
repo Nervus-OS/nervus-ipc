@@ -39,6 +39,7 @@ private static final long serialVersionUID = 0L;
     schemaHash_ = com.google.protobuf.ByteString.EMPTY;
     fileDescriptorSet_ = com.google.protobuf.ByteString.EMPTY;
     methodEnumType_ = "";
+    eventEnumType_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -212,6 +213,85 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int EVENT_ENUM_TYPE_FIELD_NUMBER = 6;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object eventEnumType_ = "";
+  /**
+   * <pre>
+   * 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+   *
+   * # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+   *
+   * ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+   * schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+   * 就无从校验那个类型名指向的消息是否真的存在。
+   *
+   * 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+   * 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+   * bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+   *
+   * 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+   * descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+   * 地方指明是哪个枚举。
+   *
+   * 示例："nervus.interface.camera.v1.CameraEvent"。
+   * </pre>
+   *
+   * <code>string event_enum_type = 6 [json_name = "eventEnumType"];</code>
+   * @return The eventEnumType.
+   */
+  @java.lang.Override
+  public java.lang.String getEventEnumType() {
+    java.lang.Object ref = eventEnumType_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      eventEnumType_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+   *
+   * # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+   *
+   * ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+   * schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+   * 就无从校验那个类型名指向的消息是否真的存在。
+   *
+   * 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+   * 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+   * bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+   *
+   * 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+   * descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+   * 地方指明是哪个枚举。
+   *
+   * 示例："nervus.interface.camera.v1.CameraEvent"。
+   * </pre>
+   *
+   * <code>string event_enum_type = 6 [json_name = "eventEnumType"];</code>
+   * @return The bytes for eventEnumType.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getEventEnumTypeBytes() {
+    java.lang.Object ref = eventEnumType_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      eventEnumType_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -241,6 +321,9 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(methodEnumType_)) {
       com.google.protobuf.GeneratedMessage.writeString(output, 5, methodEnumType_);
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(eventEnumType_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 6, eventEnumType_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -268,6 +351,9 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(methodEnumType_)) {
       size += com.google.protobuf.GeneratedMessage.computeStringSize(5, methodEnumType_);
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(eventEnumType_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(6, eventEnumType_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -293,6 +379,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getFileDescriptorSet())) return false;
     if (!getMethodEnumType()
         .equals(other.getMethodEnumType())) return false;
+    if (!getEventEnumType()
+        .equals(other.getEventEnumType())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -314,6 +402,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getFileDescriptorSet().hashCode();
     hash = (37 * hash) + METHOD_ENUM_TYPE_FIELD_NUMBER;
     hash = (53 * hash) + getMethodEnumType().hashCode();
+    hash = (37 * hash) + EVENT_ENUM_TYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getEventEnumType().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -458,6 +548,7 @@ private static final long serialVersionUID = 0L;
       schemaHash_ = com.google.protobuf.ByteString.EMPTY;
       fileDescriptorSet_ = com.google.protobuf.ByteString.EMPTY;
       methodEnumType_ = "";
+      eventEnumType_ = "";
       return this;
     }
 
@@ -506,6 +597,9 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000010) != 0)) {
         result.methodEnumType_ = methodEnumType_;
       }
+      if (((from_bitField0_ & 0x00000020) != 0)) {
+        result.eventEnumType_ = eventEnumType_;
+      }
     }
 
     @java.lang.Override
@@ -537,6 +631,11 @@ private static final long serialVersionUID = 0L;
       if (!other.getMethodEnumType().isEmpty()) {
         methodEnumType_ = other.methodEnumType_;
         bitField0_ |= 0x00000010;
+        onChanged();
+      }
+      if (!other.getEventEnumType().isEmpty()) {
+        eventEnumType_ = other.eventEnumType_;
+        bitField0_ |= 0x00000020;
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -590,6 +689,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000010;
               break;
             } // case 42
+            case 50: {
+              eventEnumType_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000020;
+              break;
+            } // case 50
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -973,6 +1077,178 @@ private static final long serialVersionUID = 0L;
       checkByteStringIsUtf8(value);
       methodEnumType_ = value;
       bitField0_ |= 0x00000010;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object eventEnumType_ = "";
+    /**
+     * <pre>
+     * 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+     *
+     * # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+     *
+     * ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+     * schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+     * 就无从校验那个类型名指向的消息是否真的存在。
+     *
+     * 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+     * 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+     * bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+     *
+     * 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+     * descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+     * 地方指明是哪个枚举。
+     *
+     * 示例："nervus.interface.camera.v1.CameraEvent"。
+     * </pre>
+     *
+     * <code>string event_enum_type = 6 [json_name = "eventEnumType"];</code>
+     * @return The eventEnumType.
+     */
+    public java.lang.String getEventEnumType() {
+      java.lang.Object ref = eventEnumType_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        eventEnumType_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+     *
+     * # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+     *
+     * ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+     * schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+     * 就无从校验那个类型名指向的消息是否真的存在。
+     *
+     * 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+     * 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+     * bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+     *
+     * 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+     * descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+     * 地方指明是哪个枚举。
+     *
+     * 示例："nervus.interface.camera.v1.CameraEvent"。
+     * </pre>
+     *
+     * <code>string event_enum_type = 6 [json_name = "eventEnumType"];</code>
+     * @return The bytes for eventEnumType.
+     */
+    public com.google.protobuf.ByteString
+        getEventEnumTypeBytes() {
+      java.lang.Object ref = eventEnumType_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        eventEnumType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+     *
+     * # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+     *
+     * ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+     * schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+     * 就无从校验那个类型名指向的消息是否真的存在。
+     *
+     * 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+     * 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+     * bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+     *
+     * 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+     * descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+     * 地方指明是哪个枚举。
+     *
+     * 示例："nervus.interface.camera.v1.CameraEvent"。
+     * </pre>
+     *
+     * <code>string event_enum_type = 6 [json_name = "eventEnumType"];</code>
+     * @param value The eventEnumType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEventEnumType(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      eventEnumType_ = value;
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+     *
+     * # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+     *
+     * ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+     * schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+     * 就无从校验那个类型名指向的消息是否真的存在。
+     *
+     * 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+     * 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+     * bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+     *
+     * 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+     * descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+     * 地方指明是哪个枚举。
+     *
+     * 示例："nervus.interface.camera.v1.CameraEvent"。
+     * </pre>
+     *
+     * <code>string event_enum_type = 6 [json_name = "eventEnumType"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEventEnumType() {
+      eventEnumType_ = getDefaultInstance().getEventEnumType();
+      bitField0_ = (bitField0_ & ~0x00000020);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+     *
+     * # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+     *
+     * ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+     * schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+     * 就无从校验那个类型名指向的消息是否真的存在。
+     *
+     * 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+     * 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+     * bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+     *
+     * 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+     * descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+     * 地方指明是哪个枚举。
+     *
+     * 示例："nervus.interface.camera.v1.CameraEvent"。
+     * </pre>
+     *
+     * <code>string event_enum_type = 6 [json_name = "eventEnumType"];</code>
+     * @param value The bytes for eventEnumType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEventEnumTypeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      eventEnumType_ = value;
+      bitField0_ |= 0x00000020;
       onChanged();
       return this;
     }

@@ -45,12 +45,13 @@ public final class SchemaProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\032nervus/ipc/v1/schema.proto\022\rnervus.ipc" +
-      ".v1\"\317\001\n\025InterfaceSchemaBundle\022!\n\014interfa" +
+      ".v1\"\367\001\n\025InterfaceSchemaBundle\022!\n\014interfa" +
       "ce_id\030\001 \001(\tR\013interfaceId\022\030\n\007version\030\002 \001(" +
       "\rR\007version\022\037\n\013schema_hash\030\003 \001(\014R\nschemaH" +
       "ash\022.\n\023file_descriptor_set\030\004 \001(\014R\021fileDe" +
       "scriptorSet\022(\n\020method_enum_type\030\005 \001(\tR\016m" +
-      "ethodEnumType\"Z\n\030InterfaceSchemaBundleSe" +
+      "ethodEnumType\022&\n\017event_enum_type\030\006 \001(\tR\r" +
+      "eventEnumType\"Z\n\030InterfaceSchemaBundleSe" +
       "t\022>\n\007bundles\030\001 \003(\0132$.nervus.ipc.v1.Inter" +
       "faceSchemaBundleR\007bundlesB`\n\031io.github.n" +
       "ervusos.ipc.v1B\013SchemaProtoP\001Z4github.co" +
@@ -66,7 +67,7 @@ public final class SchemaProto {
     internal_static_nervus_ipc_v1_InterfaceSchemaBundle_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_InterfaceSchemaBundle_descriptor,
-        new java.lang.String[] { "InterfaceId", "Version", "SchemaHash", "FileDescriptorSet", "MethodEnumType", });
+        new java.lang.String[] { "InterfaceId", "Version", "SchemaHash", "FileDescriptorSet", "MethodEnumType", "EventEnumType", });
     internal_static_nervus_ipc_v1_InterfaceSchemaBundleSet_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_nervus_ipc_v1_InterfaceSchemaBundleSet_fieldAccessorTable = new

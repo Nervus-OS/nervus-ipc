@@ -1590,11 +1590,11 @@ const file_nervus_interface_camera_v1_camera_proto_rawDesc = "" +
 	"\x06values\x18\x01 \x03(\v2(.nervus.interface.camera.v1.ControlValueR\x06values\"\x98\x01\n" +
 	"\x11CameraErrorDetail\x12@\n" +
 	"\x06reason\x18\x01 \x01(\x0e2(.nervus.interface.camera.v1.CameraReasonR\x06reason\x12A\n" +
-	"\acontrol\x18\x02 \x01(\x0e2'.nervus.interface.camera.v1.ControlKindR\acontrol*\xe0\x04\n" +
+	"\acontrol\x18\x02 \x01(\x0e2'.nervus.interface.camera.v1.ControlKindR\acontrol*\xeb\x04\n" +
 	"\fCameraMethod\x12\x1d\n" +
 	"\x19CAMERA_METHOD_UNSPECIFIED\x10\x00\x12\xbc\x01\n" +
-	"\x1dCAMERA_METHOD_DESCRIBE_STREAM\x10\x01\x1a\x98\x01\x8a\xa6\x1d\x93\x01\b\x01\x18\x01:0nervus.interface.camera.v1.DescribeStreamRequestB,nervus.interface.camera.v1.StreamDescription\x82\x01,nervus.interface.camera.v1.CameraErrorDetail\x12\xd3\x01\n" +
-	"\x19CAMERA_METHOD_OPEN_STREAM\x10\x02\x1a\xb3\x01\x8a\xa6\x1d\xae\x01\b\x02\x12\x13perm.camera.capture\x18\x02:,nervus.interface.camera.v1.OpenStreamRequestB-nervus.interface.camera.v1.OpenStreamResponsez\a\b\x01\x10\x04*\x01\x02\x82\x01,nervus.interface.camera.v1.CameraErrorDetail\x12\x9b\x01\n" +
+	"\x1dCAMERA_METHOD_DESCRIBE_STREAM\x10\x01\x1a\x98\x01\x8a\xa6\x1d\x93\x01\b\x01\x18\x01:0nervus.interface.camera.v1.DescribeStreamRequestB,nervus.interface.camera.v1.StreamDescription\x82\x01,nervus.interface.camera.v1.CameraErrorDetail\x12\xde\x01\n" +
+	"\x19CAMERA_METHOD_OPEN_STREAM\x10\x02\x1a\xbe\x01\x8a\xa6\x1d\xb9\x01\b\x02\x12\x13perm.camera.capture\x18\x02:,nervus.interface.camera.v1.OpenStreamRequestB-nervus.interface.camera.v1.OpenStreamResponsez\x12\b\x01\x10\x04\x18\x80\x80\x80\b \x80\x80\x80\x80\x02*\x01\x02\x82\x01,nervus.interface.camera.v1.CameraErrorDetail\x12\x9b\x01\n" +
 	"\x1aCAMERA_METHOD_CLOSE_STREAM\x10\x03\x1a{\x8a\xa6\x1dw\b\x03\x12\x13perm.camera.capture\x18\x01:-nervus.interface.camera.v1.CloseStreamRequest\x82\x01,nervus.interface.camera.v1.CameraErrorDetail*\x8d\x02\n" +
 	"\vCameraEvent\x12\x1c\n" +
 	"\x18CAMERA_EVENT_UNSPECIFIED\x10\x00\x12p\n" +

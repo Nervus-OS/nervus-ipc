@@ -93,9 +93,20 @@ enum CameraMethod {
     request_type: "nervus.interface.camera.v1.OpenStreamRequest"
     response_type: "nervus.interface.camera.v1.OpenStreamResponse"
     error_detail_type: "nervus.interface.camera.v1.CameraErrorDetail"
+    // 三个预算都【必须非零】：0 在这里表示「没声明」而不是「无限」，
+    // registry 会直接拒掉一个留空的 transfer policy。它们是绝对上限，
+    // nervud 仍把 BeginTransfer 的请求值收紧到这里，实际分配由请求值决定。
+    //
+    //   max_packet_bytes      16 MiB —— 覆盖 4K NV12 单帧（约 12.4 MB）。
+    //                         它同时是环的槽大小上限，定太大等于让一路流
+    //                         能钉住几百 MB 物理内存。
+    //   max_bytes_per_second  512 MiB/s —— 4K30 NV12 约 373 MB/s，留出余量。
+    //   max_streams           4 —— 同一路摄像头的并发消费者上限。
     transfer: {
       direction: TRANSFER_DIRECTION_PROVIDER_TO_CALLER
       max_streams: 4
+      max_packet_bytes: 16777216
+      max_bytes_per_second: 536870912
       allowed_modes: [TRANSFER_MODE_SHARED_MEMORY_RING]
     }
   }];

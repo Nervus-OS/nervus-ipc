@@ -81,8 +81,26 @@ type InterfaceSchemaBundle struct {
 	// 全部枚举，避免传递依赖里的其它接口 Method 被误收进本接口目录。
 	// 示例："nervus.interface.manipulator.v1.ManipulatorMethod"。
 	MethodEnumType string `protobuf:"bytes,5,opt,name=method_enum_type,json=methodEnumType,proto3" json:"method_enum_type,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+	//
+	// # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+	//
+	// ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+	// schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+	// 就无从校验那个类型名指向的消息是否真的存在。
+	//
+	// 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+	// 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+	// bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+	//
+	// 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+	// descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+	// 地方指明是哪个枚举。
+	//
+	// 示例："nervus.interface.camera.v1.CameraEvent"。
+	EventEnumType string `protobuf:"bytes,6,opt,name=event_enum_type,json=eventEnumType,proto3" json:"event_enum_type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *InterfaceSchemaBundle) Reset() {
@@ -150,6 +168,13 @@ func (x *InterfaceSchemaBundle) GetMethodEnumType() string {
 	return ""
 }
 
+func (x *InterfaceSchemaBundle) GetEventEnumType() string {
+	if x != nil {
+		return x.EventEnumType
+	}
+	return ""
+}
+
 // InterfaceSchemaBundleSet 是一个 .nspkg 携带的【全部】接口 bundle 的集合。
 //
 // 一个包可以实现多个接口（一个多功能 Provider）。安装时 nervud 逐个验证：
@@ -203,14 +228,15 @@ var File_nervus_ipc_v1_schema_proto protoreflect.FileDescriptor
 
 const file_nervus_ipc_v1_schema_proto_rawDesc = "" +
 	"\n" +
-	"\x1anervus/ipc/v1/schema.proto\x12\rnervus.ipc.v1\"\xcf\x01\n" +
+	"\x1anervus/ipc/v1/schema.proto\x12\rnervus.ipc.v1\"\xf7\x01\n" +
 	"\x15InterfaceSchemaBundle\x12!\n" +
 	"\finterface_id\x18\x01 \x01(\tR\vinterfaceId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\rR\aversion\x12\x1f\n" +
 	"\vschema_hash\x18\x03 \x01(\fR\n" +
 	"schemaHash\x12.\n" +
 	"\x13file_descriptor_set\x18\x04 \x01(\fR\x11fileDescriptorSet\x12(\n" +
-	"\x10method_enum_type\x18\x05 \x01(\tR\x0emethodEnumType\"Z\n" +
+	"\x10method_enum_type\x18\x05 \x01(\tR\x0emethodEnumType\x12&\n" +
+	"\x0fevent_enum_type\x18\x06 \x01(\tR\reventEnumType\"Z\n" +
 	"\x18InterfaceSchemaBundleSet\x12>\n" +
 	"\abundles\x18\x01 \x03(\v2$.nervus.ipc.v1.InterfaceSchemaBundleR\abundlesB`\n" +
 	"\x19io.github.nervusos.ipc.v1B\vSchemaProtoP\x01Z4github.com/nervus-os/nervus-ipc/protocol/ipcv1;ipcv1b\x06proto3"

@@ -97,4 +97,56 @@ public interface InterfaceSchemaBundleOrBuilder extends
    */
   com.google.protobuf.ByteString
       getMethodEnumTypeBytes();
+
+  /**
+   * <pre>
+   * 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+   *
+   * # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+   *
+   * ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+   * schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+   * 就无从校验那个类型名指向的消息是否真的存在。
+   *
+   * 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+   * 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+   * bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+   *
+   * 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+   * descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+   * 地方指明是哪个枚举。
+   *
+   * 示例："nervus.interface.camera.v1.CameraEvent"。
+   * </pre>
+   *
+   * <code>string event_enum_type = 6 [json_name = "eventEnumType"];</code>
+   * @return The eventEnumType.
+   */
+  java.lang.String getEventEnumType();
+  /**
+   * <pre>
+   * 挂载 event_meta 的 event_id 枚举全名。空 = 本接口不推送任何事件。
+   *
+   * # 为什么必须单列一个字段，而不是内联 EventMeta 到 ProviderDescriptor
+   *
+   * ProvidedInterfaceVersion.events 是给【元数据接口】用的：那种接口没有
+   * schema bundle，因此它的事件也不能有 payload_type——没有 FileDescriptorSet
+   * 就无从校验那个类型名指向的消息是否真的存在。
+   *
+   * 而带 schema 的接口正相反：它的事件几乎总是有载荷（一次状态快照、一份
+   * 控制值）。载荷类型必须能被解析和校验，那份 FileDescriptorSet 就在同一个
+   * bundle 里——事件元数据也应当从这里取，与 method_enum_type 完全对称。
+   *
+   * 缺了这个字段的后果很具体：带载荷的事件【根本声明不出来】。内联到
+   * descriptor 会被「元数据接口不允许 payload_type」拒掉，放进 bundle 又没有
+   * 地方指明是哪个枚举。
+   *
+   * 示例："nervus.interface.camera.v1.CameraEvent"。
+   * </pre>
+   *
+   * <code>string event_enum_type = 6 [json_name = "eventEnumType"];</code>
+   * @return The bytes for eventEnumType.
+   */
+  com.google.protobuf.ByteString
+      getEventEnumTypeBytes();
 }

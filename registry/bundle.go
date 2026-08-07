@@ -97,7 +97,40 @@ func (s *SchemaSet) Len() int {
 
 // BuildSchemaBundle 从生成代码的 method enum 构造自包含、确定性编码的
 // FileDescriptorSet。打包器使用这个函数即可，不需要复制 descriptor 遍历逻辑。
-func BuildSchemaBundle(interfaceID string, major uint32, methodEnum protoreflect.EnumDescriptor) (*ipcv1.InterfaceSchemaBundle, error) {
+//
+// 接口有事件时用 BuildSchemaBundleWithEvents。
+func BuildSchemaBundle(
+	interfaceID string, major uint32, methodEnum protoreflect.EnumDescriptor,
+) (*ipcv1.InterfaceSchemaBundle, error) {
+	return BuildSchemaBundleWithEvents(interfaceID, major, methodEnum, nil)
+}
+
+// BuildSchemaBundleWithEvents 同上，并记下挂载 event_meta 的枚举。
+//
+// # 为什么事件枚举要进 bundle 而不是内联到 ProviderDescriptor
+//
+// descriptor 里的内联 events 是给【元数据接口】用的——那种接口没有
+// FileDescriptorSet，因此它的事件也不允许有 payload_type：没有 descriptor set
+// 就无从校验那个类型名指向的消息是否真的存在。
+//
+// 带 schema 的接口正相反，它的事件几乎总是有载荷。载荷类型必须能被解析校验，
+// 而那份 descriptor set 就在同一个 bundle 里，与 method 的 request/response
+// 走完全相同的一条校验路径。
+//
+// eventEnum 为 nil 表示本接口不推送事件。
+//
+// # 事件枚举不影响 schema_hash
+//
+// hash 算的是 FileDescriptorSet，而事件枚举本来就在那份 descriptor set 里
+// （它与 method 枚举同文件）。单列 event_enum_type 只是指明「哪个枚举是本接口
+// 的事件表」，不引入新内容——因此给一个已有接口补上事件枚举【不会改变
+// schema_hash】，已装的 Provider 不会因此报到失败。
+func BuildSchemaBundleWithEvents(
+	interfaceID string,
+	major uint32,
+	methodEnum protoreflect.EnumDescriptor,
+	eventEnum protoreflect.EnumDescriptor,
+) (*ipcv1.InterfaceSchemaBundle, error) {
 	if interfaceID == "" {
 		return nil, errors.New("registry: empty interface id")
 	}
@@ -106,6 +139,14 @@ func BuildSchemaBundle(interfaceID string, major uint32, methodEnum protoreflect
 	}
 	if methodEnum == nil {
 		return nil, errors.New("registry: nil method enum")
+	}
+	if eventEnum != nil && eventEnum.ParentFile() != methodEnum.ParentFile() {
+		// 事件枚举必须与方法枚举同文件，否则它的传递依赖可能不在下面遍历到的
+		// descriptor set 里——那时 ParseSchemaBundle 会在自己的 bundle 里
+		// 找不到事件枚举，报一个指向「bundle 损坏」的错误。
+		return nil, fmt.Errorf(
+			"registry: interface %q event enum %q is not in the same file as method enum %q",
+			interfaceID, eventEnum.FullName(), methodEnum.FullName())
 	}
 
 	seen := make(map[string]protoreflect.FileDescriptor)
@@ -142,13 +183,17 @@ func BuildSchemaBundle(interfaceID string, major uint32, methodEnum protoreflect
 	}
 	sum := sha256.Sum256(wire)
 
-	return &ipcv1.InterfaceSchemaBundle{
+	bundle := &ipcv1.InterfaceSchemaBundle{
 		InterfaceId:       interfaceID,
 		Version:           major,
 		SchemaHash:        sum[:],
 		FileDescriptorSet: wire,
 		MethodEnumType:    string(methodEnum.FullName()),
-	}, nil
+	}
+	if eventEnum != nil {
+		bundle.EventEnumType = string(eventEnum.FullName())
+	}
+	return bundle, nil
 }
 
 // ParseSchemaBundle 校验并解析一份签名包携带的接口 bundle。
@@ -222,11 +267,100 @@ func ParseSchemaBundle(bundle *ipcv1.InterfaceSchemaBundle) (*Schema, error) {
 		methods[meta.GetMethodId()] = meta
 	}
 
+	events, err := parseBundleEvents(bundle, files)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Schema{
 		bundle:  proto.Clone(bundle).(*ipcv1.InterfaceSchemaBundle),
 		files:   files,
 		methods: methods,
+		events:  events,
 	}, nil
+}
+
+// parseBundleEvents 从 bundle 的 event_enum_type 抽取并校验 EventMeta。
+//
+// event_enum_type 为空 = 本接口不推送事件，返回 nil。这是常态而不是异常：
+// 大多数接口只有方法。
+func parseBundleEvents(
+	bundle *ipcv1.InterfaceSchemaBundle, files *protoregistry.Files,
+) (map[uint32]*ipcv1.EventMeta, error) {
+	name := bundle.GetEventEnumType()
+	if name == "" {
+		return nil, nil
+	}
+
+	desc, err := files.FindDescriptorByName(protoreflect.FullName(name))
+	if err != nil {
+		return nil, fmt.Errorf("registry: interface %q@%d event enum %q: %w",
+			bundle.GetInterfaceId(), bundle.GetVersion(), name, err)
+	}
+	enum, ok := desc.(protoreflect.EnumDescriptor)
+	if !ok {
+		return nil, fmt.Errorf("registry: interface %q@%d event_enum_type %q is not an enum",
+			bundle.GetInterfaceId(), bundle.GetVersion(), name)
+	}
+	metas, err := ExtractEventMetas(enum)
+	if err != nil {
+		return nil, err
+	}
+	if len(metas) == 0 {
+		// 指名了事件枚举却抽不出任何元数据，几乎肯定是漏了
+		// (nervus.ipc.v1.event_meta) option。静默当成「没有事件」会让 Provider
+		// 报到成功、然后每一条 PublishEvent 都被内核拒掉，而拒绝只进内核审计。
+		return nil, fmt.Errorf(
+			"registry: interface %q@%d names event enum %q but it carries no event metadata",
+			bundle.GetInterfaceId(), bundle.GetVersion(), name)
+	}
+
+	events := make(map[uint32]*ipcv1.EventMeta, len(metas))
+	for _, meta := range metas {
+		if err := validateEventMeta(files, meta); err != nil {
+			return nil, fmt.Errorf("registry: interface %q@%d: %w",
+				bundle.GetInterfaceId(), bundle.GetVersion(), err)
+		}
+		if _, dup := events[meta.GetEventId()]; dup {
+			return nil, fmt.Errorf("registry: interface %q@%d duplicate event id %d",
+				bundle.GetInterfaceId(), bundle.GetVersion(), meta.GetEventId())
+		}
+		events[meta.GetEventId()] = meta
+	}
+	return events, nil
+}
+
+// validateEventMeta 校验一条带 schema 的事件元数据。
+//
+// 与 validateMetadataEvent 的差别只有一处：这里【允许并校验 payload_type】。
+// 元数据接口没有 descriptor set，无从确认那个类型名指向的消息是否存在，
+// 因此只能禁止；这里有，于是必须查——一个指向不存在消息的 payload_type
+// 会让订阅方拿到一段解不开的字节。
+func validateEventMeta(files *protoregistry.Files, meta *ipcv1.EventMeta) error {
+	if meta.GetEventId() == 0 {
+		return errors.New("event id 0 is reserved")
+	}
+	if !knownRiskClass(meta.GetRiskClass()) {
+		return fmt.Errorf("event %d has invalid risk class %d",
+			meta.GetEventId(), meta.GetRiskClass())
+	}
+	if !knownDeliveryClass(meta.GetDeliveryClass()) {
+		return fmt.Errorf("event %d has invalid delivery class %d",
+			meta.GetEventId(), meta.GetDeliveryClass())
+	}
+	name := meta.GetPayloadType()
+	if name == "" {
+		// 纯信号事件，合法。
+		return nil
+	}
+	d, err := files.FindDescriptorByName(protoreflect.FullName(name))
+	if err != nil {
+		return fmt.Errorf("event %d payload type %q not found: %w", meta.GetEventId(), name, err)
+	}
+	if _, ok := d.(protoreflect.MessageDescriptor); !ok {
+		return fmt.Errorf("event %d payload type %q is not a message", meta.GetEventId(), name)
+	}
+	return nil
 }
 
 func validateMethodMeta(files *protoregistry.Files, meta *ipcv1.MethodMeta) error {
@@ -591,6 +725,19 @@ func validatePermissionReference(
 func knownRiskClass(value ipcv1.RiskClass) bool {
 	return value >= ipcv1.RiskClass_RISK_CLASS_NORMAL &&
 		value <= ipcv1.RiskClass_RISK_CLASS_CRITICAL_SAFETY
+}
+
+// knownDeliveryClass 接受 UNSPECIFIED。
+//
+// 【0 是合法的】：protocol 明确规定未指定时 nervud fail closed 按 RELIABLE
+// 处理。在这里拒掉它会让一个只想推纯信号事件的接口被迫显式写一档，
+// 而写错那一档（比如随手填 LOSSY）比不写危险得多。
+//
+// 拒的只是本 build 完全不认识的值——那说明 bundle 来自一个更新的协议版本，
+// 继续解析只会在某个字段上悄悄不一致。
+func knownDeliveryClass(value ipcv1.DeliveryClass) bool {
+	return value >= ipcv1.DeliveryClass_DELIVERY_CLASS_UNSPECIFIED &&
+		value <= ipcv1.DeliveryClass_DELIVERY_CLASS_LOSSY
 }
 
 func knownGrantMode(value ipcv1.GrantMode) bool {
