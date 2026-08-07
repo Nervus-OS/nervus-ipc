@@ -34,8 +34,6 @@ private static final long serialVersionUID = 0L;
   }
   private ProvidedInterface() {
     interfaceId_ = "";
-    versions_ = emptyIntList();
-    schemaHash_ = com.google.protobuf.ByteString.EMPTY;
     requiredPermission_ = "";
     resourceRiskFloor_ = 0;
     compatibleResourceTypes_ =
@@ -105,66 +103,6 @@ private static final long serialVersionUID = 0L;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
-  }
-
-  public static final int VERSIONS_FIELD_NUMBER = 2;
-  @SuppressWarnings("serial")
-  private com.google.protobuf.Internal.IntList versions_ =
-      emptyIntList();
-  /**
-   * <pre>
-   * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-   * </pre>
-   *
-   * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-   * @return A list containing the versions.
-   */
-  @java.lang.Override
-  public java.util.List<java.lang.Integer>
-      getVersionsList() {
-    return versions_;
-  }
-  /**
-   * <pre>
-   * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-   * </pre>
-   *
-   * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-   * @return The count of versions.
-   */
-  public int getVersionsCount() {
-    return versions_.size();
-  }
-  /**
-   * <pre>
-   * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-   * </pre>
-   *
-   * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-   * @param index The index of the element to return.
-   * @return The versions at the given index.
-   */
-  public int getVersions(int index) {
-    return versions_.getInt(index);
-  }
-  private int versionsMemoizedSerializedSize = -1;
-
-  public static final int SCHEMA_HASH_FIELD_NUMBER = 3;
-  private com.google.protobuf.ByteString schemaHash_ = com.google.protobuf.ByteString.EMPTY;
-  /**
-   * <pre>
-   * 该接口 descriptor bundle 的 hash（NRCP §8.4）。必须与 RegisterEndpoint 里
-   * Provider 声明的 interface_schema_hash、以及 RobotCatalog 投影一致；不一致
-   * 一律拒绝——避免用旧 schema 编译的 Provider 悄悄服务新接口，也避免运行期
-   * 下载任意 schema 直接喂模型/SDK（§8.4）。
-   * </pre>
-   *
-   * <code>bytes schema_hash = 3 [json_name = "schemaHash"];</code>
-   * @return The schemaHash.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString getSchemaHash() {
-    return schemaHash_;
   }
 
   public static final int REQUIRED_PERMISSION_FIELD_NUMBER = 4;
@@ -406,9 +344,7 @@ private static final long serialVersionUID = 0L;
   private java.util.List<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion> interfaceVersions_;
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -419,9 +355,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -433,9 +367,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -446,9 +378,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -459,9 +389,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -486,19 +414,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    getSerializedSize();
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(interfaceId_)) {
       com.google.protobuf.GeneratedMessage.writeString(output, 1, interfaceId_);
-    }
-    if (getVersionsList().size() > 0) {
-      output.writeUInt32NoTag(18);
-      output.writeUInt32NoTag(versionsMemoizedSerializedSize);
-    }
-    for (int i = 0; i < versions_.size(); i++) {
-      output.writeUInt32NoTag(versions_.getInt(i));
-    }
-    if (!schemaHash_.isEmpty()) {
-      output.writeBytes(3, schemaHash_);
     }
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(requiredPermission_)) {
       com.google.protobuf.GeneratedMessage.writeString(output, 4, requiredPermission_);
@@ -529,24 +446,6 @@ private static final long serialVersionUID = 0L;
     size = 0;
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(interfaceId_)) {
       size += com.google.protobuf.GeneratedMessage.computeStringSize(1, interfaceId_);
-    }
-    {
-      int dataSize = 0;
-      for (int i = 0; i < versions_.size(); i++) {
-        dataSize += com.google.protobuf.CodedOutputStream
-          .computeUInt32SizeNoTag(versions_.getInt(i));
-      }
-      size += dataSize;
-      if (!getVersionsList().isEmpty()) {
-        size += 1;
-        size += com.google.protobuf.CodedOutputStream
-            .computeInt32SizeNoTag(dataSize);
-      }
-      versionsMemoizedSerializedSize = dataSize;
-    }
-    if (!schemaHash_.isEmpty()) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeBytesSize(3, schemaHash_);
     }
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(requiredPermission_)) {
       size += com.google.protobuf.GeneratedMessage.computeStringSize(4, requiredPermission_);
@@ -590,10 +489,6 @@ private static final long serialVersionUID = 0L;
 
     if (!getInterfaceId()
         .equals(other.getInterfaceId())) return false;
-    if (!getVersionsList()
-        .equals(other.getVersionsList())) return false;
-    if (!getSchemaHash()
-        .equals(other.getSchemaHash())) return false;
     if (!getRequiredPermission()
         .equals(other.getRequiredPermission())) return false;
     if (resourceRiskFloor_ != other.resourceRiskFloor_) return false;
@@ -618,12 +513,6 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + INTERFACE_ID_FIELD_NUMBER;
     hash = (53 * hash) + getInterfaceId().hashCode();
-    if (getVersionsCount() > 0) {
-      hash = (37 * hash) + VERSIONS_FIELD_NUMBER;
-      hash = (53 * hash) + getVersionsList().hashCode();
-    }
-    hash = (37 * hash) + SCHEMA_HASH_FIELD_NUMBER;
-    hash = (53 * hash) + getSchemaHash().hashCode();
     hash = (37 * hash) + REQUIRED_PERMISSION_FIELD_NUMBER;
     hash = (53 * hash) + getRequiredPermission().hashCode();
     hash = (37 * hash) + RESOURCE_RISK_FLOOR_FIELD_NUMBER;
@@ -778,8 +667,6 @@ private static final long serialVersionUID = 0L;
       super.clear();
       bitField0_ = 0;
       interfaceId_ = "";
-      versions_ = emptyIntList();
-      schemaHash_ = com.google.protobuf.ByteString.EMPTY;
       requiredPermission_ = "";
       resourceRiskFloor_ = 0;
       compatibleResourceTypes_ =
@@ -792,7 +679,7 @@ private static final long serialVersionUID = 0L;
         interfaceVersions_ = null;
         interfaceVersionsBuilder_.clear();
       }
-      bitField0_ = (bitField0_ & ~0x00000100);
+      bitField0_ = (bitField0_ & ~0x00000040);
       return this;
     }
 
@@ -827,9 +714,9 @@ private static final long serialVersionUID = 0L;
 
     private void buildPartialRepeatedFields(io.github.nervusos.ipc.v1.ProvidedInterface result) {
       if (interfaceVersionsBuilder_ == null) {
-        if (((bitField0_ & 0x00000100) != 0)) {
+        if (((bitField0_ & 0x00000040) != 0)) {
           interfaceVersions_ = java.util.Collections.unmodifiableList(interfaceVersions_);
-          bitField0_ = (bitField0_ & ~0x00000100);
+          bitField0_ = (bitField0_ & ~0x00000040);
         }
         result.interfaceVersions_ = interfaceVersions_;
       } else {
@@ -843,26 +730,19 @@ private static final long serialVersionUID = 0L;
         result.interfaceId_ = interfaceId_;
       }
       if (((from_bitField0_ & 0x00000002) != 0)) {
-        versions_.makeImmutable();
-        result.versions_ = versions_;
-      }
-      if (((from_bitField0_ & 0x00000004) != 0)) {
-        result.schemaHash_ = schemaHash_;
-      }
-      if (((from_bitField0_ & 0x00000008) != 0)) {
         result.requiredPermission_ = requiredPermission_;
       }
-      if (((from_bitField0_ & 0x00000010) != 0)) {
+      if (((from_bitField0_ & 0x00000004) != 0)) {
         result.resourceRiskFloor_ = resourceRiskFloor_;
       }
-      if (((from_bitField0_ & 0x00000020) != 0)) {
+      if (((from_bitField0_ & 0x00000008) != 0)) {
         compatibleResourceTypes_.makeImmutable();
         result.compatibleResourceTypes_ = compatibleResourceTypes_;
       }
-      if (((from_bitField0_ & 0x00000040) != 0)) {
+      if (((from_bitField0_ & 0x00000010) != 0)) {
         result.defaultResourceType_ = defaultResourceType_;
       }
-      if (((from_bitField0_ & 0x00000080) != 0)) {
+      if (((from_bitField0_ & 0x00000020) != 0)) {
         result.defaultResourceRole_ = defaultResourceRole_;
       }
     }
@@ -884,23 +764,9 @@ private static final long serialVersionUID = 0L;
         bitField0_ |= 0x00000001;
         onChanged();
       }
-      if (!other.versions_.isEmpty()) {
-        if (versions_.isEmpty()) {
-          versions_ = other.versions_;
-          versions_.makeImmutable();
-          bitField0_ |= 0x00000002;
-        } else {
-          ensureVersionsIsMutable();
-          versions_.addAll(other.versions_);
-        }
-        onChanged();
-      }
-      if (other.getSchemaHash() != com.google.protobuf.ByteString.EMPTY) {
-        setSchemaHash(other.getSchemaHash());
-      }
       if (!other.getRequiredPermission().isEmpty()) {
         requiredPermission_ = other.requiredPermission_;
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000002;
         onChanged();
       }
       if (other.resourceRiskFloor_ != 0) {
@@ -909,7 +775,7 @@ private static final long serialVersionUID = 0L;
       if (!other.compatibleResourceTypes_.isEmpty()) {
         if (compatibleResourceTypes_.isEmpty()) {
           compatibleResourceTypes_ = other.compatibleResourceTypes_;
-          bitField0_ |= 0x00000020;
+          bitField0_ |= 0x00000008;
         } else {
           ensureCompatibleResourceTypesIsMutable();
           compatibleResourceTypes_.addAll(other.compatibleResourceTypes_);
@@ -918,19 +784,19 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getDefaultResourceType().isEmpty()) {
         defaultResourceType_ = other.defaultResourceType_;
-        bitField0_ |= 0x00000040;
+        bitField0_ |= 0x00000010;
         onChanged();
       }
       if (!other.getDefaultResourceRole().isEmpty()) {
         defaultResourceRole_ = other.defaultResourceRole_;
-        bitField0_ |= 0x00000080;
+        bitField0_ |= 0x00000020;
         onChanged();
       }
       if (interfaceVersionsBuilder_ == null) {
         if (!other.interfaceVersions_.isEmpty()) {
           if (interfaceVersions_.isEmpty()) {
             interfaceVersions_ = other.interfaceVersions_;
-            bitField0_ = (bitField0_ & ~0x00000100);
+            bitField0_ = (bitField0_ & ~0x00000040);
           } else {
             ensureInterfaceVersionsIsMutable();
             interfaceVersions_.addAll(other.interfaceVersions_);
@@ -943,7 +809,7 @@ private static final long serialVersionUID = 0L;
             interfaceVersionsBuilder_.dispose();
             interfaceVersionsBuilder_ = null;
             interfaceVersions_ = other.interfaceVersions_;
-            bitField0_ = (bitField0_ & ~0x00000100);
+            bitField0_ = (bitField0_ & ~0x00000040);
             interfaceVersionsBuilder_ = 
               com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                  getInterfaceVersionsFieldBuilder() : null;
@@ -983,35 +849,14 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000001;
               break;
             } // case 10
-            case 16: {
-              int v = input.readUInt32();
-              ensureVersionsIsMutable();
-              versions_.addInt(v);
-              break;
-            } // case 16
-            case 18: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              ensureVersionsIsMutable();
-              while (input.getBytesUntilLimit() > 0) {
-                versions_.addInt(input.readUInt32());
-              }
-              input.popLimit(limit);
-              break;
-            } // case 18
-            case 26: {
-              schemaHash_ = input.readBytes();
-              bitField0_ |= 0x00000004;
-              break;
-            } // case 26
             case 34: {
               requiredPermission_ = input.readStringRequireUtf8();
-              bitField0_ |= 0x00000008;
+              bitField0_ |= 0x00000002;
               break;
             } // case 34
             case 40: {
               resourceRiskFloor_ = input.readEnum();
-              bitField0_ |= 0x00000010;
+              bitField0_ |= 0x00000004;
               break;
             } // case 40
             case 50: {
@@ -1022,12 +867,12 @@ private static final long serialVersionUID = 0L;
             } // case 50
             case 58: {
               defaultResourceType_ = input.readStringRequireUtf8();
-              bitField0_ |= 0x00000040;
+              bitField0_ |= 0x00000010;
               break;
             } // case 58
             case 66: {
               defaultResourceRole_ = input.readStringRequireUtf8();
-              bitField0_ |= 0x00000080;
+              bitField0_ |= 0x00000020;
               break;
             } // case 66
             case 74: {
@@ -1157,171 +1002,6 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.Internal.IntList versions_ = emptyIntList();
-    private void ensureVersionsIsMutable() {
-      if (!versions_.isModifiable()) {
-        versions_ = makeMutableCopy(versions_);
-      }
-      bitField0_ |= 0x00000002;
-    }
-    /**
-     * <pre>
-     * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-     * </pre>
-     *
-     * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-     * @return A list containing the versions.
-     */
-    public java.util.List<java.lang.Integer>
-        getVersionsList() {
-      versions_.makeImmutable();
-      return versions_;
-    }
-    /**
-     * <pre>
-     * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-     * </pre>
-     *
-     * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-     * @return The count of versions.
-     */
-    public int getVersionsCount() {
-      return versions_.size();
-    }
-    /**
-     * <pre>
-     * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-     * </pre>
-     *
-     * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-     * @param index The index of the element to return.
-     * @return The versions at the given index.
-     */
-    public int getVersions(int index) {
-      return versions_.getInt(index);
-    }
-    /**
-     * <pre>
-     * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-     * </pre>
-     *
-     * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-     * @param index The index to set the value at.
-     * @param value The versions to set.
-     * @return This builder for chaining.
-     */
-    public Builder setVersions(
-        int index, int value) {
-
-      ensureVersionsIsMutable();
-      versions_.setInt(index, value);
-      bitField0_ |= 0x00000002;
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-     * </pre>
-     *
-     * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-     * @param value The versions to add.
-     * @return This builder for chaining.
-     */
-    public Builder addVersions(int value) {
-
-      ensureVersionsIsMutable();
-      versions_.addInt(value);
-      bitField0_ |= 0x00000002;
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-     * </pre>
-     *
-     * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-     * @param values The versions to add.
-     * @return This builder for chaining.
-     */
-    public Builder addAllVersions(
-        java.lang.Iterable<? extends java.lang.Integer> values) {
-      ensureVersionsIsMutable();
-      com.google.protobuf.AbstractMessageLite.Builder.addAll(
-          values, versions_);
-      bitField0_ |= 0x00000002;
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-     * </pre>
-     *
-     * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearVersions() {
-      versions_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000002);
-      onChanged();
-      return this;
-    }
-
-    private com.google.protobuf.ByteString schemaHash_ = com.google.protobuf.ByteString.EMPTY;
-    /**
-     * <pre>
-     * 该接口 descriptor bundle 的 hash（NRCP §8.4）。必须与 RegisterEndpoint 里
-     * Provider 声明的 interface_schema_hash、以及 RobotCatalog 投影一致；不一致
-     * 一律拒绝——避免用旧 schema 编译的 Provider 悄悄服务新接口，也避免运行期
-     * 下载任意 schema 直接喂模型/SDK（§8.4）。
-     * </pre>
-     *
-     * <code>bytes schema_hash = 3 [json_name = "schemaHash"];</code>
-     * @return The schemaHash.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getSchemaHash() {
-      return schemaHash_;
-    }
-    /**
-     * <pre>
-     * 该接口 descriptor bundle 的 hash（NRCP §8.4）。必须与 RegisterEndpoint 里
-     * Provider 声明的 interface_schema_hash、以及 RobotCatalog 投影一致；不一致
-     * 一律拒绝——避免用旧 schema 编译的 Provider 悄悄服务新接口，也避免运行期
-     * 下载任意 schema 直接喂模型/SDK（§8.4）。
-     * </pre>
-     *
-     * <code>bytes schema_hash = 3 [json_name = "schemaHash"];</code>
-     * @param value The schemaHash to set.
-     * @return This builder for chaining.
-     */
-    public Builder setSchemaHash(com.google.protobuf.ByteString value) {
-      if (value == null) { throw new NullPointerException(); }
-      schemaHash_ = value;
-      bitField0_ |= 0x00000004;
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * 该接口 descriptor bundle 的 hash（NRCP §8.4）。必须与 RegisterEndpoint 里
-     * Provider 声明的 interface_schema_hash、以及 RobotCatalog 投影一致；不一致
-     * 一律拒绝——避免用旧 schema 编译的 Provider 悄悄服务新接口，也避免运行期
-     * 下载任意 schema 直接喂模型/SDK（§8.4）。
-     * </pre>
-     *
-     * <code>bytes schema_hash = 3 [json_name = "schemaHash"];</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearSchemaHash() {
-      bitField0_ = (bitField0_ & ~0x00000004);
-      schemaHash_ = getDefaultInstance().getSchemaHash();
-      onChanged();
-      return this;
-    }
-
     private java.lang.Object requiredPermission_ = "";
     /**
      * <pre>
@@ -1392,7 +1072,7 @@ private static final long serialVersionUID = 0L;
         java.lang.String value) {
       if (value == null) { throw new NullPointerException(); }
       requiredPermission_ = value;
-      bitField0_ |= 0x00000008;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -1411,7 +1091,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearRequiredPermission() {
       requiredPermission_ = getDefaultInstance().getRequiredPermission();
-      bitField0_ = (bitField0_ & ~0x00000008);
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }
@@ -1434,7 +1114,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) { throw new NullPointerException(); }
       checkByteStringIsUtf8(value);
       requiredPermission_ = value;
-      bitField0_ |= 0x00000008;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -1466,7 +1146,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setResourceRiskFloorValue(int value) {
       resourceRiskFloor_ = value;
-      bitField0_ |= 0x00000010;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -1500,7 +1180,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      bitField0_ |= 0x00000010;
+      bitField0_ |= 0x00000004;
       resourceRiskFloor_ = value.getNumber();
       onChanged();
       return this;
@@ -1516,7 +1196,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearResourceRiskFloor() {
-      bitField0_ = (bitField0_ & ~0x00000010);
+      bitField0_ = (bitField0_ & ~0x00000004);
       resourceRiskFloor_ = 0;
       onChanged();
       return this;
@@ -1528,7 +1208,7 @@ private static final long serialVersionUID = 0L;
       if (!compatibleResourceTypes_.isModifiable()) {
         compatibleResourceTypes_ = new com.google.protobuf.LazyStringArrayList(compatibleResourceTypes_);
       }
-      bitField0_ |= 0x00000020;
+      bitField0_ |= 0x00000008;
     }
     /**
      * <pre>
@@ -1599,7 +1279,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) { throw new NullPointerException(); }
       ensureCompatibleResourceTypesIsMutable();
       compatibleResourceTypes_.set(index, value);
-      bitField0_ |= 0x00000020;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1618,7 +1298,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) { throw new NullPointerException(); }
       ensureCompatibleResourceTypesIsMutable();
       compatibleResourceTypes_.add(value);
-      bitField0_ |= 0x00000020;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1637,7 +1317,7 @@ private static final long serialVersionUID = 0L;
       ensureCompatibleResourceTypesIsMutable();
       com.google.protobuf.AbstractMessageLite.Builder.addAll(
           values, compatibleResourceTypes_);
-      bitField0_ |= 0x00000020;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1653,7 +1333,7 @@ private static final long serialVersionUID = 0L;
     public Builder clearCompatibleResourceTypes() {
       compatibleResourceTypes_ =
         com.google.protobuf.LazyStringArrayList.emptyList();
-      bitField0_ = (bitField0_ & ~0x00000020);;
+      bitField0_ = (bitField0_ & ~0x00000008);;
       onChanged();
       return this;
     }
@@ -1673,7 +1353,7 @@ private static final long serialVersionUID = 0L;
       checkByteStringIsUtf8(value);
       ensureCompatibleResourceTypesIsMutable();
       compatibleResourceTypes_.add(value);
-      bitField0_ |= 0x00000020;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1739,7 +1419,7 @@ private static final long serialVersionUID = 0L;
         java.lang.String value) {
       if (value == null) { throw new NullPointerException(); }
       defaultResourceType_ = value;
-      bitField0_ |= 0x00000040;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }
@@ -1755,7 +1435,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearDefaultResourceType() {
       defaultResourceType_ = getDefaultInstance().getDefaultResourceType();
-      bitField0_ = (bitField0_ & ~0x00000040);
+      bitField0_ = (bitField0_ & ~0x00000010);
       onChanged();
       return this;
     }
@@ -1775,7 +1455,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) { throw new NullPointerException(); }
       checkByteStringIsUtf8(value);
       defaultResourceType_ = value;
-      bitField0_ |= 0x00000040;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }
@@ -1823,7 +1503,7 @@ private static final long serialVersionUID = 0L;
         java.lang.String value) {
       if (value == null) { throw new NullPointerException(); }
       defaultResourceRole_ = value;
-      bitField0_ |= 0x00000080;
+      bitField0_ |= 0x00000020;
       onChanged();
       return this;
     }
@@ -1833,7 +1513,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearDefaultResourceRole() {
       defaultResourceRole_ = getDefaultInstance().getDefaultResourceRole();
-      bitField0_ = (bitField0_ & ~0x00000080);
+      bitField0_ = (bitField0_ & ~0x00000020);
       onChanged();
       return this;
     }
@@ -1847,7 +1527,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) { throw new NullPointerException(); }
       checkByteStringIsUtf8(value);
       defaultResourceRole_ = value;
-      bitField0_ |= 0x00000080;
+      bitField0_ |= 0x00000020;
       onChanged();
       return this;
     }
@@ -1855,9 +1535,9 @@ private static final long serialVersionUID = 0L;
     private java.util.List<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion> interfaceVersions_ =
       java.util.Collections.emptyList();
     private void ensureInterfaceVersionsIsMutable() {
-      if (!((bitField0_ & 0x00000100) != 0)) {
+      if (!((bitField0_ & 0x00000040) != 0)) {
         interfaceVersions_ = new java.util.ArrayList<io.github.nervusos.ipc.v1.ProvidedInterfaceVersion>(interfaceVersions_);
-        bitField0_ |= 0x00000100;
+        bitField0_ |= 0x00000040;
        }
     }
 
@@ -1866,9 +1546,7 @@ private static final long serialVersionUID = 0L;
 
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -1882,9 +1560,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -1898,9 +1574,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -1914,9 +1588,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -1937,9 +1609,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -1957,9 +1627,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -1979,9 +1647,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2002,9 +1668,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2022,9 +1686,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2042,9 +1704,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2063,9 +1723,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2073,7 +1731,7 @@ private static final long serialVersionUID = 0L;
     public Builder clearInterfaceVersions() {
       if (interfaceVersionsBuilder_ == null) {
         interfaceVersions_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000040);
         onChanged();
       } else {
         interfaceVersionsBuilder_.clear();
@@ -2082,9 +1740,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2101,9 +1757,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2114,9 +1768,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2130,9 +1782,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2147,9 +1797,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2160,9 +1808,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2174,9 +1820,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-     * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-     * 两种表达不得同时出现。
+     * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
      * </pre>
      *
      * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -2192,7 +1836,7 @@ private static final long serialVersionUID = 0L;
         interfaceVersionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
             io.github.nervusos.ipc.v1.ProvidedInterfaceVersion, io.github.nervusos.ipc.v1.ProvidedInterfaceVersion.Builder, io.github.nervusos.ipc.v1.ProvidedInterfaceVersionOrBuilder>(
                 interfaceVersions_,
-                ((bitField0_ & 0x00000100) != 0),
+                ((bitField0_ & 0x00000040) != 0),
                 getParentForChildren(),
                 isClean());
         interfaceVersions_ = null;

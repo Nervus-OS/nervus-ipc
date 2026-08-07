@@ -113,7 +113,12 @@ func TestValidateOEMNamespace_CatchesViolation(t *testing.T) {
 		PackageId: "com.acme.dog",
 		Interfaces: []*ipcv1.ProvidedInterface{
 			// 私有接口却挂在别人（com.evil）命名空间下 —— 必须被拦。
-			{InterfaceId: "com.evil.interface.hijack", Versions: []uint32{1}},
+			{
+				InterfaceId: "com.evil.interface.hijack",
+				InterfaceVersions: []*ipcv1.ProvidedInterfaceVersion{
+					{Major: 1},
+				},
+			},
 		},
 		Permissions: []*ipcv1.DefinedPermission{
 			// 自定义权限不在自己命名空间下 —— 必须被拦。

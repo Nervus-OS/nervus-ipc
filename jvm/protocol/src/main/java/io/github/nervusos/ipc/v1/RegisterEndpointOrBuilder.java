@@ -52,7 +52,8 @@ public interface RegisterEndpointOrBuilder extends
 
   /**
    * <pre>
-   * 该 endpoint 服务的 Resource。[REWRITE-v1] 固定为 base.main。
+   * 该 endpoint 服务的 Resource 句柄。不绑物理资源的接口留空——
+   * 填了但不在 Resource Registry 里会被 INVALID_ARGUMENT 拒掉。
    * </pre>
    *
    * <code>string resource_handle = 6 [json_name = "resourceHandle"];</code>
@@ -61,7 +62,8 @@ public interface RegisterEndpointOrBuilder extends
   java.lang.String getResourceHandle();
   /**
    * <pre>
-   * 该 endpoint 服务的 Resource。[REWRITE-v1] 固定为 base.main。
+   * 该 endpoint 服务的 Resource 句柄。不绑物理资源的接口留空——
+   * 填了但不在 Resource Registry 里会被 INVALID_ARGUMENT 拒掉。
    * </pre>
    *
    * <code>string resource_handle = 6 [json_name = "resourceHandle"];</code>

@@ -33,48 +33,6 @@ public interface ProvidedInterfaceOrBuilder extends
 
   /**
    * <pre>
-   * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-   * </pre>
-   *
-   * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-   * @return A list containing the versions.
-   */
-  java.util.List<java.lang.Integer> getVersionsList();
-  /**
-   * <pre>
-   * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-   * </pre>
-   *
-   * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-   * @return The count of versions.
-   */
-  int getVersionsCount();
-  /**
-   * <pre>
-   * 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-   * </pre>
-   *
-   * <code>repeated uint32 versions = 2 [json_name = "versions"];</code>
-   * @param index The index of the element to return.
-   * @return The versions at the given index.
-   */
-  int getVersions(int index);
-
-  /**
-   * <pre>
-   * 该接口 descriptor bundle 的 hash（NRCP §8.4）。必须与 RegisterEndpoint 里
-   * Provider 声明的 interface_schema_hash、以及 RobotCatalog 投影一致；不一致
-   * 一律拒绝——避免用旧 schema 编译的 Provider 悄悄服务新接口，也避免运行期
-   * 下载任意 schema 直接喂模型/SDK（§8.4）。
-   * </pre>
-   *
-   * <code>bytes schema_hash = 3 [json_name = "schemaHash"];</code>
-   * @return The schemaHash.
-   */
-  com.google.protobuf.ByteString getSchemaHash();
-
-  /**
-   * <pre>
    * 接口级权限门槛：Resolve 该接口所需权限 ID。
    * 标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
    * OEM 私有接口 → 指向本 Descriptor 里 DefinedPermission 声明的自定义权限
@@ -209,9 +167,7 @@ public interface ProvidedInterfaceOrBuilder extends
 
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -220,9 +176,7 @@ public interface ProvidedInterfaceOrBuilder extends
       getInterfaceVersionsList();
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -230,9 +184,7 @@ public interface ProvidedInterfaceOrBuilder extends
   io.github.nervusos.ipc.v1.ProvidedInterfaceVersion getInterfaceVersions(int index);
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -240,9 +192,7 @@ public interface ProvidedInterfaceOrBuilder extends
   int getInterfaceVersionsCount();
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>
@@ -251,9 +201,7 @@ public interface ProvidedInterfaceOrBuilder extends
       getInterfaceVersionsOrBuilderList();
   /**
    * <pre>
-   * 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-   * 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-   * 两种表达不得同时出现。
+   * 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
    * </pre>
    *
    * <code>repeated .nervus.ipc.v1.ProvidedInterfaceVersion interface_versions = 9 [json_name = "interfaceVersions"];</code>

@@ -259,10 +259,14 @@ message ResolveEndpoint {
 
   // Resource 选择器。
   //
-  // [REWRITE-v1] 固定 BaseMotion 可以留空，由 nervud 隐式取
-  // {type=nervus.resource.motion.base, role=main}。
-  // [v2+] 通用机器人 App 必须显式给出，且【不能】提交 OEM 的
-  // Package/Component/Provider 名称——那会让 App 绕过标准 Resource 选择。
+  // 绑资源的接口【必须显式给出】。v1 曾允许留空并由 nervud 隐式取
+  // {nervus.resource.motion.base, main}，那条默认已随 v2 移除：它让「我没写
+  // selector」和「我要底盘」变成同一件事，一个忘了填的调用会静默地拿到底盘。
+  //
+  // 不绑资源的接口留空即可（接口的 compatible_resource_types 为空时）。
+  //
+  // 【不能】提交 OEM 的 Package/Component/Provider 名称——那会让 App 绕过标准
+  // Resource 选择。要按语义选设备用 labels。
   ResourceSelector selector = 5;
 
   // 仅用于 manifest 已明确绑定的非通用 Service 或 OEM 私有依赖。
@@ -356,7 +360,8 @@ message RegisterEndpoint {
   // 避免一个用旧 schema 编译的 Provider 悄悄服务新接口。
   bytes interface_schema_hash = 5;
 
-  // 该 endpoint 服务的 Resource。[REWRITE-v1] 固定为 base.main。
+  // 该 endpoint 服务的 Resource 句柄。不绑物理资源的接口留空——
+  // 填了但不在 Resource Registry 里会被 INVALID_ARGUMENT 拒掉。
   string resource_handle = 6;
 }
 
@@ -827,8 +832,8 @@ message Pong {
 //     Safety 触发即撤销（撤销世代 motion_epoch 按 §10.5 递增）。
 //   - 客户端【不能】申请 NONE：NONE 表示"当前没有有效 lease"，不是可申请的值，
 //     因此 ControllerClass 里根本没有 NONE 这个可选项。
-//   - ControlLease 从第一天起就是 Resource-scoped；[REWRITE-v1] 唯一合法 Scope 是
-//     单资源 base.main（狗）/ arm.main（臂），内部可退化为单 Lease 槽实现。
+//   - ControlLease 从第一天起就是 Resource-scoped：申请时必须给出 selector，
+//     由 Catalog 里已声明的 ManagedResource 决定它指向谁。
 //   - ExecutionContext 的可信字段（caller_context / lease_id / controller_class /
 //     motion_epoch / deadline）由 nervud 在【派发给 Provider 时】附加，App
 //     【不得】在任何 Request payload 里自填（§10.3）。本节的 Acquire/Release 是
@@ -856,7 +861,11 @@ message AcquireControl {
   ControllerClass controller_class = 2;
 
   // 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-  // [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+  //
+  // 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+  // 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+  // 的传感器可被路由，但永远拿不到控制权。
+  //
   // 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
   ResourceSelector resource = 3;
 

@@ -95,7 +95,11 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-   * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+   *
+   * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+   * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+   * 的传感器可被路由，但永远拿不到控制权。
+   *
    * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
    * </pre>
    *
@@ -109,7 +113,11 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-   * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+   *
+   * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+   * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+   * 的传感器可被路由，但永远拿不到控制权。
+   *
    * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
    * </pre>
    *
@@ -123,7 +131,11 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-   * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+   *
+   * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+   * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+   * 的传感器可被路由，但永远拿不到控制权。
+   *
    * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
    * </pre>
    *
@@ -665,7 +677,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-     * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+     *
+     * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+     * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+     * 的传感器可被路由，但永远拿不到控制权。
+     *
      * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
      * </pre>
      *
@@ -678,7 +694,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-     * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+     *
+     * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+     * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+     * 的传感器可被路由，但永远拿不到控制权。
+     *
      * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
      * </pre>
      *
@@ -695,7 +715,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-     * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+     *
+     * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+     * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+     * 的传感器可被路由，但永远拿不到控制权。
+     *
      * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
      * </pre>
      *
@@ -717,7 +741,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-     * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+     *
+     * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+     * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+     * 的传感器可被路由，但永远拿不到控制权。
+     *
      * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
      * </pre>
      *
@@ -737,7 +765,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-     * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+     *
+     * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+     * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+     * 的传感器可被路由，但永远拿不到控制权。
+     *
      * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
      * </pre>
      *
@@ -764,7 +796,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-     * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+     *
+     * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+     * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+     * 的传感器可被路由，但永远拿不到控制权。
+     *
      * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
      * </pre>
      *
@@ -783,7 +819,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-     * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+     *
+     * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+     * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+     * 的传感器可被路由，但永远拿不到控制权。
+     *
      * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
      * </pre>
      *
@@ -797,7 +837,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-     * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+     *
+     * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+     * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+     * 的传感器可被路由，但永远拿不到控制权。
+     *
      * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
      * </pre>
      *
@@ -814,7 +858,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-     * [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+     *
+     * 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+     * 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+     * 的传感器可被路由，但永远拿不到控制权。
+     *
      * 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
      * </pre>
      *

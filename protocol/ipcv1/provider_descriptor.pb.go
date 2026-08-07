@@ -321,13 +321,6 @@ type ProvidedInterface struct {
 	// 逻辑接口 ID。标准接口 nervus.interface.*；OEM 私有接口必须在定义者命名空间
 	// （com.acme.*）下，且 nervud 校验其前缀与 package_id 命名空间一致（红线 #3）。
 	InterfaceId string `protobuf:"bytes,1,opt,name=interface_id,json=interfaceId,proto3" json:"interface_id,omitempty"`
-	// 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-	Versions []uint32 `protobuf:"varint,2,rep,packed,name=versions,proto3" json:"versions,omitempty"`
-	// 该接口 descriptor bundle 的 hash（NRCP §8.4）。必须与 RegisterEndpoint 里
-	// Provider 声明的 interface_schema_hash、以及 RobotCatalog 投影一致；不一致
-	// 一律拒绝——避免用旧 schema 编译的 Provider 悄悄服务新接口，也避免运行期
-	// 下载任意 schema 直接喂模型/SDK（§8.4）。
-	SchemaHash []byte `protobuf:"bytes,3,opt,name=schema_hash,json=schemaHash,proto3" json:"schema_hash,omitempty"`
 	// 接口级权限门槛：Resolve 该接口所需权限 ID。
 	//
 	//	标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
@@ -349,9 +342,7 @@ type ProvidedInterface struct {
 	// 不再由内核全局写死为 motion.base/main。
 	DefaultResourceType string `protobuf:"bytes,7,opt,name=default_resource_type,json=defaultResourceType,proto3" json:"default_resource_type,omitempty"`
 	DefaultResourceRole string `protobuf:"bytes,8,opt,name=default_resource_role,json=defaultResourceRole,proto3" json:"default_resource_role,omitempty"`
-	// 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-	// 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-	// 两种表达不得同时出现。
+	// 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
 	InterfaceVersions []*ProvidedInterfaceVersion `protobuf:"bytes,9,rep,name=interface_versions,json=interfaceVersions,proto3" json:"interface_versions,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
@@ -392,20 +383,6 @@ func (x *ProvidedInterface) GetInterfaceId() string {
 		return x.InterfaceId
 	}
 	return ""
-}
-
-func (x *ProvidedInterface) GetVersions() []uint32 {
-	if x != nil {
-		return x.Versions
-	}
-	return nil
-}
-
-func (x *ProvidedInterface) GetSchemaHash() []byte {
-	if x != nil {
-		return x.SchemaHash
-	}
-	return nil
 }
 
 func (x *ProvidedInterface) GetRequiredPermission() string {
@@ -813,18 +790,15 @@ const file_nervus_ipc_v1_provider_descriptor_proto_rawDesc = "" +
 	"interfaces\x18\x02 \x03(\v2 .nervus.ipc.v1.ProvidedInterfaceR\n" +
 	"interfaces\x12<\n" +
 	"\tresources\x18\x03 \x03(\v2\x1e.nervus.ipc.v1.ManagedResourceR\tresources\x12B\n" +
-	"\vpermissions\x18\x04 \x03(\v2 .nervus.ipc.v1.DefinedPermissionR\vpermissions\"\xea\x03\n" +
+	"\vpermissions\x18\x04 \x03(\v2 .nervus.ipc.v1.DefinedPermissionR\vpermissions\"\xd0\x03\n" +
 	"\x11ProvidedInterface\x12!\n" +
-	"\finterface_id\x18\x01 \x01(\tR\vinterfaceId\x12\x1a\n" +
-	"\bversions\x18\x02 \x03(\rR\bversions\x12\x1f\n" +
-	"\vschema_hash\x18\x03 \x01(\fR\n" +
-	"schemaHash\x12/\n" +
+	"\finterface_id\x18\x01 \x01(\tR\vinterfaceId\x12/\n" +
 	"\x13required_permission\x18\x04 \x01(\tR\x12requiredPermission\x12H\n" +
 	"\x13resource_risk_floor\x18\x05 \x01(\x0e2\x18.nervus.ipc.v1.RiskClassR\x11resourceRiskFloor\x12:\n" +
 	"\x19compatible_resource_types\x18\x06 \x03(\tR\x17compatibleResourceTypes\x122\n" +
 	"\x15default_resource_type\x18\a \x01(\tR\x13defaultResourceType\x122\n" +
 	"\x15default_resource_role\x18\b \x01(\tR\x13defaultResourceRole\x12V\n" +
-	"\x12interface_versions\x18\t \x03(\v2'.nervus.ipc.v1.ProvidedInterfaceVersionR\x11interfaceVersions\"\x86\x01\n" +
+	"\x12interface_versions\x18\t \x03(\v2'.nervus.ipc.v1.ProvidedInterfaceVersionR\x11interfaceVersionsJ\x04\b\x02\x10\x03J\x04\b\x03\x10\x04R\bversionsR\vschema_hash\"\x86\x01\n" +
 	"\x18ProvidedInterfaceVersion\x12\x14\n" +
 	"\x05major\x18\x01 \x01(\rR\x05major\x12\x1f\n" +
 	"\vschema_hash\x18\x02 \x01(\fR\n" +

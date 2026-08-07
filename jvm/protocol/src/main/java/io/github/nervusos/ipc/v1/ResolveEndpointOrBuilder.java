@@ -56,10 +56,14 @@ public interface ResolveEndpointOrBuilder extends
    * <pre>
    * Resource 选择器。
    *
-   * [REWRITE-v1] 固定 BaseMotion 可以留空，由 nervud 隐式取
-   * {type=nervus.resource.motion.base, role=main}。
-   * [v2+] 通用机器人 App 必须显式给出，且【不能】提交 OEM 的
-   * Package/Component/Provider 名称——那会让 App 绕过标准 Resource 选择。
+   * 绑资源的接口【必须显式给出】。v1 曾允许留空并由 nervud 隐式取
+   * {nervus.resource.motion.base, main}，那条默认已随 v2 移除：它让「我没写
+   * selector」和「我要底盘」变成同一件事，一个忘了填的调用会静默地拿到底盘。
+   *
+   * 不绑资源的接口留空即可（接口的 compatible_resource_types 为空时）。
+   *
+   * 【不能】提交 OEM 的 Package/Component/Provider 名称——那会让 App 绕过标准
+   * Resource 选择。要按语义选设备用 labels。
    * </pre>
    *
    * <code>.nervus.ipc.v1.ResourceSelector selector = 5 [json_name = "selector"];</code>
@@ -70,10 +74,14 @@ public interface ResolveEndpointOrBuilder extends
    * <pre>
    * Resource 选择器。
    *
-   * [REWRITE-v1] 固定 BaseMotion 可以留空，由 nervud 隐式取
-   * {type=nervus.resource.motion.base, role=main}。
-   * [v2+] 通用机器人 App 必须显式给出，且【不能】提交 OEM 的
-   * Package/Component/Provider 名称——那会让 App 绕过标准 Resource 选择。
+   * 绑资源的接口【必须显式给出】。v1 曾允许留空并由 nervud 隐式取
+   * {nervus.resource.motion.base, main}，那条默认已随 v2 移除：它让「我没写
+   * selector」和「我要底盘」变成同一件事，一个忘了填的调用会静默地拿到底盘。
+   *
+   * 不绑资源的接口留空即可（接口的 compatible_resource_types 为空时）。
+   *
+   * 【不能】提交 OEM 的 Package/Component/Provider 名称——那会让 App 绕过标准
+   * Resource 选择。要按语义选设备用 labels。
    * </pre>
    *
    * <code>.nervus.ipc.v1.ResourceSelector selector = 5 [json_name = "selector"];</code>
@@ -84,10 +92,14 @@ public interface ResolveEndpointOrBuilder extends
    * <pre>
    * Resource 选择器。
    *
-   * [REWRITE-v1] 固定 BaseMotion 可以留空，由 nervud 隐式取
-   * {type=nervus.resource.motion.base, role=main}。
-   * [v2+] 通用机器人 App 必须显式给出，且【不能】提交 OEM 的
-   * Package/Component/Provider 名称——那会让 App 绕过标准 Resource 选择。
+   * 绑资源的接口【必须显式给出】。v1 曾允许留空并由 nervud 隐式取
+   * {nervus.resource.motion.base, main}，那条默认已随 v2 移除：它让「我没写
+   * selector」和「我要底盘」变成同一件事，一个忘了填的调用会静默地拿到底盘。
+   *
+   * 不绑资源的接口留空即可（接口的 compatible_resource_types 为空时）。
+   *
+   * 【不能】提交 OEM 的 Package/Component/Provider 名称——那会让 App 绕过标准
+   * Resource 选择。要按语义选设备用 labels。
    * </pre>
    *
    * <code>.nervus.ipc.v1.ResourceSelector selector = 5 [json_name = "selector"];</code>

@@ -86,14 +86,15 @@ message ProvidedInterface {
   // （com.acme.*）下，且 nervud 校验其前缀与 package_id 命名空间一致（红线 #3）。
   string interface_id = 1;
 
-  // 支持的 major 版本集合（NRCP §17 接口按 major 版本演进）。
-  repeated uint32 versions = 2;
-
-  // 该接口 descriptor bundle 的 hash（NRCP §8.4）。必须与 RegisterEndpoint 里
-  // Provider 声明的 interface_schema_hash、以及 RobotCatalog 投影一致；不一致
-  // 一律拒绝——避免用旧 schema 编译的 Provider 悄悄服务新接口，也避免运行期
-  // 下载任意 schema 直接喂模型/SDK（§8.4）。
-  bytes schema_hash = 3;
+  // 2、3 是 v1 的 versions/schema_hash 组合，已随 v2 移除。
+  //
+  // 它们只能表达「多个 major 恰好共用同一 hash」，而每个 major 本就该有自己的
+  // 契约身份。逐 major 绑定见 interface_versions（字段 9）。
+  //
+  // 号与名写进 reserved 而不是留空：字段号一旦发布就永不复用，否则一个用旧
+  // 生成代码的进程会把新字段按旧语义解出来，而两边都不会报错。
+  reserved 2, 3;
+  reserved "versions", "schema_hash";
 
   // 接口级权限门槛：Resolve 该接口所需权限 ID。
   //   标准接口 → 指向平台权限（如 perm.motion.control，可由平台签名 Descriptor 定义）。
@@ -118,9 +119,7 @@ message ProvidedInterface {
   string default_resource_type = 7;
   string default_resource_role = 8;
 
-  // 新 Provider 应使用本字段逐 major 绑定 schema。旧的 versions/schema_hash
-  // 组合只能表达“多个 major 恰好共用同一 hash”，保留它们仅为迁移兼容。
-  // 两种表达不得同时出现。
+  // 逐 major 绑定契约。至少要有一项，否则这个接口声明没有任何可校验的身份。
   repeated ProvidedInterfaceVersion interface_versions = 9;
 }
 

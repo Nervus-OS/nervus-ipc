@@ -1659,10 +1659,14 @@ type ResolveEndpoint struct {
 	MaxInterfaceMajor uint32 `protobuf:"varint,4,opt,name=max_interface_major,json=maxInterfaceMajor,proto3" json:"max_interface_major,omitempty"`
 	// Resource 选择器。
 	//
-	// [REWRITE-v1] 固定 BaseMotion 可以留空，由 nervud 隐式取
-	// {type=nervus.resource.motion.base, role=main}。
-	// [v2+] 通用机器人 App 必须显式给出，且【不能】提交 OEM 的
-	// Package/Component/Provider 名称——那会让 App 绕过标准 Resource 选择。
+	// 绑资源的接口【必须显式给出】。v1 曾允许留空并由 nervud 隐式取
+	// {nervus.resource.motion.base, main}，那条默认已随 v2 移除：它让「我没写
+	// selector」和「我要底盘」变成同一件事，一个忘了填的调用会静默地拿到底盘。
+	//
+	// 不绑资源的接口留空即可（接口的 compatible_resource_types 为空时）。
+	//
+	// 【不能】提交 OEM 的 Package/Component/Provider 名称——那会让 App 绕过标准
+	// Resource 选择。要按语义选设备用 labels。
 	Selector *ResourceSelector `protobuf:"bytes,5,opt,name=selector,proto3" json:"selector,omitempty"`
 	// 仅用于 manifest 已明确绑定的非通用 Service 或 OEM 私有依赖。
 	// 它不是「指定实现」的后门：标准接口走 selector，本字段非空且未在
@@ -2022,7 +2026,8 @@ type RegisterEndpoint struct {
 	// 本 Service 实现的 schema hash。与 Registry 中登记值不符即拒绝——
 	// 避免一个用旧 schema 编译的 Provider 悄悄服务新接口。
 	InterfaceSchemaHash []byte `protobuf:"bytes,5,opt,name=interface_schema_hash,json=interfaceSchemaHash,proto3" json:"interface_schema_hash,omitempty"`
-	// 该 endpoint 服务的 Resource。[REWRITE-v1] 固定为 base.main。
+	// 该 endpoint 服务的 Resource 句柄。不绑物理资源的接口留空——
+	// 填了但不在 Resource Registry 里会被 INVALID_ARGUMENT 拒掉。
 	ResourceHandle string `protobuf:"bytes,6,opt,name=resource_handle,json=resourceHandle,proto3" json:"resource_handle,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -3948,7 +3953,11 @@ type AcquireControl struct {
 	// 申请的控制主体类别，必须是 HUMAN 或 AI（见 ControllerClass：无 NONE）。
 	ControllerClass ControllerClass `protobuf:"varint,2,opt,name=controller_class,json=controllerClass,proto3,enum=nervus.ipc.v1.ControllerClass" json:"controller_class,omitempty"`
 	// 申请控制的 Resource。ControlLease 天生 Resource-scoped（§10.2）。
-	// [REWRITE-v1] nervud 只解析到单资源 base.main / arm.main；
+	//
+	// 【必须显式给出】：v1 曾允许留空并隐式取底盘，那条默认已随 v2 移除。
+	// 只有 access_mode 为 EXCLUSIVE_CONTROL 的资源能被租约——声明为 SHARED_OBSERVE
+	// 的传感器可被路由，但永远拿不到控制权。
+	//
 	// 提交 OEM 的 Package/Component/Provider 名一律拒绝（同 ResolveEndpoint.selector）。
 	Resource *ResourceSelector `protobuf:"bytes,3,opt,name=resource,proto3" json:"resource,omitempty"`
 	// 调用者期望的租约时效（纳秒）。这是【期望值】不是承诺：nervud 可按 Policy

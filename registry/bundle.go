@@ -518,42 +518,29 @@ func ValidateProviderArtifacts(descriptor *ipcv1.ProviderDescriptor, schemas *Sc
 	return nil
 }
 
+// providedVersions 把接口声明的各 major 展开成 major -> 契约哈希。
+//
+// 只认 interface_versions。v1 的 versions/schema_hash 组合已随 v2 移除
+// （proto 里那两个字段号已 reserved）——它只能表达「多个 major 恰好共用同一
+// hash」，而每个 major 本就该有自己的契约身份。
 func providedVersions(iface *ipcv1.ProvidedInterface) (map[uint32][]byte, error) {
-	out := make(map[uint32][]byte)
-	if len(iface.GetInterfaceVersions()) != 0 {
-		if len(iface.GetVersions()) != 0 || len(iface.GetSchemaHash()) != 0 {
-			return nil, errors.New("legacy versions/schema_hash and interface_versions cannot be mixed")
+	versions := iface.GetInterfaceVersions()
+	if len(versions) == 0 {
+		return nil, errors.New("no interface versions")
+	}
+	out := make(map[uint32][]byte, len(versions))
+	for _, version := range versions {
+		if version.GetMajor() == 0 {
+			return nil, errors.New("major 0 is reserved")
 		}
-		for _, version := range iface.GetInterfaceVersions() {
-			if version.GetMajor() == 0 {
-				return nil, errors.New("major 0 is reserved")
-			}
-			if len(version.GetSchemaHash()) != sha256.Size {
-				return nil, fmt.Errorf("major %d schema hash has %d bytes, want %d",
-					version.GetMajor(), len(version.GetSchemaHash()), sha256.Size)
-			}
-			if _, dup := out[version.GetMajor()]; dup {
-				return nil, fmt.Errorf("duplicate major %d", version.GetMajor())
-			}
-			out[version.GetMajor()] = append([]byte(nil), version.GetSchemaHash()...)
+		if len(version.GetSchemaHash()) != sha256.Size {
+			return nil, fmt.Errorf("major %d schema hash has %d bytes, want %d",
+				version.GetMajor(), len(version.GetSchemaHash()), sha256.Size)
 		}
-	} else {
-		if len(iface.GetVersions()) == 0 {
-			return nil, errors.New("no interface versions")
+		if _, dup := out[version.GetMajor()]; dup {
+			return nil, fmt.Errorf("duplicate major %d", version.GetMajor())
 		}
-		if len(iface.GetSchemaHash()) != sha256.Size {
-			return nil, fmt.Errorf("legacy schema hash has %d bytes, want %d",
-				len(iface.GetSchemaHash()), sha256.Size)
-		}
-		for _, major := range iface.GetVersions() {
-			if major == 0 {
-				return nil, errors.New("major 0 is reserved")
-			}
-			if _, dup := out[major]; dup {
-				return nil, fmt.Errorf("duplicate major %d", major)
-			}
-			out[major] = append([]byte(nil), iface.GetSchemaHash()...)
-		}
+		out[version.GetMajor()] = append([]byte(nil), version.GetSchemaHash()...)
 	}
 	return out, nil
 }
