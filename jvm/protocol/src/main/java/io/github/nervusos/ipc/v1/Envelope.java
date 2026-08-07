@@ -78,6 +78,7 @@ private static final long serialVersionUID = 0L;
     DISPATCH(50),
     DISPATCH_RESULT(51),
     CANCEL_DISPATCH(52),
+    PUBLISH_EVENT(53),
     PING(60),
     PONG(61),
     ACQUIRE_CONTROL(70),
@@ -125,6 +126,7 @@ private static final long serialVersionUID = 0L;
         case 50: return DISPATCH;
         case 51: return DISPATCH_RESULT;
         case 52: return CANCEL_DISPATCH;
+        case 53: return PUBLISH_EVENT;
         case 60: return PING;
         case 61: return PONG;
         case 70: return ACQUIRE_CONTROL;
@@ -651,10 +653,8 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * --- 订阅与事件 ---
-   * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-   * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-   * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-   * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+   * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+   * 事件的【来源】不在这一组，见 PublishEvent(53)。
    * </pre>
    *
    * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -667,10 +667,8 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * --- 订阅与事件 ---
-   * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-   * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-   * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-   * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+   * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+   * 事件的【来源】不在这一组，见 PublishEvent(53)。
    * </pre>
    *
    * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -686,10 +684,8 @@ private static final long serialVersionUID = 0L;
   /**
    * <pre>
    * --- 订阅与事件 ---
-   * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-   * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-   * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-   * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+   * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+   * 事件的【来源】不在这一组，见 PublishEvent(53)。
    * </pre>
    *
    * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -990,6 +986,73 @@ private static final long serialVersionUID = 0L;
        return (io.github.nervusos.ipc.v1.CancelDispatch) body_;
     }
     return io.github.nervusos.ipc.v1.CancelDispatch.getDefaultInstance();
+  }
+
+  public static final int PUBLISH_EVENT_FIELD_NUMBER = 53;
+  /**
+   * <pre>
+   * 53 是本文件的扩展：订阅链路的【来源】那一半。
+   *
+   * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+   * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+   * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+   *
+   * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+   * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+   * 雷达、Safety）都不再需要改 IPC。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+   * @return Whether the publishEvent field is set.
+   */
+  @java.lang.Override
+  public boolean hasPublishEvent() {
+    return bodyCase_ == 53;
+  }
+  /**
+   * <pre>
+   * 53 是本文件的扩展：订阅链路的【来源】那一半。
+   *
+   * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+   * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+   * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+   *
+   * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+   * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+   * 雷达、Safety）都不再需要改 IPC。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+   * @return The publishEvent.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.PublishEvent getPublishEvent() {
+    if (bodyCase_ == 53) {
+       return (io.github.nervusos.ipc.v1.PublishEvent) body_;
+    }
+    return io.github.nervusos.ipc.v1.PublishEvent.getDefaultInstance();
+  }
+  /**
+   * <pre>
+   * 53 是本文件的扩展：订阅链路的【来源】那一半。
+   *
+   * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+   * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+   * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+   *
+   * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+   * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+   * 雷达、Safety）都不再需要改 IPC。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.PublishEventOrBuilder getPublishEventOrBuilder() {
+    if (bodyCase_ == 53) {
+       return (io.github.nervusos.ipc.v1.PublishEvent) body_;
+    }
+    return io.github.nervusos.ipc.v1.PublishEvent.getDefaultInstance();
   }
 
   public static final int PING_FIELD_NUMBER = 60;
@@ -1419,6 +1482,9 @@ private static final long serialVersionUID = 0L;
     if (bodyCase_ == 52) {
       output.writeMessage(52, (io.github.nervusos.ipc.v1.CancelDispatch) body_);
     }
+    if (bodyCase_ == 53) {
+      output.writeMessage(53, (io.github.nervusos.ipc.v1.PublishEvent) body_);
+    }
     if (bodyCase_ == 60) {
       output.writeMessage(60, (io.github.nervusos.ipc.v1.Ping) body_);
     }
@@ -1547,6 +1613,10 @@ private static final long serialVersionUID = 0L;
     if (bodyCase_ == 52) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(52, (io.github.nervusos.ipc.v1.CancelDispatch) body_);
+    }
+    if (bodyCase_ == 53) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(53, (io.github.nervusos.ipc.v1.PublishEvent) body_);
     }
     if (bodyCase_ == 60) {
       size += com.google.protobuf.CodedOutputStream
@@ -1689,6 +1759,10 @@ private static final long serialVersionUID = 0L;
         if (!getCancelDispatch()
             .equals(other.getCancelDispatch())) return false;
         break;
+      case 53:
+        if (!getPublishEvent()
+            .equals(other.getPublishEvent())) return false;
+        break;
       case 60:
         if (!getPing()
             .equals(other.getPing())) return false;
@@ -1827,6 +1901,10 @@ private static final long serialVersionUID = 0L;
       case 52:
         hash = (37 * hash) + CANCEL_DISPATCH_FIELD_NUMBER;
         hash = (53 * hash) + getCancelDispatch().hashCode();
+        break;
+      case 53:
+        hash = (37 * hash) + PUBLISH_EVENT_FIELD_NUMBER;
+        hash = (53 * hash) + getPublishEvent().hashCode();
         break;
       case 60:
         hash = (37 * hash) + PING_FIELD_NUMBER;
@@ -2002,6 +2080,7 @@ private static final long serialVersionUID = 0L;
     public Builder clear() {
       super.clear();
       bitField0_ = 0;
+      bitField1_ = 0;
       protocolMajor_ = 0;
       protocolMinor_ = 0;
       if (helloBuilder_ != null) {
@@ -2070,6 +2149,9 @@ private static final long serialVersionUID = 0L;
       if (cancelDispatchBuilder_ != null) {
         cancelDispatchBuilder_.clear();
       }
+      if (publishEventBuilder_ != null) {
+        publishEventBuilder_.clear();
+      }
       if (pingBuilder_ != null) {
         pingBuilder_.clear();
       }
@@ -2123,6 +2205,7 @@ private static final long serialVersionUID = 0L;
     public io.github.nervusos.ipc.v1.Envelope buildPartial() {
       io.github.nervusos.ipc.v1.Envelope result = new io.github.nervusos.ipc.v1.Envelope(this);
       if (bitField0_ != 0) { buildPartial0(result); }
+      if (bitField1_ != 0) { buildPartial1(result); }
       buildPartialOneofs(result);
       onBuilt();
       return result;
@@ -2136,6 +2219,10 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000002) != 0)) {
         result.protocolMinor_ = protocolMinor_;
       }
+    }
+
+    private void buildPartial1(io.github.nervusos.ipc.v1.Envelope result) {
+      int from_bitField1_ = bitField1_;
     }
 
     private void buildPartialOneofs(io.github.nervusos.ipc.v1.Envelope result) {
@@ -2228,6 +2315,10 @@ private static final long serialVersionUID = 0L;
       if (bodyCase_ == 52 &&
           cancelDispatchBuilder_ != null) {
         result.body_ = cancelDispatchBuilder_.build();
+      }
+      if (bodyCase_ == 53 &&
+          publishEventBuilder_ != null) {
+        result.body_ = publishEventBuilder_.build();
       }
       if (bodyCase_ == 60 &&
           pingBuilder_ != null) {
@@ -2368,6 +2459,10 @@ private static final long serialVersionUID = 0L;
         }
         case CANCEL_DISPATCH: {
           mergeCancelDispatch(other.getCancelDispatch());
+          break;
+        }
+        case PUBLISH_EVENT: {
+          mergePublishEvent(other.getPublishEvent());
           break;
         }
         case PING: {
@@ -2596,6 +2691,13 @@ private static final long serialVersionUID = 0L;
               bodyCase_ = 52;
               break;
             } // case 418
+            case 426: {
+              input.readMessage(
+                  getPublishEventFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bodyCase_ = 53;
+              break;
+            } // case 426
             case 482: {
               input.readMessage(
                   getPingFieldBuilder().getBuilder(),
@@ -2683,6 +2785,7 @@ private static final long serialVersionUID = 0L;
     }
 
     private int bitField0_;
+    private int bitField1_;
 
     private int protocolMajor_ ;
     /**
@@ -4821,10 +4924,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * --- 订阅与事件 ---
-     * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-     * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-     * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-     * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+     * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+     * 事件的【来源】不在这一组，见 PublishEvent(53)。
      * </pre>
      *
      * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -4837,10 +4938,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * --- 订阅与事件 ---
-     * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-     * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-     * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-     * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+     * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+     * 事件的【来源】不在这一组，见 PublishEvent(53)。
      * </pre>
      *
      * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -4863,10 +4962,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * --- 订阅与事件 ---
-     * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-     * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-     * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-     * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+     * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+     * 事件的【来源】不在这一组，见 PublishEvent(53)。
      * </pre>
      *
      * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -4887,10 +4984,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * --- 订阅与事件 ---
-     * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-     * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-     * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-     * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+     * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+     * 事件的【来源】不在这一组，见 PublishEvent(53)。
      * </pre>
      *
      * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -4909,10 +5004,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * --- 订阅与事件 ---
-     * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-     * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-     * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-     * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+     * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+     * 事件的【来源】不在这一组，见 PublishEvent(53)。
      * </pre>
      *
      * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -4940,10 +5033,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * --- 订阅与事件 ---
-     * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-     * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-     * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-     * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+     * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+     * 事件的【来源】不在这一组，见 PublishEvent(53)。
      * </pre>
      *
      * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -4967,10 +5058,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * --- 订阅与事件 ---
-     * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-     * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-     * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-     * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+     * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+     * 事件的【来源】不在这一组，见 PublishEvent(53)。
      * </pre>
      *
      * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -4981,10 +5070,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * --- 订阅与事件 ---
-     * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-     * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-     * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-     * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+     * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+     * 事件的【来源】不在这一组，见 PublishEvent(53)。
      * </pre>
      *
      * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -5003,10 +5090,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <pre>
      * --- 订阅与事件 ---
-     * [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-     * Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-     * SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-     * SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+     * 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+     * 事件的【来源】不在这一组，见 PublishEvent(53)。
      * </pre>
      *
      * <code>.nervus.ipc.v1.Subscribe subscribe = 40 [json_name = "subscribe"];</code>
@@ -6290,6 +6375,256 @@ private static final long serialVersionUID = 0L;
       bodyCase_ = 52;
       onChanged();
       return cancelDispatchBuilder_;
+    }
+
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.PublishEvent, io.github.nervusos.ipc.v1.PublishEvent.Builder, io.github.nervusos.ipc.v1.PublishEventOrBuilder> publishEventBuilder_;
+    /**
+     * <pre>
+     * 53 是本文件的扩展：订阅链路的【来源】那一半。
+     *
+     * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+     * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+     * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+     *
+     * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+     * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+     * 雷达、Safety）都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+     * @return Whether the publishEvent field is set.
+     */
+    @java.lang.Override
+    public boolean hasPublishEvent() {
+      return bodyCase_ == 53;
+    }
+    /**
+     * <pre>
+     * 53 是本文件的扩展：订阅链路的【来源】那一半。
+     *
+     * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+     * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+     * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+     *
+     * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+     * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+     * 雷达、Safety）都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+     * @return The publishEvent.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.PublishEvent getPublishEvent() {
+      if (publishEventBuilder_ == null) {
+        if (bodyCase_ == 53) {
+          return (io.github.nervusos.ipc.v1.PublishEvent) body_;
+        }
+        return io.github.nervusos.ipc.v1.PublishEvent.getDefaultInstance();
+      } else {
+        if (bodyCase_ == 53) {
+          return publishEventBuilder_.getMessage();
+        }
+        return io.github.nervusos.ipc.v1.PublishEvent.getDefaultInstance();
+      }
+    }
+    /**
+     * <pre>
+     * 53 是本文件的扩展：订阅链路的【来源】那一半。
+     *
+     * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+     * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+     * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+     *
+     * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+     * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+     * 雷达、Safety）都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+     */
+    public Builder setPublishEvent(io.github.nervusos.ipc.v1.PublishEvent value) {
+      if (publishEventBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        body_ = value;
+        onChanged();
+      } else {
+        publishEventBuilder_.setMessage(value);
+      }
+      bodyCase_ = 53;
+      return this;
+    }
+    /**
+     * <pre>
+     * 53 是本文件的扩展：订阅链路的【来源】那一半。
+     *
+     * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+     * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+     * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+     *
+     * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+     * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+     * 雷达、Safety）都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+     */
+    public Builder setPublishEvent(
+        io.github.nervusos.ipc.v1.PublishEvent.Builder builderForValue) {
+      if (publishEventBuilder_ == null) {
+        body_ = builderForValue.build();
+        onChanged();
+      } else {
+        publishEventBuilder_.setMessage(builderForValue.build());
+      }
+      bodyCase_ = 53;
+      return this;
+    }
+    /**
+     * <pre>
+     * 53 是本文件的扩展：订阅链路的【来源】那一半。
+     *
+     * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+     * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+     * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+     *
+     * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+     * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+     * 雷达、Safety）都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+     */
+    public Builder mergePublishEvent(io.github.nervusos.ipc.v1.PublishEvent value) {
+      if (publishEventBuilder_ == null) {
+        if (bodyCase_ == 53 &&
+            body_ != io.github.nervusos.ipc.v1.PublishEvent.getDefaultInstance()) {
+          body_ = io.github.nervusos.ipc.v1.PublishEvent.newBuilder((io.github.nervusos.ipc.v1.PublishEvent) body_)
+              .mergeFrom(value).buildPartial();
+        } else {
+          body_ = value;
+        }
+        onChanged();
+      } else {
+        if (bodyCase_ == 53) {
+          publishEventBuilder_.mergeFrom(value);
+        } else {
+          publishEventBuilder_.setMessage(value);
+        }
+      }
+      bodyCase_ = 53;
+      return this;
+    }
+    /**
+     * <pre>
+     * 53 是本文件的扩展：订阅链路的【来源】那一半。
+     *
+     * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+     * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+     * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+     *
+     * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+     * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+     * 雷达、Safety）都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+     */
+    public Builder clearPublishEvent() {
+      if (publishEventBuilder_ == null) {
+        if (bodyCase_ == 53) {
+          bodyCase_ = 0;
+          body_ = null;
+          onChanged();
+        }
+      } else {
+        if (bodyCase_ == 53) {
+          bodyCase_ = 0;
+          body_ = null;
+        }
+        publishEventBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * 53 是本文件的扩展：订阅链路的【来源】那一半。
+     *
+     * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+     * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+     * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+     *
+     * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+     * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+     * 雷达、Safety）都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+     */
+    public io.github.nervusos.ipc.v1.PublishEvent.Builder getPublishEventBuilder() {
+      return getPublishEventFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * 53 是本文件的扩展：订阅链路的【来源】那一半。
+     *
+     * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+     * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+     * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+     *
+     * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+     * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+     * 雷达、Safety）都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.PublishEventOrBuilder getPublishEventOrBuilder() {
+      if ((bodyCase_ == 53) && (publishEventBuilder_ != null)) {
+        return publishEventBuilder_.getMessageOrBuilder();
+      } else {
+        if (bodyCase_ == 53) {
+          return (io.github.nervusos.ipc.v1.PublishEvent) body_;
+        }
+        return io.github.nervusos.ipc.v1.PublishEvent.getDefaultInstance();
+      }
+    }
+    /**
+     * <pre>
+     * 53 是本文件的扩展：订阅链路的【来源】那一半。
+     *
+     * 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+     * Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+     * 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+     *
+     * 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+     * nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+     * 雷达、Safety）都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.PublishEvent publish_event = 53 [json_name = "publishEvent"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.PublishEvent, io.github.nervusos.ipc.v1.PublishEvent.Builder, io.github.nervusos.ipc.v1.PublishEventOrBuilder> 
+        getPublishEventFieldBuilder() {
+      if (publishEventBuilder_ == null) {
+        if (!(bodyCase_ == 53)) {
+          body_ = io.github.nervusos.ipc.v1.PublishEvent.getDefaultInstance();
+        }
+        publishEventBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.PublishEvent, io.github.nervusos.ipc.v1.PublishEvent.Builder, io.github.nervusos.ipc.v1.PublishEventOrBuilder>(
+                (io.github.nervusos.ipc.v1.PublishEvent) body_,
+                getParentForChildren(),
+                isClean());
+        body_ = null;
+      }
+      bodyCase_ = 53;
+      onChanged();
+      return publishEventBuilder_;
     }
 
     private com.google.protobuf.SingleFieldBuilder<

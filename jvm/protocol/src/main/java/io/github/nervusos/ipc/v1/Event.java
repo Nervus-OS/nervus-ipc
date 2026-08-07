@@ -143,6 +143,24 @@ private static final long serialVersionUID = 0L;
     return dropped_;
   }
 
+  public static final int MONOTONIC_TIMESTAMP_NANOS_FIELD_NUMBER = 7;
+  private long monotonicTimestampNanos_ = 0L;
+  /**
+   * <pre>
+   * Provider 在 PublishEvent 里给出的产生时刻，原样透传。0 表示未提供。
+   *
+   * 【与「收到时刻」不是一回事】：事件经过 nervud 扇出、经过订阅方的出站队列，
+   * 两者之间可能隔着一次背压等待。做时序判断的消费者必须用这个值。
+   * </pre>
+   *
+   * <code>uint64 monotonic_timestamp_nanos = 7 [json_name = "monotonicTimestampNanos"];</code>
+   * @return The monotonicTimestampNanos.
+   */
+  @java.lang.Override
+  public long getMonotonicTimestampNanos() {
+    return monotonicTimestampNanos_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -174,6 +192,9 @@ private static final long serialVersionUID = 0L;
     }
     if (dropped_ != 0L) {
       output.writeUInt64(6, dropped_);
+    }
+    if (monotonicTimestampNanos_ != 0L) {
+      output.writeUInt64(7, monotonicTimestampNanos_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -208,6 +229,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(6, dropped_);
     }
+    if (monotonicTimestampNanos_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeUInt64Size(7, monotonicTimestampNanos_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -235,6 +260,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getPayload())) return false;
     if (getDropped()
         != other.getDropped()) return false;
+    if (getMonotonicTimestampNanos()
+        != other.getMonotonicTimestampNanos()) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -262,6 +289,9 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + DROPPED_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         getDropped());
+    hash = (37 * hash) + MONOTONIC_TIMESTAMP_NANOS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getMonotonicTimestampNanos());
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -403,6 +433,7 @@ private static final long serialVersionUID = 0L;
       eventId_ = 0;
       payload_ = com.google.protobuf.ByteString.EMPTY;
       dropped_ = 0L;
+      monotonicTimestampNanos_ = 0L;
       return this;
     }
 
@@ -454,6 +485,9 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000020) != 0)) {
         result.dropped_ = dropped_;
       }
+      if (((from_bitField0_ & 0x00000040) != 0)) {
+        result.monotonicTimestampNanos_ = monotonicTimestampNanos_;
+      }
     }
 
     @java.lang.Override
@@ -485,6 +519,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getDropped() != 0L) {
         setDropped(other.getDropped());
+      }
+      if (other.getMonotonicTimestampNanos() != 0L) {
+        setMonotonicTimestampNanos(other.getMonotonicTimestampNanos());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -542,6 +579,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000020;
               break;
             } // case 48
+            case 56: {
+              monotonicTimestampNanos_ = input.readUInt64();
+              bitField0_ |= 0x00000040;
+              break;
+            } // case 56
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -837,6 +879,59 @@ private static final long serialVersionUID = 0L;
     public Builder clearDropped() {
       bitField0_ = (bitField0_ & ~0x00000020);
       dropped_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long monotonicTimestampNanos_ ;
+    /**
+     * <pre>
+     * Provider 在 PublishEvent 里给出的产生时刻，原样透传。0 表示未提供。
+     *
+     * 【与「收到时刻」不是一回事】：事件经过 nervud 扇出、经过订阅方的出站队列，
+     * 两者之间可能隔着一次背压等待。做时序判断的消费者必须用这个值。
+     * </pre>
+     *
+     * <code>uint64 monotonic_timestamp_nanos = 7 [json_name = "monotonicTimestampNanos"];</code>
+     * @return The monotonicTimestampNanos.
+     */
+    @java.lang.Override
+    public long getMonotonicTimestampNanos() {
+      return monotonicTimestampNanos_;
+    }
+    /**
+     * <pre>
+     * Provider 在 PublishEvent 里给出的产生时刻，原样透传。0 表示未提供。
+     *
+     * 【与「收到时刻」不是一回事】：事件经过 nervud 扇出、经过订阅方的出站队列，
+     * 两者之间可能隔着一次背压等待。做时序判断的消费者必须用这个值。
+     * </pre>
+     *
+     * <code>uint64 monotonic_timestamp_nanos = 7 [json_name = "monotonicTimestampNanos"];</code>
+     * @param value The monotonicTimestampNanos to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMonotonicTimestampNanos(long value) {
+
+      monotonicTimestampNanos_ = value;
+      bitField0_ |= 0x00000040;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Provider 在 PublishEvent 里给出的产生时刻，原样透传。0 表示未提供。
+     *
+     * 【与「收到时刻」不是一回事】：事件经过 nervud 扇出、经过订阅方的出站队列，
+     * 两者之间可能隔着一次背压等待。做时序判断的消费者必须用这个值。
+     * </pre>
+     *
+     * <code>uint64 monotonic_timestamp_nanos = 7 [json_name = "monotonicTimestampNanos"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMonotonicTimestampNanos() {
+      bitField0_ = (bitField0_ & ~0x00000040);
+      monotonicTimestampNanos_ = 0L;
       onChanged();
       return this;
     }

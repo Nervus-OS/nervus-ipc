@@ -84,10 +84,8 @@ message Envelope {
     Cancel cancel = 32;
 
     // --- 订阅与事件 ---
-    // [KERNEL: NOT IMPLEMENTED] 整组 40-45 nervud 尚未实现：Subscribe /
-    // Unsubscribe 收到即关闭连接；Event / SubscribeResult / UnsubscribeResult /
-    // SubscriptionClosed 是 nervud → 对端方向，nervud 目前不会发出。
-    // SDK 不得发送 Subscribe / Unsubscribe。实现状态见 README「实现状态」表。
+    // 40/42 是订阅方 → nervud；41/43/44/45 是 nervud → 订阅方。
+    // 事件的【来源】不在这一组，见 PublishEvent(53)。
     Subscribe subscribe = 40;
     SubscribeResult subscribe_result = 41;
     Unsubscribe unsubscribe = 42;
@@ -103,6 +101,16 @@ message Envelope {
     // [KERNEL: NOT IMPLEMENTED] nervud 目前不会发出 CancelDispatch（上游的
     // Cancel(32) 尚未实现，没有触发源）。ServiceHost 可以先不处理它。
     CancelDispatch cancel_dispatch = 52;
+    // 53 是本文件的扩展：订阅链路的【来源】那一半。
+    //
+    // 40-45 六个 body 全是「订阅方 ↔ nervud」，没有一个能让 Provider 推出事件——
+    // Event 携带的 subscription_id 是订阅方连接作用域的句柄，Provider 既不知道
+    // 也不该知道（那是别人连接上的东西）。缺了 53，订阅能建起来但永远收不到东西。
+    //
+    // 与 Dispatch(50) 对称：调用有 nervud → Service 的转发，订阅有 Service →
+    // nervud 的上报。两者都是【机制】，加这一次之后所有事件源（摄像头、麦克风、
+    // 雷达、Safety）都不再需要改 IPC。
+    PublishEvent publish_event = 53;
 
     // --- 保活 ---
     Ping ping = 60;
@@ -621,6 +629,12 @@ message Event {
   //
   // 有了它，客户端不必再从 sequence 差值里反推「这次跳号到底要不要紧」。
   uint64 dropped = 6;
+
+  // Provider 在 PublishEvent 里给出的产生时刻，原样透传。0 表示未提供。
+  //
+  // 【与「收到时刻」不是一回事】：事件经过 nervud 扇出、经过订阅方的出站队列，
+  // 两者之间可能隔着一次背压等待。做时序判断的消费者必须用这个值。
+  uint64 monotonic_timestamp_nanos = 7;
 }
 
 // SubscriptionClosed 是本文件的扩展（号 45）：服务端单方面终止一个订阅。
@@ -635,6 +649,50 @@ message Event {
 message SubscriptionClosed {
   uint64 subscription_id = 1;
   SubscriptionClosedReason reason = 2;
+}
+
+// PublishEvent 是 Provider 向 nervud 上报一条事件（本文件扩展，号 53）。
+//
+// 【只出现在 nervud ↔ Service 的连接上】，订阅方既不发送也不接收——它收到的是
+// nervud 扇出后的 Event(43)。
+//
+// # 为什么不能让 Provider 直接发 Event
+//
+// Event 携带 subscription_id，那是【订阅方连接作用域】的句柄。Provider 不知道
+// 有哪些订阅者、更不知道它们各自的句柄，也不该知道——那是别人连接上的东西。
+// 让 Provider 填这个字段等于让它指定「这条消息投递给谁」，而投递决策必须留在
+// nervud：订阅方的权限可能在订阅之后被撤销，Provider 无从得知。
+//
+// # nervud 收到之后做什么
+//
+//  1. 核对 endpoint_id 属于本连接、且仍然存活
+//  2. 按 event_id 查权威 EventMeta；未声明的 event_id 一律拒绝——Provider
+//     不能推一个没在契约里出现过的事件
+//  3. 按 max_payload_bytes 与 max_events_per_second 收紧
+//  4. 扇出给每个订阅者，各自换算成它自己的 subscription_id 与 sequence，
+//     并按 delivery_class 处理背压（RELIABLE 断慢消费者 / STATE 合并 / LOSSY 丢弃）
+//
+// 【没有 PublishEventResult】：上报是单向的。给它配一个结果会让 Provider 的
+// 事件循环变成请求-响应，一个慢订阅者就能拖住整个 Provider——而背压的正确
+// 落点是 nervud 与订阅方之间，不是 nervud 与 Provider 之间。
+message PublishEvent {
+  // Provider 侧 endpoint 句柄，即 RegisterEndpointSuccess.endpoint_id。
+  //
+  // 用 Provider 自己的句柄而不是订阅方的：nervud 据此确认「这条连接确实拥有
+  // 这个 endpoint」，Provider 无法替别的 endpoint 推事件。
+  uint64 endpoint_id = 1;
+
+  // schema 中稳定的数字事件 ID。必须在该接口的 EventMeta 里声明过。
+  uint32 event_id = 2;
+
+  // 事件专属 Protobuf bytes，可为空（纯信号事件）。
+  bytes payload = 3;
+
+  // Provider 侧的单调时间戳（纳秒），可为 0 表示不提供。
+  //
+  // nervud 不用它做任何裁决——它只是随事件透传给订阅方，让消费者能算出
+  // 「这条数据是什么时候产生的」而不是「什么时候收到的」。
+  uint64 monotonic_timestamp_nanos = 4;
 }
 
 enum SubscriptionClosedReason {

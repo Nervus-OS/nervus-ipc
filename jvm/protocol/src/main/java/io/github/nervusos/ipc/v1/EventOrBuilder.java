@@ -74,4 +74,17 @@ public interface EventOrBuilder extends
    * @return The dropped.
    */
   long getDropped();
+
+  /**
+   * <pre>
+   * Provider 在 PublishEvent 里给出的产生时刻，原样透传。0 表示未提供。
+   *
+   * 【与「收到时刻」不是一回事】：事件经过 nervud 扇出、经过订阅方的出站队列，
+   * 两者之间可能隔着一次背压等待。做时序判断的消费者必须用这个值。
+   * </pre>
+   *
+   * <code>uint64 monotonic_timestamp_nanos = 7 [json_name = "monotonicTimestampNanos"];</code>
+   * @return The monotonicTimestampNanos.
+   */
+  long getMonotonicTimestampNanos();
 }
