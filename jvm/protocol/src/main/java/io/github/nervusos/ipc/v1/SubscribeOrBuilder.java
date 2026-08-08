@@ -43,4 +43,37 @@ public interface SubscribeOrBuilder extends
    * @return The payload.
    */
   com.google.protobuf.ByteString getPayload();
+
+  /**
+   * <pre>
+   * 实例作用域：一个 endpoint 上有多个可独立观察的实例时，指定要看哪一个。
+   *
+   * # 它解决的问题
+   *
+   * 订阅是按 (endpoint, event_id) 建的。而一路摄像头上可以同时开好几条 stream，
+   * 一个内建 endpoint 上跑着全机的 operation——不分实例就意味着每个订阅方都
+   * 收到全部实例的事件。那不只是浪费带宽，是【信息泄漏】：别人的进度、失败
+   * 细因、资源句柄都会送到。
+   *
+   * # 为什么是 Envelope 上的一个 uint64，而不是 payload 里的一个字段
+   *
+   * nervud 必须【自己看懂它】才能做归属裁决。放进 payload 就要求内核按
+   * Provider 的 schema 解一段 bytes——而那正是 status.proto 反复在防的
+   * 「按发送方自报的类型解码」。
+   *
+   * 现实里的实例标识全是数字句柄（stream_id、operation_id），一个 uint64 够用。
+   *
+   * # 谁说了算
+   *
+   * 【归属由 Provider 预先登记】，见 BindEventScope(54)：Provider 在创建实例
+   * 时告诉 nervud「这个 scope 属于哪次调用的调用方」。订阅时 nervud 查自己的
+   * 表同步裁决，不需要再问 Provider——那会让 Subscribe 卡在读循环里等一次往返。
+   *
+   * 事件声明了 EventMeta.scoped 时本字段必填且非 0；未声明时必须为 0。
+   * </pre>
+   *
+   * <code>uint64 scope = 5 [json_name = "scope"];</code>
+   * @return The scope.
+   */
+  long getScope();
 }

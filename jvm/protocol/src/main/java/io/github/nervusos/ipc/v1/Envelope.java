@@ -79,6 +79,7 @@ private static final long serialVersionUID = 0L;
     DISPATCH_RESULT(51),
     CANCEL_DISPATCH(52),
     PUBLISH_EVENT(53),
+    BIND_EVENT_SCOPE(54),
     PING(60),
     PONG(61),
     ACQUIRE_CONTROL(70),
@@ -127,6 +128,7 @@ private static final long serialVersionUID = 0L;
         case 51: return DISPATCH_RESULT;
         case 52: return CANCEL_DISPATCH;
         case 53: return PUBLISH_EVENT;
+        case 54: return BIND_EVENT_SCOPE;
         case 60: return PING;
         case 61: return PONG;
         case 70: return ACQUIRE_CONTROL;
@@ -1055,6 +1057,61 @@ private static final long serialVersionUID = 0L;
     return io.github.nervusos.ipc.v1.PublishEvent.getDefaultInstance();
   }
 
+  public static final int BIND_EVENT_SCOPE_FIELD_NUMBER = 54;
+  /**
+   * <pre>
+   * Provider 登记一个事件实例的归属（Service → nervud）。
+   *
+   * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+   * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+   * 能力都不再需要改 IPC。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+   * @return Whether the bindEventScope field is set.
+   */
+  @java.lang.Override
+  public boolean hasBindEventScope() {
+    return bodyCase_ == 54;
+  }
+  /**
+   * <pre>
+   * Provider 登记一个事件实例的归属（Service → nervud）。
+   *
+   * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+   * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+   * 能力都不再需要改 IPC。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+   * @return The bindEventScope.
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.BindEventScope getBindEventScope() {
+    if (bodyCase_ == 54) {
+       return (io.github.nervusos.ipc.v1.BindEventScope) body_;
+    }
+    return io.github.nervusos.ipc.v1.BindEventScope.getDefaultInstance();
+  }
+  /**
+   * <pre>
+   * Provider 登记一个事件实例的归属（Service → nervud）。
+   *
+   * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+   * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+   * 能力都不再需要改 IPC。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+   */
+  @java.lang.Override
+  public io.github.nervusos.ipc.v1.BindEventScopeOrBuilder getBindEventScopeOrBuilder() {
+    if (bodyCase_ == 54) {
+       return (io.github.nervusos.ipc.v1.BindEventScope) body_;
+    }
+    return io.github.nervusos.ipc.v1.BindEventScope.getDefaultInstance();
+  }
+
   public static final int PING_FIELD_NUMBER = 60;
   /**
    * <pre>
@@ -1485,6 +1542,9 @@ private static final long serialVersionUID = 0L;
     if (bodyCase_ == 53) {
       output.writeMessage(53, (io.github.nervusos.ipc.v1.PublishEvent) body_);
     }
+    if (bodyCase_ == 54) {
+      output.writeMessage(54, (io.github.nervusos.ipc.v1.BindEventScope) body_);
+    }
     if (bodyCase_ == 60) {
       output.writeMessage(60, (io.github.nervusos.ipc.v1.Ping) body_);
     }
@@ -1617,6 +1677,10 @@ private static final long serialVersionUID = 0L;
     if (bodyCase_ == 53) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(53, (io.github.nervusos.ipc.v1.PublishEvent) body_);
+    }
+    if (bodyCase_ == 54) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(54, (io.github.nervusos.ipc.v1.BindEventScope) body_);
     }
     if (bodyCase_ == 60) {
       size += com.google.protobuf.CodedOutputStream
@@ -1763,6 +1827,10 @@ private static final long serialVersionUID = 0L;
         if (!getPublishEvent()
             .equals(other.getPublishEvent())) return false;
         break;
+      case 54:
+        if (!getBindEventScope()
+            .equals(other.getBindEventScope())) return false;
+        break;
       case 60:
         if (!getPing()
             .equals(other.getPing())) return false;
@@ -1905,6 +1973,10 @@ private static final long serialVersionUID = 0L;
       case 53:
         hash = (37 * hash) + PUBLISH_EVENT_FIELD_NUMBER;
         hash = (53 * hash) + getPublishEvent().hashCode();
+        break;
+      case 54:
+        hash = (37 * hash) + BIND_EVENT_SCOPE_FIELD_NUMBER;
+        hash = (53 * hash) + getBindEventScope().hashCode();
         break;
       case 60:
         hash = (37 * hash) + PING_FIELD_NUMBER;
@@ -2152,6 +2224,9 @@ private static final long serialVersionUID = 0L;
       if (publishEventBuilder_ != null) {
         publishEventBuilder_.clear();
       }
+      if (bindEventScopeBuilder_ != null) {
+        bindEventScopeBuilder_.clear();
+      }
       if (pingBuilder_ != null) {
         pingBuilder_.clear();
       }
@@ -2320,6 +2395,10 @@ private static final long serialVersionUID = 0L;
           publishEventBuilder_ != null) {
         result.body_ = publishEventBuilder_.build();
       }
+      if (bodyCase_ == 54 &&
+          bindEventScopeBuilder_ != null) {
+        result.body_ = bindEventScopeBuilder_.build();
+      }
       if (bodyCase_ == 60 &&
           pingBuilder_ != null) {
         result.body_ = pingBuilder_.build();
@@ -2463,6 +2542,10 @@ private static final long serialVersionUID = 0L;
         }
         case PUBLISH_EVENT: {
           mergePublishEvent(other.getPublishEvent());
+          break;
+        }
+        case BIND_EVENT_SCOPE: {
+          mergeBindEventScope(other.getBindEventScope());
           break;
         }
         case PING: {
@@ -2698,6 +2781,13 @@ private static final long serialVersionUID = 0L;
               bodyCase_ = 53;
               break;
             } // case 426
+            case 434: {
+              input.readMessage(
+                  getBindEventScopeFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bodyCase_ = 54;
+              break;
+            } // case 434
             case 482: {
               input.readMessage(
                   getPingFieldBuilder().getBuilder(),
@@ -6625,6 +6715,220 @@ private static final long serialVersionUID = 0L;
       bodyCase_ = 53;
       onChanged();
       return publishEventBuilder_;
+    }
+
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.BindEventScope, io.github.nervusos.ipc.v1.BindEventScope.Builder, io.github.nervusos.ipc.v1.BindEventScopeOrBuilder> bindEventScopeBuilder_;
+    /**
+     * <pre>
+     * Provider 登记一个事件实例的归属（Service → nervud）。
+     *
+     * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+     * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+     * 能力都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+     * @return Whether the bindEventScope field is set.
+     */
+    @java.lang.Override
+    public boolean hasBindEventScope() {
+      return bodyCase_ == 54;
+    }
+    /**
+     * <pre>
+     * Provider 登记一个事件实例的归属（Service → nervud）。
+     *
+     * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+     * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+     * 能力都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+     * @return The bindEventScope.
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.BindEventScope getBindEventScope() {
+      if (bindEventScopeBuilder_ == null) {
+        if (bodyCase_ == 54) {
+          return (io.github.nervusos.ipc.v1.BindEventScope) body_;
+        }
+        return io.github.nervusos.ipc.v1.BindEventScope.getDefaultInstance();
+      } else {
+        if (bodyCase_ == 54) {
+          return bindEventScopeBuilder_.getMessage();
+        }
+        return io.github.nervusos.ipc.v1.BindEventScope.getDefaultInstance();
+      }
+    }
+    /**
+     * <pre>
+     * Provider 登记一个事件实例的归属（Service → nervud）。
+     *
+     * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+     * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+     * 能力都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+     */
+    public Builder setBindEventScope(io.github.nervusos.ipc.v1.BindEventScope value) {
+      if (bindEventScopeBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        body_ = value;
+        onChanged();
+      } else {
+        bindEventScopeBuilder_.setMessage(value);
+      }
+      bodyCase_ = 54;
+      return this;
+    }
+    /**
+     * <pre>
+     * Provider 登记一个事件实例的归属（Service → nervud）。
+     *
+     * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+     * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+     * 能力都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+     */
+    public Builder setBindEventScope(
+        io.github.nervusos.ipc.v1.BindEventScope.Builder builderForValue) {
+      if (bindEventScopeBuilder_ == null) {
+        body_ = builderForValue.build();
+        onChanged();
+      } else {
+        bindEventScopeBuilder_.setMessage(builderForValue.build());
+      }
+      bodyCase_ = 54;
+      return this;
+    }
+    /**
+     * <pre>
+     * Provider 登记一个事件实例的归属（Service → nervud）。
+     *
+     * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+     * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+     * 能力都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+     */
+    public Builder mergeBindEventScope(io.github.nervusos.ipc.v1.BindEventScope value) {
+      if (bindEventScopeBuilder_ == null) {
+        if (bodyCase_ == 54 &&
+            body_ != io.github.nervusos.ipc.v1.BindEventScope.getDefaultInstance()) {
+          body_ = io.github.nervusos.ipc.v1.BindEventScope.newBuilder((io.github.nervusos.ipc.v1.BindEventScope) body_)
+              .mergeFrom(value).buildPartial();
+        } else {
+          body_ = value;
+        }
+        onChanged();
+      } else {
+        if (bodyCase_ == 54) {
+          bindEventScopeBuilder_.mergeFrom(value);
+        } else {
+          bindEventScopeBuilder_.setMessage(value);
+        }
+      }
+      bodyCase_ = 54;
+      return this;
+    }
+    /**
+     * <pre>
+     * Provider 登记一个事件实例的归属（Service → nervud）。
+     *
+     * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+     * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+     * 能力都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+     */
+    public Builder clearBindEventScope() {
+      if (bindEventScopeBuilder_ == null) {
+        if (bodyCase_ == 54) {
+          bodyCase_ = 0;
+          body_ = null;
+          onChanged();
+        }
+      } else {
+        if (bodyCase_ == 54) {
+          bodyCase_ = 0;
+          body_ = null;
+        }
+        bindEventScopeBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Provider 登记一个事件实例的归属（Service → nervud）。
+     *
+     * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+     * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+     * 能力都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+     */
+    public io.github.nervusos.ipc.v1.BindEventScope.Builder getBindEventScopeBuilder() {
+      return getBindEventScopeFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * Provider 登记一个事件实例的归属（Service → nervud）。
+     *
+     * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+     * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+     * 能力都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+     */
+    @java.lang.Override
+    public io.github.nervusos.ipc.v1.BindEventScopeOrBuilder getBindEventScopeOrBuilder() {
+      if ((bodyCase_ == 54) && (bindEventScopeBuilder_ != null)) {
+        return bindEventScopeBuilder_.getMessageOrBuilder();
+      } else {
+        if (bodyCase_ == 54) {
+          return (io.github.nervusos.ipc.v1.BindEventScope) body_;
+        }
+        return io.github.nervusos.ipc.v1.BindEventScope.getDefaultInstance();
+      }
+    }
+    /**
+     * <pre>
+     * Provider 登记一个事件实例的归属（Service → nervud）。
+     *
+     * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+     * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+     * 能力都不再需要改 IPC。
+     * </pre>
+     *
+     * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+     */
+    private com.google.protobuf.SingleFieldBuilder<
+        io.github.nervusos.ipc.v1.BindEventScope, io.github.nervusos.ipc.v1.BindEventScope.Builder, io.github.nervusos.ipc.v1.BindEventScopeOrBuilder> 
+        getBindEventScopeFieldBuilder() {
+      if (bindEventScopeBuilder_ == null) {
+        if (!(bodyCase_ == 54)) {
+          body_ = io.github.nervusos.ipc.v1.BindEventScope.getDefaultInstance();
+        }
+        bindEventScopeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+            io.github.nervusos.ipc.v1.BindEventScope, io.github.nervusos.ipc.v1.BindEventScope.Builder, io.github.nervusos.ipc.v1.BindEventScopeOrBuilder>(
+                (io.github.nervusos.ipc.v1.BindEventScope) body_,
+                getParentForChildren(),
+                isClean());
+        body_ = null;
+      }
+      bodyCase_ = 54;
+      onChanged();
+      return bindEventScopeBuilder_;
     }
 
     private com.google.protobuf.SingleFieldBuilder<

@@ -538,6 +538,45 @@ public interface EnvelopeOrBuilder extends
 
   /**
    * <pre>
+   * Provider 登记一个事件实例的归属（Service → nervud）。
+   *
+   * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+   * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+   * 能力都不再需要改 IPC。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+   * @return Whether the bindEventScope field is set.
+   */
+  boolean hasBindEventScope();
+  /**
+   * <pre>
+   * Provider 登记一个事件实例的归属（Service → nervud）。
+   *
+   * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+   * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+   * 能力都不再需要改 IPC。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+   * @return The bindEventScope.
+   */
+  io.github.nervusos.ipc.v1.BindEventScope getBindEventScope();
+  /**
+   * <pre>
+   * Provider 登记一个事件实例的归属（Service → nervud）。
+   *
+   * 与 PublishEvent(53) 同为订阅机制的提供侧：那一条说「发生了什么」，
+   * 这一条说「谁有资格看」。加这一次之后，任何「一个 endpoint 多实例」的
+   * 能力都不再需要改 IPC。
+   * </pre>
+   *
+   * <code>.nervus.ipc.v1.BindEventScope bind_event_scope = 54 [json_name = "bindEventScope"];</code>
+   */
+  io.github.nervusos.ipc.v1.BindEventScopeOrBuilder getBindEventScopeOrBuilder();
+
+  /**
+   * <pre>
    * --- 保活 ---
    * </pre>
    *

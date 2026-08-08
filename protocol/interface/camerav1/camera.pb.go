@@ -137,20 +137,16 @@ func (CameraMethod) EnumDescriptor() ([]byte, []int) {
 // event_id 与 method_id 是【两个互不相干的编号空间】：本接口的 event 1 与
 // method 1 毫无关系。
 //
-// # ⚠️ 已知泄漏：事件按 endpoint 扇出，不按 stream
+// # 两个事件都按 stream 分发
 //
 // 一路摄像头上可以同时开好几条 stream（导航一条、录制一条、检测一条），
 // 而订阅是按 endpoint 建的——endpoint 是按摄像头分的，不是按 stream 分的。
-// 于是订了 cam.front 的 A 会收到 B 那条 stream 的状态变化：什么时候开的、
-// 开了多久、什么时候掉的线。
+// 不分实例的话，订了 cam.front 的 A 会收到 B 那条 stream 的状态变化：
+// 什么时候开的、开了多久、什么时候掉的线。
 //
-// EventMeta.subscribe_payload_type 正是为这件事加的，但它需要 nervud 在
-// Subscribe 时问 endpoint 所有者「这条 stream 是不是你开的」——而对外部
-// Provider 那是一次往返，会让 Subscribe 变成异步。当前只有内建 endpoint
-// 支持这道准入（见 nervus.interface.operation.control）。
-//
-// 【所以这里刻意不声明 subscribe_payload_type】：声明一个内核强制不了的
-// 字段比不声明更糟，它读起来像个保证。Provider 侧准入落地后再补。
+// 所以两个事件都声明 scoped：订阅时 Subscribe.scope 填 stream_id，而归属由
+// camerad 在 OpenStream 里用 BindEventScope(54) 预先登记给 nervud。
+// 订一条不属于自己的 stream 会被直接拒。
 type CameraEvent int32
 
 const (
@@ -1610,12 +1606,12 @@ const file_nervus_interface_camera_v1_camera_proto_rawDesc = "" +
 	"\x19CAMERA_METHOD_UNSPECIFIED\x10\x00\x12\xbc\x01\n" +
 	"\x1dCAMERA_METHOD_DESCRIBE_STREAM\x10\x01\x1a\x98\x01\x8a\xa6\x1d\x93\x01\b\x01\x18\x01:0nervus.interface.camera.v1.DescribeStreamRequestB,nervus.interface.camera.v1.StreamDescription\x82\x01,nervus.interface.camera.v1.CameraErrorDetail\x12\xde\x01\n" +
 	"\x19CAMERA_METHOD_OPEN_STREAM\x10\x02\x1a\xbe\x01\x8a\xa6\x1d\xb9\x01\b\x02\x12\x13perm.camera.capture\x18\x02:,nervus.interface.camera.v1.OpenStreamRequestB-nervus.interface.camera.v1.OpenStreamResponsez\x12\b\x01\x10\x04\x18\x80\x80\x80\b \x80\x80\x80\x80\x02*\x01\x02\x82\x01,nervus.interface.camera.v1.CameraErrorDetail\x12\x9b\x01\n" +
-	"\x1aCAMERA_METHOD_CLOSE_STREAM\x10\x03\x1a{\x8a\xa6\x1dw\b\x03\x12\x13perm.camera.capture\x18\x01:-nervus.interface.camera.v1.CloseStreamRequest\x82\x01,nervus.interface.camera.v1.CameraErrorDetail*\x8d\x02\n" +
+	"\x1aCAMERA_METHOD_CLOSE_STREAM\x10\x03\x1a{\x8a\xa6\x1dw\b\x03\x12\x13perm.camera.capture\x18\x01:-nervus.interface.camera.v1.CloseStreamRequest\x82\x01,nervus.interface.camera.v1.CameraErrorDetail*\x91\x02\n" +
 	"\vCameraEvent\x12\x1c\n" +
-	"\x18CAMERA_EVENT_UNSPECIFIED\x10\x00\x12p\n" +
-	"!CAMERA_EVENT_STREAM_STATE_CHANGED\x10\x01\x1aI\x92\xa6\x1dE\b\x01\x12\x13perm.camera.capture\x18\x01 \x02*&nervus.interface.camera.v1.StreamState8\x14\x12n\n" +
-	"\x19CAMERA_EVENT_DEVICE_ERROR\x10\x02\x1aO\x92\xa6\x1dK\b\x02\x12\x13perm.camera.capture\x18\x01 \x01*,nervus.interface.camera.v1.CameraDeviceError8\n" +
-	"*\xbd\x05\n" +
+	"\x18CAMERA_EVENT_UNSPECIFIED\x10\x00\x12r\n" +
+	"!CAMERA_EVENT_STREAM_STATE_CHANGED\x10\x01\x1aK\x92\xa6\x1dG\b\x01\x12\x13perm.camera.capture\x18\x01 \x02*&nervus.interface.camera.v1.StreamState8\x14H\x01\x12p\n" +
+	"\x19CAMERA_EVENT_DEVICE_ERROR\x10\x02\x1aQ\x92\xa6\x1dM\b\x02\x12\x13perm.camera.capture\x18\x01 \x01*,nervus.interface.camera.v1.CameraDeviceError8\n" +
+	"H\x01*\xbd\x05\n" +
 	"\x12CameraConfigMethod\x12$\n" +
 	" CAMERA_CONFIG_METHOD_UNSPECIFIED\x10\x00\x12\xd8\x01\n" +
 	"\"CAMERA_CONFIG_METHOD_LIST_CONTROLS\x10\x01\x1a\xaf\x01\x8a\xa6\x1d\xaa\x01\b\x01\x12\x15perm.camera.configure\x18\x01:.nervus.interface.camera.v1.ListControlsRequestB.nervus.interface.camera.v1.ControlDescriptions\x82\x01,nervus.interface.camera.v1.CameraErrorDetail\x12\xd0\x01\n" +

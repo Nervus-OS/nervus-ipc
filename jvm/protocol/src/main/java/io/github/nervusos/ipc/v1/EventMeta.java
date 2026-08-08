@@ -48,7 +48,6 @@ private static final long serialVersionUID = 0L;
     riskClass_ = 0;
     deliveryClass_ = 0;
     payloadType_ = "";
-    subscribePayloadType_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -230,85 +229,42 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int SUBSCRIBE_PAYLOAD_TYPE_FIELD_NUMBER = 8;
-  @SuppressWarnings("serial")
-  private volatile java.lang.Object subscribePayloadType_ = "";
+  public static final int SCOPED_FIELD_NUMBER = 9;
+  private boolean scoped_ = false;
   /**
    * <pre>
-   * Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
-   * 带了 payload 的 Subscribe 会被拒绝。
+   * 本事件是否按【实例】分发。
    *
    * # 它解决的是「一个 endpoint 上有多个实例」
    *
    * 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
    * 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
-   * 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
+   * 几条 stream——不分实例就意味着每个订阅方都收到全部实例的事件。
    *
    * 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
    * 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
    * 两条路径、两种规则，是最容易被忽略的那类漏洞。
    *
-   * # 裁决发生在 Subscribe，不在扇出
+   * # true 时的约定
    *
-   * nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
-   * 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
-   * 然后一直等一个永远不来的事件。
-   * </pre>
+   * Subscribe.scope        必填且非 0
+   * 归属                    由 Provider 经 BindEventScope(54) 预先登记，
+   * 或（内建 endpoint）由 nervud 自己掌握
    *
-   * <code>string subscribe_payload_type = 8 [json_name = "subscribePayloadType"];</code>
-   * @return The subscribePayloadType.
-   */
-  @java.lang.Override
-  public java.lang.String getSubscribePayloadType() {
-    java.lang.Object ref = subscribePayloadType_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      subscribePayloadType_ = s;
-      return s;
-    }
-  }
-  /**
-   * <pre>
-   * Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
-   * 带了 payload 的 Subscribe 会被拒绝。
-   *
-   * # 它解决的是「一个 endpoint 上有多个实例」
-   *
-   * 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
-   * 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
-   * 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
-   *
-   * 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
-   * 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
-   * 两条路径、两种规则，是最容易被忽略的那类漏洞。
+   * 订不到自己没有的实例，nervud 直接拒。
    *
    * # 裁决发生在 Subscribe，不在扇出
    *
-   * nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
-   * 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
-   * 然后一直等一个永远不来的事件。
+   * 订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，然后一直等一个
+   * 永远不来的事件。「订不上」是一次明确的失败，它立刻知道该怎么办。
    * </pre>
    *
-   * <code>string subscribe_payload_type = 8 [json_name = "subscribePayloadType"];</code>
-   * @return The bytes for subscribePayloadType.
+   * <code>bool scoped = 9 [json_name = "scoped"];</code>
+   * @return The scoped.
    */
   @java.lang.Override
-  public com.google.protobuf.ByteString
-      getSubscribePayloadTypeBytes() {
-    java.lang.Object ref = subscribePayloadType_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      subscribePayloadType_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
+  public boolean getScoped() {
+    return scoped_;
   }
 
   public static final int MAX_PAYLOAD_BYTES_FIELD_NUMBER = 6;
@@ -378,8 +334,8 @@ private static final long serialVersionUID = 0L;
     if (maxEventsPerSecond_ != 0) {
       output.writeUInt32(7, maxEventsPerSecond_);
     }
-    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(subscribePayloadType_)) {
-      com.google.protobuf.GeneratedMessage.writeString(output, 8, subscribePayloadType_);
+    if (scoped_ != false) {
+      output.writeBool(9, scoped_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -416,8 +372,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeUInt32Size(7, maxEventsPerSecond_);
     }
-    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(subscribePayloadType_)) {
-      size += com.google.protobuf.GeneratedMessage.computeStringSize(8, subscribePayloadType_);
+    if (scoped_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(9, scoped_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -442,8 +399,8 @@ private static final long serialVersionUID = 0L;
     if (deliveryClass_ != other.deliveryClass_) return false;
     if (!getPayloadType()
         .equals(other.getPayloadType())) return false;
-    if (!getSubscribePayloadType()
-        .equals(other.getSubscribePayloadType())) return false;
+    if (getScoped()
+        != other.getScoped()) return false;
     if (getMaxPayloadBytes()
         != other.getMaxPayloadBytes()) return false;
     if (getMaxEventsPerSecond()
@@ -469,8 +426,9 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + deliveryClass_;
     hash = (37 * hash) + PAYLOAD_TYPE_FIELD_NUMBER;
     hash = (53 * hash) + getPayloadType().hashCode();
-    hash = (37 * hash) + SUBSCRIBE_PAYLOAD_TYPE_FIELD_NUMBER;
-    hash = (53 * hash) + getSubscribePayloadType().hashCode();
+    hash = (37 * hash) + SCOPED_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getScoped());
     hash = (37 * hash) + MAX_PAYLOAD_BYTES_FIELD_NUMBER;
     hash = (53 * hash) + getMaxPayloadBytes();
     hash = (37 * hash) + MAX_EVENTS_PER_SECOND_FIELD_NUMBER;
@@ -628,7 +586,7 @@ private static final long serialVersionUID = 0L;
       riskClass_ = 0;
       deliveryClass_ = 0;
       payloadType_ = "";
-      subscribePayloadType_ = "";
+      scoped_ = false;
       maxPayloadBytes_ = 0;
       maxEventsPerSecond_ = 0;
       return this;
@@ -680,7 +638,7 @@ private static final long serialVersionUID = 0L;
         result.payloadType_ = payloadType_;
       }
       if (((from_bitField0_ & 0x00000020) != 0)) {
-        result.subscribePayloadType_ = subscribePayloadType_;
+        result.scoped_ = scoped_;
       }
       if (((from_bitField0_ & 0x00000040) != 0)) {
         result.maxPayloadBytes_ = maxPayloadBytes_;
@@ -721,10 +679,8 @@ private static final long serialVersionUID = 0L;
         bitField0_ |= 0x00000010;
         onChanged();
       }
-      if (!other.getSubscribePayloadType().isEmpty()) {
-        subscribePayloadType_ = other.subscribePayloadType_;
-        bitField0_ |= 0x00000020;
-        onChanged();
+      if (other.getScoped() != false) {
+        setScoped(other.getScoped());
       }
       if (other.getMaxPayloadBytes() != 0) {
         setMaxPayloadBytes(other.getMaxPayloadBytes());
@@ -793,11 +749,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000080;
               break;
             } // case 56
-            case 66: {
-              subscribePayloadType_ = input.readStringRequireUtf8();
+            case 72: {
+              scoped_ = input.readBool();
               bitField0_ |= 0x00000020;
               break;
-            } // case 66
+            } // case 72
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1202,179 +1158,115 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object subscribePayloadType_ = "";
+    private boolean scoped_ ;
     /**
      * <pre>
-     * Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
-     * 带了 payload 的 Subscribe 会被拒绝。
+     * 本事件是否按【实例】分发。
      *
      * # 它解决的是「一个 endpoint 上有多个实例」
      *
      * 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
      * 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
-     * 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
+     * 几条 stream——不分实例就意味着每个订阅方都收到全部实例的事件。
      *
      * 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
      * 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
      * 两条路径、两种规则，是最容易被忽略的那类漏洞。
      *
+     * # true 时的约定
+     *
+     * Subscribe.scope        必填且非 0
+     * 归属                    由 Provider 经 BindEventScope(54) 预先登记，
+     * 或（内建 endpoint）由 nervud 自己掌握
+     *
+     * 订不到自己没有的实例，nervud 直接拒。
+     *
      * # 裁决发生在 Subscribe，不在扇出
      *
-     * nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
-     * 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
-     * 然后一直等一个永远不来的事件。
+     * 订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，然后一直等一个
+     * 永远不来的事件。「订不上」是一次明确的失败，它立刻知道该怎么办。
      * </pre>
      *
-     * <code>string subscribe_payload_type = 8 [json_name = "subscribePayloadType"];</code>
-     * @return The subscribePayloadType.
+     * <code>bool scoped = 9 [json_name = "scoped"];</code>
+     * @return The scoped.
      */
-    public java.lang.String getSubscribePayloadType() {
-      java.lang.Object ref = subscribePayloadType_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        subscribePayloadType_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
+    @java.lang.Override
+    public boolean getScoped() {
+      return scoped_;
     }
     /**
      * <pre>
-     * Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
-     * 带了 payload 的 Subscribe 会被拒绝。
+     * 本事件是否按【实例】分发。
      *
      * # 它解决的是「一个 endpoint 上有多个实例」
      *
      * 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
      * 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
-     * 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
+     * 几条 stream——不分实例就意味着每个订阅方都收到全部实例的事件。
      *
      * 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
      * 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
      * 两条路径、两种规则，是最容易被忽略的那类漏洞。
      *
-     * # 裁决发生在 Subscribe，不在扇出
+     * # true 时的约定
      *
-     * nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
-     * 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
-     * 然后一直等一个永远不来的事件。
-     * </pre>
+     * Subscribe.scope        必填且非 0
+     * 归属                    由 Provider 经 BindEventScope(54) 预先登记，
+     * 或（内建 endpoint）由 nervud 自己掌握
      *
-     * <code>string subscribe_payload_type = 8 [json_name = "subscribePayloadType"];</code>
-     * @return The bytes for subscribePayloadType.
-     */
-    public com.google.protobuf.ByteString
-        getSubscribePayloadTypeBytes() {
-      java.lang.Object ref = subscribePayloadType_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        subscribePayloadType_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <pre>
-     * Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
-     * 带了 payload 的 Subscribe 会被拒绝。
-     *
-     * # 它解决的是「一个 endpoint 上有多个实例」
-     *
-     * 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
-     * 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
-     * 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
-     *
-     * 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
-     * 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
-     * 两条路径、两种规则，是最容易被忽略的那类漏洞。
+     * 订不到自己没有的实例，nervud 直接拒。
      *
      * # 裁决发生在 Subscribe，不在扇出
      *
-     * nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
-     * 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
-     * 然后一直等一个永远不来的事件。
+     * 订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，然后一直等一个
+     * 永远不来的事件。「订不上」是一次明确的失败，它立刻知道该怎么办。
      * </pre>
      *
-     * <code>string subscribe_payload_type = 8 [json_name = "subscribePayloadType"];</code>
-     * @param value The subscribePayloadType to set.
+     * <code>bool scoped = 9 [json_name = "scoped"];</code>
+     * @param value The scoped to set.
      * @return This builder for chaining.
      */
-    public Builder setSubscribePayloadType(
-        java.lang.String value) {
-      if (value == null) { throw new NullPointerException(); }
-      subscribePayloadType_ = value;
+    public Builder setScoped(boolean value) {
+
+      scoped_ = value;
       bitField0_ |= 0x00000020;
       onChanged();
       return this;
     }
     /**
      * <pre>
-     * Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
-     * 带了 payload 的 Subscribe 会被拒绝。
+     * 本事件是否按【实例】分发。
      *
      * # 它解决的是「一个 endpoint 上有多个实例」
      *
      * 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
      * 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
-     * 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
+     * 几条 stream——不分实例就意味着每个订阅方都收到全部实例的事件。
      *
      * 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
      * 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
      * 两条路径、两种规则，是最容易被忽略的那类漏洞。
      *
+     * # true 时的约定
+     *
+     * Subscribe.scope        必填且非 0
+     * 归属                    由 Provider 经 BindEventScope(54) 预先登记，
+     * 或（内建 endpoint）由 nervud 自己掌握
+     *
+     * 订不到自己没有的实例，nervud 直接拒。
+     *
      * # 裁决发生在 Subscribe，不在扇出
      *
-     * nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
-     * 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
-     * 然后一直等一个永远不来的事件。
+     * 订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，然后一直等一个
+     * 永远不来的事件。「订不上」是一次明确的失败，它立刻知道该怎么办。
      * </pre>
      *
-     * <code>string subscribe_payload_type = 8 [json_name = "subscribePayloadType"];</code>
+     * <code>bool scoped = 9 [json_name = "scoped"];</code>
      * @return This builder for chaining.
      */
-    public Builder clearSubscribePayloadType() {
-      subscribePayloadType_ = getDefaultInstance().getSubscribePayloadType();
+    public Builder clearScoped() {
       bitField0_ = (bitField0_ & ~0x00000020);
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
-     * 带了 payload 的 Subscribe 会被拒绝。
-     *
-     * # 它解决的是「一个 endpoint 上有多个实例」
-     *
-     * 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
-     * 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
-     * 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
-     *
-     * 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
-     * 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
-     * 两条路径、两种规则，是最容易被忽略的那类漏洞。
-     *
-     * # 裁决发生在 Subscribe，不在扇出
-     *
-     * nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
-     * 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
-     * 然后一直等一个永远不来的事件。
-     * </pre>
-     *
-     * <code>string subscribe_payload_type = 8 [json_name = "subscribePayloadType"];</code>
-     * @param value The bytes for subscribePayloadType to set.
-     * @return This builder for chaining.
-     */
-    public Builder setSubscribePayloadTypeBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) { throw new NullPointerException(); }
-      checkByteStringIsUtf8(value);
-      subscribePayloadType_ = value;
-      bitField0_ |= 0x00000020;
+      scoped_ = false;
       onChanged();
       return this;
     }

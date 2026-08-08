@@ -46,11 +46,6 @@ public final class OperationControlProto {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_nervus_interface_operation_v1_OperationEvent_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_nervus_interface_operation_v1_OperationSubscription_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_nervus_interface_operation_v1_OperationSubscription_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_nervus_interface_operation_v1_GetOperationRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -121,73 +116,70 @@ public final class OperationControlProto {
       "ogress\022>\n\rterminal_code\030\006 \001(\0162\031.nervus.i" +
       "pc.v1.StatusCodeR\014terminalCode\022\'\n\017termin" +
       "al_result\030\007 \001(\014R\016terminalResult\022%\n\016termi" +
-      "nal_error\030\010 \001(\014R\rterminalError\":\n\025Operat" +
-      "ionSubscription\022!\n\014operation_id\030\001 \001(\004R\013o" +
-      "perationId\"8\n\023GetOperationRequest\022!\n\014ope" +
-      "ration_id\030\001 \001(\004R\013operationId\";\n\026CancelOp" +
-      "erationRequest\022!\n\014operation_id\030\001 \001(\004R\013op" +
-      "erationId\"^\n\026AcceptOperationRequest\022!\n\014o" +
-      "peration_id\030\001 \001(\004R\013operationId\022!\n\014motion" +
-      "_epoch\030\002 \001(\004R\013motionEpoch\"V\n\025ReportProgr" +
-      "essRequest\022!\n\014operation_id\030\001 \001(\004R\013operat" +
-      "ionId\022\032\n\010progress\030\002 \001(\014R\010progress\"\247\001\n\030Co" +
-      "mpleteOperationRequest\022!\n\014operation_id\030\001" +
-      " \001(\004R\013operationId\022-\n\004code\030\002 \001(\0162\031.nervus" +
-      ".ipc.v1.StatusCodeR\004code\022\026\n\006result\030\003 \001(\014" +
-      "R\006result\022!\n\014error_detail\030\004 \001(\014R\013errorDet" +
-      "ail\"^\n\024OperationErrorDetail\022F\n\006reason\030\001 " +
-      "\001(\0162..nervus.interface.operation.v1.Oper" +
-      "ationReasonR\006reason*\310\007\n\026OperationControl" +
-      "Method\022(\n$OPERATION_CONTROL_METHOD_UNSPE" +
-      "CIFIED\020\000\022\325\001\n&OPERATION_CONTROL_METHOD_GE" +
-      "T_OPERATION\020\001\032\250\001\212\246\035\243\001\010\001\030\001:1nervus.interf" +
-      "ace.operation.v1.GetOperationRequestB-ne" +
-      "rvus.interface.operation.v1.OperationSta" +
-      "tusH\001X\350\007`\270\027\202\0012nervus.interface.operation" +
-      ".v1.OperationErrorDetail\022\250\001\n)OPERATION_C" +
-      "ONTROL_METHOD_CANCEL_OPERATION\020\002\032y\212\246\035u\010\002" +
-      "\030\001:4nervus.interface.operation.v1.Cancel" +
-      "OperationRequestX\350\007`\270\027\202\0012nervus.interfac" +
-      "e.operation.v1.OperationErrorDetail\022\250\001\n)" +
-      "OPERATION_CONTROL_METHOD_ACCEPT_OPERATIO" +
-      "N\020\003\032y\212\246\035u\010\003\030\001:4nervus.interface.operatio" +
-      "n.v1.AcceptOperationRequestX\350\007`\270\027\202\0012nerv" +
-      "us.interface.operation.v1.OperationError" +
-      "Detail\022\246\001\n(OPERATION_CONTROL_METHOD_REPO" +
-      "RT_PROGRESS\020\004\032x\212\246\035t\010\004\030\001:3nervus.interfac" +
-      "e.operation.v1.ReportProgressRequestX\350\007`" +
+      "nal_error\030\010 \001(\014R\rterminalError\"8\n\023GetOpe" +
+      "rationRequest\022!\n\014operation_id\030\001 \001(\004R\013ope" +
+      "rationId\";\n\026CancelOperationRequest\022!\n\014op" +
+      "eration_id\030\001 \001(\004R\013operationId\"^\n\026AcceptO" +
+      "perationRequest\022!\n\014operation_id\030\001 \001(\004R\013o" +
+      "perationId\022!\n\014motion_epoch\030\002 \001(\004R\013motion" +
+      "Epoch\"V\n\025ReportProgressRequest\022!\n\014operat" +
+      "ion_id\030\001 \001(\004R\013operationId\022\032\n\010progress\030\002 " +
+      "\001(\014R\010progress\"\247\001\n\030CompleteOperationReque" +
+      "st\022!\n\014operation_id\030\001 \001(\004R\013operationId\022-\n" +
+      "\004code\030\002 \001(\0162\031.nervus.ipc.v1.StatusCodeR\004" +
+      "code\022\026\n\006result\030\003 \001(\014R\006result\022!\n\014error_de" +
+      "tail\030\004 \001(\014R\013errorDetail\"^\n\024OperationErro" +
+      "rDetail\022F\n\006reason\030\001 \001(\0162..nervus.interfa" +
+      "ce.operation.v1.OperationReasonR\006reason*" +
+      "\310\007\n\026OperationControlMethod\022(\n$OPERATION_" +
+      "CONTROL_METHOD_UNSPECIFIED\020\000\022\325\001\n&OPERATI" +
+      "ON_CONTROL_METHOD_GET_OPERATION\020\001\032\250\001\212\246\035\243" +
+      "\001\010\001\030\001:1nervus.interface.operation.v1.Get" +
+      "OperationRequestB-nervus.interface.opera" +
+      "tion.v1.OperationStatusH\001X\350\007`\270\027\202\0012nervus" +
+      ".interface.operation.v1.OperationErrorDe" +
+      "tail\022\250\001\n)OPERATION_CONTROL_METHOD_CANCEL" +
+      "_OPERATION\020\002\032y\212\246\035u\010\002\030\001:4nervus.interface" +
+      ".operation.v1.CancelOperationRequestX\350\007`" +
       "\270\027\202\0012nervus.interface.operation.v1.Opera" +
-      "tionErrorDetail\022\254\001\n+OPERATION_CONTROL_ME" +
-      "THOD_COMPLETE_OPERATION\020\005\032{\212\246\035w\010\005\030\001:6ner" +
-      "vus.interface.operation.v1.CompleteOpera" +
-      "tionRequestX\350\007`\270\027\202\0012nervus.interface.ope" +
-      "ration.v1.OperationErrorDetail*\341\001\n\025Opera" +
-      "tionControlEvent\022\'\n#OPERATION_CONTROL_EV" +
-      "ENT_UNSPECIFIED\020\000\022\236\001\n)OPERATION_CONTROL_" +
-      "EVENT_OPERATION_CHANGED\020\001\032o\222\246\035k\010\001\030\001 \001*,n" +
-      "ervus.interface.operation.v1.OperationEv" +
-      "ent8dB3nervus.interface.operation.v1.Ope" +
-      "rationSubscription*\353\001\n\016OperationState\022\037\n" +
-      "\033OPERATION_STATE_UNSPECIFIED\020\000\022\033\n\027OPERAT" +
-      "ION_STATE_PENDING\020\001\022\033\n\027OPERATION_STATE_R" +
-      "UNNING\020\002\022$\n OPERATION_STATE_CANCEL_REQUE" +
-      "STED\020\003\022\035\n\031OPERATION_STATE_SUCCEEDED\020\004\022\032\n" +
-      "\026OPERATION_STATE_FAILED\020\005\022\035\n\031OPERATION_S" +
-      "TATE_CANCELLED\020\006*}\n\022OperationEventKind\022$" +
-      "\n OPERATION_EVENT_KIND_UNSPECIFIED\020\000\022!\n\035" +
-      "OPERATION_EVENT_KIND_PROGRESS\020\001\022\036\n\032OPERA" +
-      "TION_EVENT_KIND_STATE\020\002*\221\002\n\017OperationRea" +
-      "son\022 \n\034OPERATION_REASON_UNSPECIFIED\020\000\022\036\n" +
-      "\032OPERATION_REASON_NOT_FOUND\020\001\022\036\n\032OPERATI" +
-      "ON_REASON_NOT_OWNER\020\002\022%\n!OPERATION_REASO" +
-      "N_ALREADY_TERMINAL\020\003\022 \n\034OPERATION_REASON" +
-      "_STALE_EPOCH\020\004\022\'\n#OPERATION_REASON_INVAL" +
-      "ID_TRANSITION\020\005\022*\n&OPERATION_REASON_INVA" +
-      "LID_TERMINAL_CODE\020\006B\214\001\n%io.github.nervus" +
-      "os.iface.operation.v1B\025OperationControlP" +
-      "rotoP\001ZJgithub.com/nervus-os/nervus-ipc/" +
-      "protocol/interface/operationv1;operation" +
-      "v1b\006proto3"
+      "tionErrorDetail\022\250\001\n)OPERATION_CONTROL_ME" +
+      "THOD_ACCEPT_OPERATION\020\003\032y\212\246\035u\010\003\030\001:4nervu" +
+      "s.interface.operation.v1.AcceptOperation" +
+      "RequestX\350\007`\270\027\202\0012nervus.interface.operati" +
+      "on.v1.OperationErrorDetail\022\246\001\n(OPERATION" +
+      "_CONTROL_METHOD_REPORT_PROGRESS\020\004\032x\212\246\035t\010" +
+      "\004\030\001:3nervus.interface.operation.v1.Repor" +
+      "tProgressRequestX\350\007`\270\027\202\0012nervus.interfac" +
+      "e.operation.v1.OperationErrorDetail\022\254\001\n+" +
+      "OPERATION_CONTROL_METHOD_COMPLETE_OPERAT" +
+      "ION\020\005\032{\212\246\035w\010\005\030\001:6nervus.interface.operat" +
+      "ion.v1.CompleteOperationRequestX\350\007`\270\027\202\0012" +
+      "nervus.interface.operation.v1.OperationE" +
+      "rrorDetail*\255\001\n\025OperationControlEvent\022\'\n#" +
+      "OPERATION_CONTROL_EVENT_UNSPECIFIED\020\000\022k\n" +
+      ")OPERATION_CONTROL_EVENT_OPERATION_CHANG" +
+      "ED\020\001\032<\222\246\0358\010\001\030\001 \001*,nervus.interface.opera" +
+      "tion.v1.OperationEvent8dH\001*\353\001\n\016Operation" +
+      "State\022\037\n\033OPERATION_STATE_UNSPECIFIED\020\000\022\033" +
+      "\n\027OPERATION_STATE_PENDING\020\001\022\033\n\027OPERATION" +
+      "_STATE_RUNNING\020\002\022$\n OPERATION_STATE_CANC" +
+      "EL_REQUESTED\020\003\022\035\n\031OPERATION_STATE_SUCCEE" +
+      "DED\020\004\022\032\n\026OPERATION_STATE_FAILED\020\005\022\035\n\031OPE" +
+      "RATION_STATE_CANCELLED\020\006*}\n\022OperationEve" +
+      "ntKind\022$\n OPERATION_EVENT_KIND_UNSPECIFI" +
+      "ED\020\000\022!\n\035OPERATION_EVENT_KIND_PROGRESS\020\001\022" +
+      "\036\n\032OPERATION_EVENT_KIND_STATE\020\002*\221\002\n\017Oper" +
+      "ationReason\022 \n\034OPERATION_REASON_UNSPECIF" +
+      "IED\020\000\022\036\n\032OPERATION_REASON_NOT_FOUND\020\001\022\036\n" +
+      "\032OPERATION_REASON_NOT_OWNER\020\002\022%\n!OPERATI" +
+      "ON_REASON_ALREADY_TERMINAL\020\003\022 \n\034OPERATIO" +
+      "N_REASON_STALE_EPOCH\020\004\022\'\n#OPERATION_REAS" +
+      "ON_INVALID_TRANSITION\020\005\022*\n&OPERATION_REA" +
+      "SON_INVALID_TERMINAL_CODE\020\006B\214\001\n%io.githu" +
+      "b.nervusos.iface.operation.v1B\025Operation" +
+      "ControlProtoP\001ZJgithub.com/nervus-os/ner" +
+      "vus-ipc/protocol/interface/operationv1;o" +
+      "perationv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -219,44 +211,38 @@ public final class OperationControlProto {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_operation_v1_OperationEvent_descriptor,
         new java.lang.String[] { "OperationId", "Kind", "State", "Origin", "Progress", "TerminalCode", "TerminalResult", "TerminalError", });
-    internal_static_nervus_interface_operation_v1_OperationSubscription_descriptor =
-      getDescriptor().getMessageTypes().get(4);
-    internal_static_nervus_interface_operation_v1_OperationSubscription_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_nervus_interface_operation_v1_OperationSubscription_descriptor,
-        new java.lang.String[] { "OperationId", });
     internal_static_nervus_interface_operation_v1_GetOperationRequest_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_nervus_interface_operation_v1_GetOperationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_operation_v1_GetOperationRequest_descriptor,
         new java.lang.String[] { "OperationId", });
     internal_static_nervus_interface_operation_v1_CancelOperationRequest_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_nervus_interface_operation_v1_CancelOperationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_operation_v1_CancelOperationRequest_descriptor,
         new java.lang.String[] { "OperationId", });
     internal_static_nervus_interface_operation_v1_AcceptOperationRequest_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_nervus_interface_operation_v1_AcceptOperationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_operation_v1_AcceptOperationRequest_descriptor,
         new java.lang.String[] { "OperationId", "MotionEpoch", });
     internal_static_nervus_interface_operation_v1_ReportProgressRequest_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_nervus_interface_operation_v1_ReportProgressRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_operation_v1_ReportProgressRequest_descriptor,
         new java.lang.String[] { "OperationId", "Progress", });
     internal_static_nervus_interface_operation_v1_CompleteOperationRequest_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_nervus_interface_operation_v1_CompleteOperationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_operation_v1_CompleteOperationRequest_descriptor,
         new java.lang.String[] { "OperationId", "Code", "Result", "ErrorDetail", });
     internal_static_nervus_interface_operation_v1_OperationErrorDetail_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_nervus_interface_operation_v1_OperationErrorDetail_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_operation_v1_OperationErrorDetail_descriptor,

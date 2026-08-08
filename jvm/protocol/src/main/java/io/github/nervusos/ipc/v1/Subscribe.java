@@ -104,6 +104,44 @@ private static final long serialVersionUID = 0L;
     return payload_;
   }
 
+  public static final int SCOPE_FIELD_NUMBER = 5;
+  private long scope_ = 0L;
+  /**
+   * <pre>
+   * 实例作用域：一个 endpoint 上有多个可独立观察的实例时，指定要看哪一个。
+   *
+   * # 它解决的问题
+   *
+   * 订阅是按 (endpoint, event_id) 建的。而一路摄像头上可以同时开好几条 stream，
+   * 一个内建 endpoint 上跑着全机的 operation——不分实例就意味着每个订阅方都
+   * 收到全部实例的事件。那不只是浪费带宽，是【信息泄漏】：别人的进度、失败
+   * 细因、资源句柄都会送到。
+   *
+   * # 为什么是 Envelope 上的一个 uint64，而不是 payload 里的一个字段
+   *
+   * nervud 必须【自己看懂它】才能做归属裁决。放进 payload 就要求内核按
+   * Provider 的 schema 解一段 bytes——而那正是 status.proto 反复在防的
+   * 「按发送方自报的类型解码」。
+   *
+   * 现实里的实例标识全是数字句柄（stream_id、operation_id），一个 uint64 够用。
+   *
+   * # 谁说了算
+   *
+   * 【归属由 Provider 预先登记】，见 BindEventScope(54)：Provider 在创建实例
+   * 时告诉 nervud「这个 scope 属于哪次调用的调用方」。订阅时 nervud 查自己的
+   * 表同步裁决，不需要再问 Provider——那会让 Subscribe 卡在读循环里等一次往返。
+   *
+   * 事件声明了 EventMeta.scoped 时本字段必填且非 0；未声明时必须为 0。
+   * </pre>
+   *
+   * <code>uint64 scope = 5 [json_name = "scope"];</code>
+   * @return The scope.
+   */
+  @java.lang.Override
+  public long getScope() {
+    return scope_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -130,6 +168,9 @@ private static final long serialVersionUID = 0L;
     if (!payload_.isEmpty()) {
       output.writeBytes(4, payload_);
     }
+    if (scope_ != 0L) {
+      output.writeUInt64(5, scope_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -155,6 +196,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBytesSize(4, payload_);
     }
+    if (scope_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeUInt64Size(5, scope_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -178,6 +223,8 @@ private static final long serialVersionUID = 0L;
         != other.getEventId()) return false;
     if (!getPayload()
         .equals(other.getPayload())) return false;
+    if (getScope()
+        != other.getScope()) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -199,6 +246,9 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getEventId();
     hash = (37 * hash) + PAYLOAD_FIELD_NUMBER;
     hash = (53 * hash) + getPayload().hashCode();
+    hash = (37 * hash) + SCOPE_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getScope());
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -340,6 +390,7 @@ private static final long serialVersionUID = 0L;
       endpointId_ = 0L;
       eventId_ = 0;
       payload_ = com.google.protobuf.ByteString.EMPTY;
+      scope_ = 0L;
       return this;
     }
 
@@ -385,6 +436,9 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000008) != 0)) {
         result.payload_ = payload_;
       }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.scope_ = scope_;
+      }
     }
 
     @java.lang.Override
@@ -410,6 +464,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getPayload() != com.google.protobuf.ByteString.EMPTY) {
         setPayload(other.getPayload());
+      }
+      if (other.getScope() != 0L) {
+        setScope(other.getScope());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -457,6 +514,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000008;
               break;
             } // case 34
+            case 40: {
+              scope_ = input.readUInt64();
+              bitField0_ |= 0x00000010;
+              break;
+            } // case 40
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -631,6 +693,119 @@ private static final long serialVersionUID = 0L;
     public Builder clearPayload() {
       bitField0_ = (bitField0_ & ~0x00000008);
       payload_ = getDefaultInstance().getPayload();
+      onChanged();
+      return this;
+    }
+
+    private long scope_ ;
+    /**
+     * <pre>
+     * 实例作用域：一个 endpoint 上有多个可独立观察的实例时，指定要看哪一个。
+     *
+     * # 它解决的问题
+     *
+     * 订阅是按 (endpoint, event_id) 建的。而一路摄像头上可以同时开好几条 stream，
+     * 一个内建 endpoint 上跑着全机的 operation——不分实例就意味着每个订阅方都
+     * 收到全部实例的事件。那不只是浪费带宽，是【信息泄漏】：别人的进度、失败
+     * 细因、资源句柄都会送到。
+     *
+     * # 为什么是 Envelope 上的一个 uint64，而不是 payload 里的一个字段
+     *
+     * nervud 必须【自己看懂它】才能做归属裁决。放进 payload 就要求内核按
+     * Provider 的 schema 解一段 bytes——而那正是 status.proto 反复在防的
+     * 「按发送方自报的类型解码」。
+     *
+     * 现实里的实例标识全是数字句柄（stream_id、operation_id），一个 uint64 够用。
+     *
+     * # 谁说了算
+     *
+     * 【归属由 Provider 预先登记】，见 BindEventScope(54)：Provider 在创建实例
+     * 时告诉 nervud「这个 scope 属于哪次调用的调用方」。订阅时 nervud 查自己的
+     * 表同步裁决，不需要再问 Provider——那会让 Subscribe 卡在读循环里等一次往返。
+     *
+     * 事件声明了 EventMeta.scoped 时本字段必填且非 0；未声明时必须为 0。
+     * </pre>
+     *
+     * <code>uint64 scope = 5 [json_name = "scope"];</code>
+     * @return The scope.
+     */
+    @java.lang.Override
+    public long getScope() {
+      return scope_;
+    }
+    /**
+     * <pre>
+     * 实例作用域：一个 endpoint 上有多个可独立观察的实例时，指定要看哪一个。
+     *
+     * # 它解决的问题
+     *
+     * 订阅是按 (endpoint, event_id) 建的。而一路摄像头上可以同时开好几条 stream，
+     * 一个内建 endpoint 上跑着全机的 operation——不分实例就意味着每个订阅方都
+     * 收到全部实例的事件。那不只是浪费带宽，是【信息泄漏】：别人的进度、失败
+     * 细因、资源句柄都会送到。
+     *
+     * # 为什么是 Envelope 上的一个 uint64，而不是 payload 里的一个字段
+     *
+     * nervud 必须【自己看懂它】才能做归属裁决。放进 payload 就要求内核按
+     * Provider 的 schema 解一段 bytes——而那正是 status.proto 反复在防的
+     * 「按发送方自报的类型解码」。
+     *
+     * 现实里的实例标识全是数字句柄（stream_id、operation_id），一个 uint64 够用。
+     *
+     * # 谁说了算
+     *
+     * 【归属由 Provider 预先登记】，见 BindEventScope(54)：Provider 在创建实例
+     * 时告诉 nervud「这个 scope 属于哪次调用的调用方」。订阅时 nervud 查自己的
+     * 表同步裁决，不需要再问 Provider——那会让 Subscribe 卡在读循环里等一次往返。
+     *
+     * 事件声明了 EventMeta.scoped 时本字段必填且非 0；未声明时必须为 0。
+     * </pre>
+     *
+     * <code>uint64 scope = 5 [json_name = "scope"];</code>
+     * @param value The scope to set.
+     * @return This builder for chaining.
+     */
+    public Builder setScope(long value) {
+
+      scope_ = value;
+      bitField0_ |= 0x00000010;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 实例作用域：一个 endpoint 上有多个可独立观察的实例时，指定要看哪一个。
+     *
+     * # 它解决的问题
+     *
+     * 订阅是按 (endpoint, event_id) 建的。而一路摄像头上可以同时开好几条 stream，
+     * 一个内建 endpoint 上跑着全机的 operation——不分实例就意味着每个订阅方都
+     * 收到全部实例的事件。那不只是浪费带宽，是【信息泄漏】：别人的进度、失败
+     * 细因、资源句柄都会送到。
+     *
+     * # 为什么是 Envelope 上的一个 uint64，而不是 payload 里的一个字段
+     *
+     * nervud 必须【自己看懂它】才能做归属裁决。放进 payload 就要求内核按
+     * Provider 的 schema 解一段 bytes——而那正是 status.proto 反复在防的
+     * 「按发送方自报的类型解码」。
+     *
+     * 现实里的实例标识全是数字句柄（stream_id、operation_id），一个 uint64 够用。
+     *
+     * # 谁说了算
+     *
+     * 【归属由 Provider 预先登记】，见 BindEventScope(54)：Provider 在创建实例
+     * 时告诉 nervud「这个 scope 属于哪次调用的调用方」。订阅时 nervud 查自己的
+     * 表同步裁决，不需要再问 Provider——那会让 Subscribe 卡在读循环里等一次往返。
+     *
+     * 事件声明了 EventMeta.scoped 时本字段必填且非 0；未声明时必须为 0。
+     * </pre>
+     *
+     * <code>uint64 scope = 5 [json_name = "scope"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearScope() {
+      bitField0_ = (bitField0_ & ~0x00000010);
+      scope_ = 0L;
       onChanged();
       return this;
     }

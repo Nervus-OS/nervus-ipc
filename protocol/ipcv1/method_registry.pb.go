@@ -377,25 +377,31 @@ type EventMeta struct {
 	DeliveryClass DeliveryClass `protobuf:"varint,4,opt,name=delivery_class,json=deliveryClass,proto3,enum=nervus.ipc.v1.DeliveryClass" json:"delivery_class,omitempty"`
 	// 事件载荷的 Protobuf 全名。空表示无载荷（纯信号事件）。
 	PayloadType string `protobuf:"bytes,5,opt,name=payload_type,json=payloadType,proto3" json:"payload_type,omitempty"`
-	// Subscribe.payload 的 Protobuf 全名。空 = 本事件不接受订阅参数，
-	// 带了 payload 的 Subscribe 会被拒绝。
+	// 本事件是否按【实例】分发。
 	//
 	// # 它解决的是「一个 endpoint 上有多个实例」
 	//
 	// 订阅是按 (endpoint, event_id) 建的。当一个 endpoint 背后有多个可独立观察
 	// 的实例时——一个内建 endpoint 上跑着全机的 operation，一路摄像头上开着好
-	// 几条 stream——不带参数的订阅意味着每个订阅方都收到全部实例的事件。
+	// 几条 stream——不分实例就意味着每个订阅方都收到全部实例的事件。
 	//
 	// 那不只是浪费带宽，是【信息泄漏】：别人的进度、失败细因、资源句柄都会送到。
 	// 而同一份信息的查询路径（GetOperation 一类）通常是查可见性的——同一份数据、
 	// 两条路径、两种规则，是最容易被忽略的那类漏洞。
 	//
+	// # true 时的约定
+	//
+	//	Subscribe.scope        必填且非 0
+	//	归属                    由 Provider 经 BindEventScope(54) 预先登记，
+	//	                       或（内建 endpoint）由 nervud 自己掌握
+	//
+	// 订不到自己没有的实例，nervud 直接拒。
+	//
 	// # 裁决发生在 Subscribe，不在扇出
 	//
-	// nervud 把 payload 交给 endpoint 所有者判定「这个调用方能不能订这个实例」，
-	// 不通过就直接拒。订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，
-	// 然后一直等一个永远不来的事件。
-	SubscribePayloadType string `protobuf:"bytes,8,opt,name=subscribe_payload_type,json=subscribePayloadType,proto3" json:"subscribe_payload_type,omitempty"`
+	// 订上了再在扇出时逐条丢弃是错的：调用方会以为自己在观察，然后一直等一个
+	// 永远不来的事件。「订不上」是一次明确的失败，它立刻知道该怎么办。
+	Scoped bool `protobuf:"varint,9,opt,name=scoped,proto3" json:"scoped,omitempty"`
 	// 单条事件载荷上限。0 表示采用 nervud 的保守默认，不表示无限。
 	MaxPayloadBytes uint32 `protobuf:"varint,6,opt,name=max_payload_bytes,json=maxPayloadBytes,proto3" json:"max_payload_bytes,omitempty"`
 	// 每秒最大推送条数。0 表示采用 nervud 的保守默认，不表示无限。
@@ -471,11 +477,11 @@ func (x *EventMeta) GetPayloadType() string {
 	return ""
 }
 
-func (x *EventMeta) GetSubscribePayloadType() string {
+func (x *EventMeta) GetScoped() bool {
 	if x != nil {
-		return x.SubscribePayloadType
+		return x.Scoped
 	}
-	return ""
+	return false
 }
 
 func (x *EventMeta) GetMaxPayloadBytes() uint32 {
@@ -560,10 +566,10 @@ const file_nervus_ipc_v1_method_registry_proto_rawDesc = "" +
 	"\n" +
 	"risk_class\x18\x03 \x01(\x0e2\x18.nervus.ipc.v1.RiskClassR\triskClass\x12C\n" +
 	"\x0edelivery_class\x18\x04 \x01(\x0e2\x1c.nervus.ipc.v1.DeliveryClassR\rdeliveryClass\x12!\n" +
-	"\fpayload_type\x18\x05 \x01(\tR\vpayloadType\x124\n" +
-	"\x16subscribe_payload_type\x18\b \x01(\tR\x14subscribePayloadType\x12*\n" +
+	"\fpayload_type\x18\x05 \x01(\tR\vpayloadType\x12\x16\n" +
+	"\x06scoped\x18\t \x01(\bR\x06scoped\x12*\n" +
 	"\x11max_payload_bytes\x18\x06 \x01(\rR\x0fmaxPayloadBytes\x121\n" +
-	"\x15max_events_per_second\x18\a \x01(\rR\x12maxEventsPerSecond*\xa1\x01\n" +
+	"\x15max_events_per_second\x18\a \x01(\rR\x12maxEventsPerSecondJ\x04\b\b\x10\tR\x16subscribe_payload_type*\xa1\x01\n" +
 	"\tRiskClass\x12\x1a\n" +
 	"\x16RISK_CLASS_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11RISK_CLASS_NORMAL\x10\x01\x12 \n" +

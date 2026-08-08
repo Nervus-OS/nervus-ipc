@@ -176,14 +176,21 @@ enum OperationControlEvent {
   //
   // 代价是慢消费者会被断开订阅。那是对的：一个连结果都收不动的调用方，
   // 让它以为自己在观察还不如让它明确失败。
-  // 【订阅时必须带 OperationSubscription 指定 operation_id】，见那条消息的说明：
-  // 本接口只有一个内建 endpoint，不指定就等于订阅全机所有人的 operation。
+  //
+  // # scoped
+  //
+  // 订阅时 Subscribe.scope 填 operation_id。本接口只有一个内建 endpoint，
+  // 全机所有 operation 的事件都从它出来——不指定实例就等于订阅所有人的
+  // 进度与失败细因。
+  //
+  // 归属【不需要 BindEventScope】：nervud 自己就是 operation 的所有者，
+  // 它知道每一条属于谁。订一个不属于自己的 operation 直接被拒。
   OPERATION_CONTROL_EVENT_OPERATION_CHANGED = 1 [(nervus.ipc.v1.event_meta) = {
     event_id: 1
     risk_class: RISK_CLASS_NORMAL
     delivery_class: DELIVERY_CLASS_RELIABLE
     payload_type: "nervus.interface.operation.v1.OperationEvent"
-    subscribe_payload_type: "nervus.interface.operation.v1.OperationSubscription"
+    scoped: true
     max_events_per_second: 100
   }];
 }
@@ -312,31 +319,6 @@ message OperationEvent {
   nervus.ipc.v1.StatusCode terminal_code = 6;
   bytes terminal_result = 7;
   bytes terminal_error = 8;
-}
-
-// =============================================================================
-// 订阅参数
-// =============================================================================
-
-// OperationSubscription 是订阅 OPERATION_CHANGED 时 Subscribe.payload 的类型。
-//
-// # 为什么订阅必须指定 operation_id
-//
-// 本接口只有【一个】内建 endpoint，全机所有 operation 的事件都从它出来。
-// 不指定的话，订阅方会收到别人的轨迹进度、失败细因与资源句柄——而
-// GetOperation 那条路径明明是查可见性的。同一份信息，两条路径两种规则，
-// 是最容易被忽略的那类泄漏。
-//
-// nervud 在 Subscribe 时就做可见性裁决：订一个不属于自己的 operation 直接
-// 被拒，而不是订上了再在扇出时丢弃。前者是一次明确的失败，后者会让调用方
-// 以为自己在观察。
-message OperationSubscription {
-  // 要观察哪一个 operation。0 非法——它不表示「全部」。
-  //
-  // 【留空不给「订阅全部」的语义】：那需要一条「谁有资格看全机 operation」
-  // 的权限，而那条权限一旦存在就会被顺手加进各种诊断工具的 manifest 里。
-  // 需要全局视图的运维工具应当走管理通道，不走 App 控制面。
-  uint64 operation_id = 1;
 }
 
 // =============================================================================

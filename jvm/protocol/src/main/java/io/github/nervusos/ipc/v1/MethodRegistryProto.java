@@ -106,11 +106,11 @@ public final class MethodRegistryProto {
       "k_class\030\003 \001(\0162\030.nervus.ipc.v1.RiskClassR" +
       "\triskClass\022C\n\016delivery_class\030\004 \001(\0162\034.ner" +
       "vus.ipc.v1.DeliveryClassR\rdeliveryClass\022" +
-      "!\n\014payload_type\030\005 \001(\tR\013payloadType\0224\n\026su" +
-      "bscribe_payload_type\030\010 \001(\tR\024subscribePay" +
-      "loadType\022*\n\021max_payload_bytes\030\006 \001(\rR\017max" +
-      "PayloadBytes\0221\n\025max_events_per_second\030\007 " +
-      "\001(\rR\022maxEventsPerSecond*\241\001\n\tRiskClass\022\032\n" +
+      "!\n\014payload_type\030\005 \001(\tR\013payloadType\022\026\n\006sc" +
+      "oped\030\t \001(\010R\006scoped\022*\n\021max_payload_bytes\030" +
+      "\006 \001(\rR\017maxPayloadBytes\0221\n\025max_events_per" +
+      "_second\030\007 \001(\rR\022maxEventsPerSecondJ\004\010\010\020\tR" +
+      "\026subscribe_payload_type*\241\001\n\tRiskClass\022\032\n" +
       "\026RISK_CLASS_UNSPECIFIED\020\000\022\025\n\021RISK_CLASS_" +
       "NORMAL\020\001\022 \n\034RISK_CLASS_PRIVACY_SENSITIVE" +
       "\020\002\022\037\n\033RISK_CLASS_PHYSICAL_CONTROL\020\003\022\036\n\032R" +
@@ -142,7 +142,7 @@ public final class MethodRegistryProto {
     internal_static_nervus_ipc_v1_EventMeta_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_ipc_v1_EventMeta_descriptor,
-        new java.lang.String[] { "EventId", "RequiredPermission", "RiskClass", "DeliveryClass", "PayloadType", "SubscribePayloadType", "MaxPayloadBytes", "MaxEventsPerSecond", });
+        new java.lang.String[] { "EventId", "RequiredPermission", "RiskClass", "DeliveryClass", "PayloadType", "Scoped", "MaxPayloadBytes", "MaxEventsPerSecond", });
     methodMeta.internalInit(descriptor.getExtensions().get(0));
     eventMeta.internalInit(descriptor.getExtensions().get(1));
     descriptor.resolveAllFeaturesImmutable();

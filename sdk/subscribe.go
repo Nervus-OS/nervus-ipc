@@ -241,6 +241,16 @@ type SubscribeRequest struct {
 	// Payload 订阅参数（过滤条件、采样率等）的序列化 bytes，可为空。
 	// 类型由 (endpoint, event_id) 决定。
 	Payload []byte
+
+	// Scope 是实例作用域：一个 endpoint 上有多个可独立观察的实例时，
+	// 指定要看哪一个（stream_id、operation_id 一类）。
+	//
+	// 事件声明了 EventMeta.scoped 时【必填且非 0】，nervud 会核对这个实例
+	// 是不是你的；未声明时必须留 0，填了会被拒。
+	//
+	// 【0 不表示「全部」】：那是本机制要消灭的广播——不分实例就意味着你会
+	// 收到别人的进度、失败细因与资源句柄。
+	Scope uint64
 	// Buffer 本地事件缓冲深度。<=0 取 DefaultSubscriptionBuffer。
 	Buffer int
 }
@@ -313,6 +323,7 @@ func (b *subscriber) subscribe(ctx context.Context, req SubscribeRequest) (*Subs
 		EndpointId: req.EndpointID,
 		EventId:    req.EventID,
 		Payload:    req.Payload,
+		Scope:      req.Scope,
 	}}}
 
 	// 订阅对象在【发出请求之前】就建好，这样读循环拿到 SubscribeResult 时

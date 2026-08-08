@@ -334,6 +334,66 @@ func (e *EndpointHost) PublishEventAt(eventID uint32, payload []byte, monotonicN
 	})
 }
 
+// BindEventScope 登记一个事件实例的归属：这个 scope 属于本次调用的调用方。
+//
+// # 什么时候需要它
+//
+// 你的 endpoint 上有多个可独立观察的实例（一路摄像头上的多条 stream），
+// 而对应的事件声明了 EventMeta.scoped。不登记的话，订阅方一律订不上——
+// nervud fail closed，未登记的 scope 直接拒。
+//
+// # 在哪里调
+//
+// 【在创建实例的那个 handler 里，返回响应之前】。originRouteID 取
+// CallContext.RouteID：它证明「这个实例属于正在调我的这一位」，而那一位是谁
+// nervud 自己知道——你不需要（也不能）自报调用方身份。
+//
+//	func (s *svc) openStream(cc sdk.CallContext, payload []byte) ([]byte, error) {
+//	    id := s.nextStreamID()
+//	    if err := s.ep.BindEventScope(id, cc.RouteID); err != nil { ... }
+//	    return proto.Marshal(&OpenStreamResponse{StreamId: id})
+//	}
+//
+// 顺序不必担心：本调用与随后的响应走同一条有序连接，调用方拿到 stream_id 时
+// 登记必然已经生效。
+//
+// # 单向，没有结果
+//
+// 返回的 error 只表示【本地写失败】（连接已断）。登记被 nervud 拒绝
+// （endpoint 不是你的、route 不存在）不会有回音，只在内核审计里留一条
+// ipc.BindEventScopeRejected。
+func (e *EndpointHost) BindEventScope(scope, originRouteID uint64) error {
+	return e.sendEventScope(scope, originRouteID, false)
+}
+
+// ReleaseEventScope 撤销一次登记：实例已经销毁。
+//
+// 【必须显式撤销】。不撤的话，一个反复开关流的服务会让 nervud 的归属表无界
+// 增长。连接断开与 endpoint 撤下会连带清理，但那兜的是崩溃，不是正常关闭。
+func (e *EndpointHost) ReleaseEventScope(scope uint64) error {
+	return e.sendEventScope(scope, 0, true)
+}
+
+func (e *EndpointHost) sendEventScope(scope, originRouteID uint64, released bool) error {
+	if scope == 0 {
+		return errors.New("sdk: event scope 0 is reserved")
+	}
+	e.mu.Lock()
+	id, registered := e.endpointID, e.registered
+	e.mu.Unlock()
+	if !registered {
+		return errors.New("sdk: endpoint is not registered")
+	}
+	return e.host.co.writeEnvelope(&ipcv1.Envelope{
+		Body: &ipcv1.Envelope_BindEventScope{BindEventScope: &ipcv1.BindEventScope{
+			EndpointId:    id,
+			Scope:         scope,
+			OriginRouteId: originRouteID,
+			Released:      released,
+		}},
+	})
+}
+
 // ResolveEndpoint 在同一条 Service 控制连接上解析一个消费侧 endpoint。
 //
 // Provider 需要回调系统接口（尤其 Transfer Control）时必须用这个方法，而不是

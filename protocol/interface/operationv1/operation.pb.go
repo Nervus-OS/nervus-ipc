@@ -171,8 +171,15 @@ const (
 	//
 	// 代价是慢消费者会被断开订阅。那是对的：一个连结果都收不动的调用方，
 	// 让它以为自己在观察还不如让它明确失败。
-	// 【订阅时必须带 OperationSubscription 指定 operation_id】，见那条消息的说明：
-	// 本接口只有一个内建 endpoint，不指定就等于订阅全机所有人的 operation。
+	//
+	// # scoped
+	//
+	// 订阅时 Subscribe.scope 填 operation_id。本接口只有一个内建 endpoint，
+	// 全机所有 operation 的事件都从它出来——不指定实例就等于订阅所有人的
+	// 进度与失败细因。
+	//
+	// 归属【不需要 BindEventScope】：nervud 自己就是 operation 的所有者，
+	// 它知道每一条属于谁。订一个不属于自己的 operation 直接被拒。
 	OperationControlEvent_OPERATION_CONTROL_EVENT_OPERATION_CHANGED OperationControlEvent = 1
 )
 
@@ -772,67 +779,6 @@ func (x *OperationEvent) GetTerminalError() []byte {
 	return nil
 }
 
-// OperationSubscription 是订阅 OPERATION_CHANGED 时 Subscribe.payload 的类型。
-//
-// # 为什么订阅必须指定 operation_id
-//
-// 本接口只有【一个】内建 endpoint，全机所有 operation 的事件都从它出来。
-// 不指定的话，订阅方会收到别人的轨迹进度、失败细因与资源句柄——而
-// GetOperation 那条路径明明是查可见性的。同一份信息，两条路径两种规则，
-// 是最容易被忽略的那类泄漏。
-//
-// nervud 在 Subscribe 时就做可见性裁决：订一个不属于自己的 operation 直接
-// 被拒，而不是订上了再在扇出时丢弃。前者是一次明确的失败，后者会让调用方
-// 以为自己在观察。
-type OperationSubscription struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// 要观察哪一个 operation。0 非法——它不表示「全部」。
-	//
-	// 【留空不给「订阅全部」的语义】：那需要一条「谁有资格看全机 operation」
-	// 的权限，而那条权限一旦存在就会被顺手加进各种诊断工具的 manifest 里。
-	// 需要全局视图的运维工具应当走管理通道，不走 App 控制面。
-	OperationId   uint64 `protobuf:"varint,1,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *OperationSubscription) Reset() {
-	*x = OperationSubscription{}
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *OperationSubscription) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*OperationSubscription) ProtoMessage() {}
-
-func (x *OperationSubscription) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use OperationSubscription.ProtoReflect.Descriptor instead.
-func (*OperationSubscription) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *OperationSubscription) GetOperationId() uint64 {
-	if x != nil {
-		return x.OperationId
-	}
-	return 0
-}
-
 type GetOperationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OperationId   uint64                 `protobuf:"varint,1,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
@@ -842,7 +788,7 @@ type GetOperationRequest struct {
 
 func (x *GetOperationRequest) Reset() {
 	*x = GetOperationRequest{}
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[5]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -854,7 +800,7 @@ func (x *GetOperationRequest) String() string {
 func (*GetOperationRequest) ProtoMessage() {}
 
 func (x *GetOperationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[5]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -867,7 +813,7 @@ func (x *GetOperationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOperationRequest.ProtoReflect.Descriptor instead.
 func (*GetOperationRequest) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{5}
+	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetOperationRequest) GetOperationId() uint64 {
@@ -886,7 +832,7 @@ type CancelOperationRequest struct {
 
 func (x *CancelOperationRequest) Reset() {
 	*x = CancelOperationRequest{}
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[6]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -898,7 +844,7 @@ func (x *CancelOperationRequest) String() string {
 func (*CancelOperationRequest) ProtoMessage() {}
 
 func (x *CancelOperationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[6]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -911,7 +857,7 @@ func (x *CancelOperationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelOperationRequest.ProtoReflect.Descriptor instead.
 func (*CancelOperationRequest) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{6}
+	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CancelOperationRequest) GetOperationId() uint64 {
@@ -936,7 +882,7 @@ type AcceptOperationRequest struct {
 
 func (x *AcceptOperationRequest) Reset() {
 	*x = AcceptOperationRequest{}
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[7]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -948,7 +894,7 @@ func (x *AcceptOperationRequest) String() string {
 func (*AcceptOperationRequest) ProtoMessage() {}
 
 func (x *AcceptOperationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[7]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -961,7 +907,7 @@ func (x *AcceptOperationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AcceptOperationRequest.ProtoReflect.Descriptor instead.
 func (*AcceptOperationRequest) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{7}
+	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *AcceptOperationRequest) GetOperationId() uint64 {
@@ -989,7 +935,7 @@ type ReportProgressRequest struct {
 
 func (x *ReportProgressRequest) Reset() {
 	*x = ReportProgressRequest{}
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[8]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1001,7 +947,7 @@ func (x *ReportProgressRequest) String() string {
 func (*ReportProgressRequest) ProtoMessage() {}
 
 func (x *ReportProgressRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[8]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1014,7 +960,7 @@ func (x *ReportProgressRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportProgressRequest.ProtoReflect.Descriptor instead.
 func (*ReportProgressRequest) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{8}
+	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ReportProgressRequest) GetOperationId() uint64 {
@@ -1048,7 +994,7 @@ type CompleteOperationRequest struct {
 
 func (x *CompleteOperationRequest) Reset() {
 	*x = CompleteOperationRequest{}
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[9]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1060,7 +1006,7 @@ func (x *CompleteOperationRequest) String() string {
 func (*CompleteOperationRequest) ProtoMessage() {}
 
 func (x *CompleteOperationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[9]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1073,7 +1019,7 @@ func (x *CompleteOperationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompleteOperationRequest.ProtoReflect.Descriptor instead.
 func (*CompleteOperationRequest) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{9}
+	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *CompleteOperationRequest) GetOperationId() uint64 {
@@ -1113,7 +1059,7 @@ type OperationErrorDetail struct {
 
 func (x *OperationErrorDetail) Reset() {
 	*x = OperationErrorDetail{}
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[10]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1125,7 +1071,7 @@ func (x *OperationErrorDetail) String() string {
 func (*OperationErrorDetail) ProtoMessage() {}
 
 func (x *OperationErrorDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[10]
+	mi := &file_nervus_interface_operation_v1_operation_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1138,7 +1084,7 @@ func (x *OperationErrorDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OperationErrorDetail.ProtoReflect.Descriptor instead.
 func (*OperationErrorDetail) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{10}
+	return file_nervus_interface_operation_v1_operation_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *OperationErrorDetail) GetReason() OperationReason {
@@ -1179,9 +1125,7 @@ const file_nervus_interface_operation_v1_operation_proto_rawDesc = "" +
 	"\bprogress\x18\x05 \x01(\fR\bprogress\x12>\n" +
 	"\rterminal_code\x18\x06 \x01(\x0e2\x19.nervus.ipc.v1.StatusCodeR\fterminalCode\x12'\n" +
 	"\x0fterminal_result\x18\a \x01(\fR\x0eterminalResult\x12%\n" +
-	"\x0eterminal_error\x18\b \x01(\fR\rterminalError\":\n" +
-	"\x15OperationSubscription\x12!\n" +
-	"\foperation_id\x18\x01 \x01(\x04R\voperationId\"8\n" +
+	"\x0eterminal_error\x18\b \x01(\fR\rterminalError\"8\n" +
 	"\x13GetOperationRequest\x12!\n" +
 	"\foperation_id\x18\x01 \x01(\x04R\voperationId\";\n" +
 	"\x16CancelOperationRequest\x12!\n" +
@@ -1205,10 +1149,10 @@ const file_nervus_interface_operation_v1_operation_proto_rawDesc = "" +
 	")OPERATION_CONTROL_METHOD_CANCEL_OPERATION\x10\x02\x1ay\x8a\xa6\x1du\b\x02\x18\x01:4nervus.interface.operation.v1.CancelOperationRequestX\xe8\a`\xb8\x17\x82\x012nervus.interface.operation.v1.OperationErrorDetail\x12\xa8\x01\n" +
 	")OPERATION_CONTROL_METHOD_ACCEPT_OPERATION\x10\x03\x1ay\x8a\xa6\x1du\b\x03\x18\x01:4nervus.interface.operation.v1.AcceptOperationRequestX\xe8\a`\xb8\x17\x82\x012nervus.interface.operation.v1.OperationErrorDetail\x12\xa6\x01\n" +
 	"(OPERATION_CONTROL_METHOD_REPORT_PROGRESS\x10\x04\x1ax\x8a\xa6\x1dt\b\x04\x18\x01:3nervus.interface.operation.v1.ReportProgressRequestX\xe8\a`\xb8\x17\x82\x012nervus.interface.operation.v1.OperationErrorDetail\x12\xac\x01\n" +
-	"+OPERATION_CONTROL_METHOD_COMPLETE_OPERATION\x10\x05\x1a{\x8a\xa6\x1dw\b\x05\x18\x01:6nervus.interface.operation.v1.CompleteOperationRequestX\xe8\a`\xb8\x17\x82\x012nervus.interface.operation.v1.OperationErrorDetail*\xe1\x01\n" +
+	"+OPERATION_CONTROL_METHOD_COMPLETE_OPERATION\x10\x05\x1a{\x8a\xa6\x1dw\b\x05\x18\x01:6nervus.interface.operation.v1.CompleteOperationRequestX\xe8\a`\xb8\x17\x82\x012nervus.interface.operation.v1.OperationErrorDetail*\xad\x01\n" +
 	"\x15OperationControlEvent\x12'\n" +
-	"#OPERATION_CONTROL_EVENT_UNSPECIFIED\x10\x00\x12\x9e\x01\n" +
-	")OPERATION_CONTROL_EVENT_OPERATION_CHANGED\x10\x01\x1ao\x92\xa6\x1dk\b\x01\x18\x01 \x01*,nervus.interface.operation.v1.OperationEvent8dB3nervus.interface.operation.v1.OperationSubscription*\xeb\x01\n" +
+	"#OPERATION_CONTROL_EVENT_UNSPECIFIED\x10\x00\x12k\n" +
+	")OPERATION_CONTROL_EVENT_OPERATION_CHANGED\x10\x01\x1a<\x92\xa6\x1d8\b\x01\x18\x01 \x01*,nervus.interface.operation.v1.OperationEvent8dH\x01*\xeb\x01\n" +
 	"\x0eOperationState\x12\x1f\n" +
 	"\x1bOPERATION_STATE_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17OPERATION_STATE_PENDING\x10\x01\x12\x1b\n" +
@@ -1244,7 +1188,7 @@ func file_nervus_interface_operation_v1_operation_proto_rawDescGZIP() []byte {
 }
 
 var file_nervus_interface_operation_v1_operation_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_nervus_interface_operation_v1_operation_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_nervus_interface_operation_v1_operation_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_nervus_interface_operation_v1_operation_proto_goTypes = []any{
 	(OperationControlMethod)(0),      // 0: nervus.interface.operation.v1.OperationControlMethod
 	(OperationControlEvent)(0),       // 1: nervus.interface.operation.v1.OperationControlEvent
@@ -1255,24 +1199,23 @@ var file_nervus_interface_operation_v1_operation_proto_goTypes = []any{
 	(*OperationOrigin)(nil),          // 6: nervus.interface.operation.v1.OperationOrigin
 	(*OperationStatus)(nil),          // 7: nervus.interface.operation.v1.OperationStatus
 	(*OperationEvent)(nil),           // 8: nervus.interface.operation.v1.OperationEvent
-	(*OperationSubscription)(nil),    // 9: nervus.interface.operation.v1.OperationSubscription
-	(*GetOperationRequest)(nil),      // 10: nervus.interface.operation.v1.GetOperationRequest
-	(*CancelOperationRequest)(nil),   // 11: nervus.interface.operation.v1.CancelOperationRequest
-	(*AcceptOperationRequest)(nil),   // 12: nervus.interface.operation.v1.AcceptOperationRequest
-	(*ReportProgressRequest)(nil),    // 13: nervus.interface.operation.v1.ReportProgressRequest
-	(*CompleteOperationRequest)(nil), // 14: nervus.interface.operation.v1.CompleteOperationRequest
-	(*OperationErrorDetail)(nil),     // 15: nervus.interface.operation.v1.OperationErrorDetail
-	(ipcv1.StatusCode)(0),            // 16: nervus.ipc.v1.StatusCode
+	(*GetOperationRequest)(nil),      // 9: nervus.interface.operation.v1.GetOperationRequest
+	(*CancelOperationRequest)(nil),   // 10: nervus.interface.operation.v1.CancelOperationRequest
+	(*AcceptOperationRequest)(nil),   // 11: nervus.interface.operation.v1.AcceptOperationRequest
+	(*ReportProgressRequest)(nil),    // 12: nervus.interface.operation.v1.ReportProgressRequest
+	(*CompleteOperationRequest)(nil), // 13: nervus.interface.operation.v1.CompleteOperationRequest
+	(*OperationErrorDetail)(nil),     // 14: nervus.interface.operation.v1.OperationErrorDetail
+	(ipcv1.StatusCode)(0),            // 15: nervus.ipc.v1.StatusCode
 }
 var file_nervus_interface_operation_v1_operation_proto_depIdxs = []int32{
 	2,  // 0: nervus.interface.operation.v1.OperationStatus.state:type_name -> nervus.interface.operation.v1.OperationState
 	6,  // 1: nervus.interface.operation.v1.OperationStatus.origin:type_name -> nervus.interface.operation.v1.OperationOrigin
-	16, // 2: nervus.interface.operation.v1.OperationStatus.terminal_code:type_name -> nervus.ipc.v1.StatusCode
+	15, // 2: nervus.interface.operation.v1.OperationStatus.terminal_code:type_name -> nervus.ipc.v1.StatusCode
 	3,  // 3: nervus.interface.operation.v1.OperationEvent.kind:type_name -> nervus.interface.operation.v1.OperationEventKind
 	2,  // 4: nervus.interface.operation.v1.OperationEvent.state:type_name -> nervus.interface.operation.v1.OperationState
 	6,  // 5: nervus.interface.operation.v1.OperationEvent.origin:type_name -> nervus.interface.operation.v1.OperationOrigin
-	16, // 6: nervus.interface.operation.v1.OperationEvent.terminal_code:type_name -> nervus.ipc.v1.StatusCode
-	16, // 7: nervus.interface.operation.v1.CompleteOperationRequest.code:type_name -> nervus.ipc.v1.StatusCode
+	15, // 6: nervus.interface.operation.v1.OperationEvent.terminal_code:type_name -> nervus.ipc.v1.StatusCode
+	15, // 7: nervus.interface.operation.v1.CompleteOperationRequest.code:type_name -> nervus.ipc.v1.StatusCode
 	4,  // 8: nervus.interface.operation.v1.OperationErrorDetail.reason:type_name -> nervus.interface.operation.v1.OperationReason
 	9,  // [9:9] is the sub-list for method output_type
 	9,  // [9:9] is the sub-list for method input_type
@@ -1292,7 +1235,7 @@ func file_nervus_interface_operation_v1_operation_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nervus_interface_operation_v1_operation_proto_rawDesc), len(file_nervus_interface_operation_v1_operation_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   11,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

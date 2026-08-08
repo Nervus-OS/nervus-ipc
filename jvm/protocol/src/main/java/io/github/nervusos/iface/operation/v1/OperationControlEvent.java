@@ -28,8 +28,15 @@ public enum OperationControlEvent
    *
    * 代价是慢消费者会被断开订阅。那是对的：一个连结果都收不动的调用方，
    * 让它以为自己在观察还不如让它明确失败。
-   * 【订阅时必须带 OperationSubscription 指定 operation_id】，见那条消息的说明：
-   * 本接口只有一个内建 endpoint，不指定就等于订阅全机所有人的 operation。
+   *
+   * # scoped
+   *
+   * 订阅时 Subscribe.scope 填 operation_id。本接口只有一个内建 endpoint，
+   * 全机所有 operation 的事件都从它出来——不指定实例就等于订阅所有人的
+   * 进度与失败细因。
+   *
+   * 归属【不需要 BindEventScope】：nervud 自己就是 operation 的所有者，
+   * 它知道每一条属于谁。订一个不属于自己的 operation 直接被拒。
    * </pre>
    *
    * <code>OPERATION_CONTROL_EVENT_OPERATION_CHANGED = 1 [(.nervus.ipc.v1.event_meta) = { ... }</code>
@@ -65,8 +72,15 @@ public enum OperationControlEvent
    *
    * 代价是慢消费者会被断开订阅。那是对的：一个连结果都收不动的调用方，
    * 让它以为自己在观察还不如让它明确失败。
-   * 【订阅时必须带 OperationSubscription 指定 operation_id】，见那条消息的说明：
-   * 本接口只有一个内建 endpoint，不指定就等于订阅全机所有人的 operation。
+   *
+   * # scoped
+   *
+   * 订阅时 Subscribe.scope 填 operation_id。本接口只有一个内建 endpoint，
+   * 全机所有 operation 的事件都从它出来——不指定实例就等于订阅所有人的
+   * 进度与失败细因。
+   *
+   * 归属【不需要 BindEventScope】：nervud 自己就是 operation 的所有者，
+   * 它知道每一条属于谁。订一个不属于自己的 operation 直接被拒。
    * </pre>
    *
    * <code>OPERATION_CONTROL_EVENT_OPERATION_CHANGED = 1 [(.nervus.ipc.v1.event_meta) = { ... }</code>
