@@ -44,10 +44,12 @@
 package stdinterface
 
 import (
+	"bytes"
+	_ "embed"
 	"encoding/hex"
 	"fmt"
 	"sort"
-	"strings"
+	"text/template"
 
 	basemotionv1 "github.com/nervus-os/nervus-ipc/protocol/interface/basemotionv1"
 	camerav1 "github.com/nervus-os/nervus-ipc/protocol/interface/camerav1"
@@ -212,6 +214,25 @@ func Entries() ([]Entry, error) {
 	return out, nil
 }
 
+// kotlinTemplate 是生成物的 Kotlin 模板.
+//
+// 【单独一个 .kt.tmpl 文件而不是内联的字符串字面量】. 内联那份曾经是一整份
+// Kotlin 源码塞在 Go 的反引号字符串里, 中间夹一个 Fprintf 循环拼 map 条目 ——
+// 两种语言的语法混在一个字面量里, 读的人得先在脑子里把它拆开. 拆成模板文件
+// 之后, 这个 .go 文件里只剩 Go, 模板能被编辑器按 Kotlin 高亮.
+//
+// 还避开了两个隐患: 模板里一旦出现反引号就用不了 Go 原始字符串, 一旦出现 %
+// 就要躲 Fprintf 的格式化. 模板文件对这两个字符都没有意见.
+//
+//go:embed schema_table.kt.tmpl
+var kotlinTemplate string
+
+// tableEntry 是模板的一行数据.
+type tableEntry struct {
+	Key string
+	Hex string
+}
+
 // RenderKotlin 渲染 committed 的 Kotlin 源码.
 //
 // 用十六进制字符串而不是 byteArrayOf(...): 前者一行一条, diff 可读, 且与
@@ -223,70 +244,19 @@ func RenderKotlin() ([]byte, error) {
 		return nil, err
 	}
 	// 按键排序落盘, 与 Entries() 的输入顺序解耦 (理由见 Entries 的说明)
-	sorted := make([]Entry, len(entries))
-	copy(sorted, entries)
-	sort.Slice(sorted, func(a, b int) bool { return sorted[a].Key() < sorted[b].Key() })
-
-	var b strings.Builder
-
-	b.WriteString(`// 本文件由 registry/stdinterface 生成, 【不要手改】.
-//
-// 重新生成:
-//   go test ./registry/stdinterface -run TestUpdateCommittedTable -update
-//
-// # 这是什么
-//
-// 全部平台标准接口的 schema hash. RegisterEndpoint 必须带上它, 内核会与 Catalog
-// 里那份逐字节比对, 不符或留空一律拒 (nervud internal/endpoint/register.go).
-//
-// # 为什么 JVM 侧读常量而不是自己算
-//
-// hash 是 sha256(确定性编码的 FileDescriptorSet). Go 侧有 registry.BuildSchemaBundle
-// 一行算出, JVM 侧没有等价物, 且 protobuf-java 不保证与 Go 的 Deterministic 编码
-// 逐字节相同 —— 而这里要的正是逐字节相等. 所以由 Go 算一次落盘, 两侧读同一份
-// 生成物, 与 golden vectors 同一形态.
-//
-// 改了任何标准接口的 .proto 而没重跑生成, nervus-ipc 的 CI 会红
-// (TestCommittedTableMatches).
-
-package io.github.nervusos.ipc.v1
-
-/** 平台标准接口的 schema hash 表. */
-object StdInterfaceSchema {
-
-    /** "<interface_id>@<major>" -> schema hash 的十六进制. */
-    private val hex: Map<String, String> = mapOf(
-`)
-
-	for _, e := range sorted {
-		fmt.Fprintf(&b, "        %q to\n            %q,\n", e.Key(), hex.EncodeToString(e.SchemaHash))
+	rows := make([]tableEntry, 0, len(entries))
+	for _, e := range entries {
+		rows = append(rows, tableEntry{Key: e.Key(), Hex: hex.EncodeToString(e.SchemaHash)})
 	}
+	sort.Slice(rows, func(a, b int) bool { return rows[a].Key < rows[b].Key })
 
-	b.WriteString(`    )
-
-    /**
-     * 取一个标准接口的 schema hash。
-     *
-     * 查不到即抛异常, 【不返回空数组】: 空 hash 会被内核拒, 症状是一句
-     * "interface schema hash does not match the catalog", 离"这个接口不在表里"
-     * 这个真正的原因很远. 在这里失败, 错误信息才指得准.
-     */
-    fun hashOf(interfaceId: String, major: Int = 1): ByteArray {
-        val key = "$interfaceId@$major"
-        val value = hex[key]
-            ?: throw IllegalArgumentException(
-                "no committed schema hash for '$key'; " +
-                    "add it to registry/stdinterface in nervus-ipc and regenerate",
-            )
-        return ByteArray(value.length / 2) { i ->
-            value.substring(i * 2, i * 2 + 2).toInt(16).toByte()
-        }
-    }
-
-    /** 表里已登记的全部键, 供诊断用. */
-    fun keys(): Set<String> = hex.keys
-}
-`)
-
-	return []byte(b.String()), nil
+	tmpl, err := template.New("schema_table").Parse(kotlinTemplate)
+	if err != nil {
+		return nil, fmt.Errorf("stdinterface: parse kotlin template: %w", err)
+	}
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, struct{ Entries []tableEntry }{rows}); err != nil {
+		return nil, fmt.Errorf("stdinterface: render kotlin table: %w", err)
+	}
+	return buf.Bytes(), nil
 }
