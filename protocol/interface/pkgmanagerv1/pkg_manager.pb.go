@@ -223,9 +223,34 @@ type InstallRequest struct {
 	// "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
 	//
 	// 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
-	NspkgRelpath  string `protobuf:"bytes,1,opt,name=nspkg_relpath,json=nspkgRelpath,proto3" json:"nspkg_relpath,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	NspkgRelpath string `protobuf:"bytes,1,opt,name=nspkg_relpath,json=nspkgRelpath,proto3" json:"nspkg_relpath,omitempty"`
+	// 用户在安装确认屏上同意的敏感权限 ID 列表。
+	//
+	// # 它解决的是什么
+	//
+	// USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+	// GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+	// NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+	// 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+	// 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+	// 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+	//
+	// # 谁有资格填它
+	//
+	// 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+	// 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+	// 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+	// nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+	//
+	// # 内核还会再过滤一遍
+	//
+	// nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+	// 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+	// 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+	// 陈述，不是「请授予什么」的命令。
+	ConsentedPermissions []string `protobuf:"bytes,2,rep,name=consented_permissions,json=consentedPermissions,proto3" json:"consented_permissions,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *InstallRequest) Reset() {
@@ -263,6 +288,13 @@ func (x *InstallRequest) GetNspkgRelpath() string {
 		return x.NspkgRelpath
 	}
 	return ""
+}
+
+func (x *InstallRequest) GetConsentedPermissions() []string {
+	if x != nil {
+		return x.ConsentedPermissions
+	}
+	return nil
 }
 
 // InstallResult 是安装成功的终态（operation 的 result）。
@@ -658,9 +690,10 @@ var File_nervus_interface_pkgmanager_v1_pkg_manager_proto protoreflect.FileDescr
 
 const file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc = "" +
 	"\n" +
-	"0nervus/interface/pkgmanager/v1/pkg_manager.proto\x12\x1enervus.interface.pkgmanager.v1\x1a#nervus/ipc/v1/method_registry.proto\"5\n" +
+	"0nervus/interface/pkgmanager/v1/pkg_manager.proto\x12\x1enervus.interface.pkgmanager.v1\x1a#nervus/ipc/v1/method_registry.proto\"j\n" +
 	"\x0eInstallRequest\x12#\n" +
-	"\rnspkg_relpath\x18\x01 \x01(\tR\fnspkgRelpath\"V\n" +
+	"\rnspkg_relpath\x18\x01 \x01(\tR\fnspkgRelpath\x123\n" +
+	"\x15consented_permissions\x18\x02 \x03(\tR\x14consentedPermissions\"V\n" +
 	"\rInstallResult\x12E\n" +
 	"\apackage\x18\x01 \x01(\v2+.nervus.interface.pkgmanager.v1.PackageInfoR\apackage\"1\n" +
 	"\x10UninstallRequest\x12\x1d\n" +

@@ -32,6 +32,8 @@ private static final long serialVersionUID = 0L;
   }
   private InstallRequest() {
     nspkgRelpath_ = "";
+    consentedPermissions_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -108,6 +110,151 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int CONSENTED_PERMISSIONS_FIELD_NUMBER = 2;
+  @SuppressWarnings("serial")
+  private com.google.protobuf.LazyStringArrayList consentedPermissions_ =
+      com.google.protobuf.LazyStringArrayList.emptyList();
+  /**
+   * <pre>
+   * 用户在安装确认屏上同意的敏感权限 ID 列表。
+   *
+   * # 它解决的是什么
+   *
+   * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+   * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+   * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+   * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+   * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+   * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+   *
+   * # 谁有资格填它
+   *
+   * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+   * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+   * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+   * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+   *
+   * # 内核还会再过滤一遍
+   *
+   * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+   * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+   * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+   * 陈述，不是「请授予什么」的命令。
+   * </pre>
+   *
+   * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+   * @return A list containing the consentedPermissions.
+   */
+  public com.google.protobuf.ProtocolStringList
+      getConsentedPermissionsList() {
+    return consentedPermissions_;
+  }
+  /**
+   * <pre>
+   * 用户在安装确认屏上同意的敏感权限 ID 列表。
+   *
+   * # 它解决的是什么
+   *
+   * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+   * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+   * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+   * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+   * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+   * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+   *
+   * # 谁有资格填它
+   *
+   * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+   * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+   * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+   * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+   *
+   * # 内核还会再过滤一遍
+   *
+   * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+   * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+   * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+   * 陈述，不是「请授予什么」的命令。
+   * </pre>
+   *
+   * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+   * @return The count of consentedPermissions.
+   */
+  public int getConsentedPermissionsCount() {
+    return consentedPermissions_.size();
+  }
+  /**
+   * <pre>
+   * 用户在安装确认屏上同意的敏感权限 ID 列表。
+   *
+   * # 它解决的是什么
+   *
+   * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+   * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+   * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+   * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+   * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+   * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+   *
+   * # 谁有资格填它
+   *
+   * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+   * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+   * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+   * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+   *
+   * # 内核还会再过滤一遍
+   *
+   * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+   * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+   * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+   * 陈述，不是「请授予什么」的命令。
+   * </pre>
+   *
+   * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+   * @param index The index of the element to return.
+   * @return The consentedPermissions at the given index.
+   */
+  public java.lang.String getConsentedPermissions(int index) {
+    return consentedPermissions_.get(index);
+  }
+  /**
+   * <pre>
+   * 用户在安装确认屏上同意的敏感权限 ID 列表。
+   *
+   * # 它解决的是什么
+   *
+   * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+   * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+   * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+   * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+   * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+   * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+   *
+   * # 谁有资格填它
+   *
+   * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+   * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+   * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+   * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+   *
+   * # 内核还会再过滤一遍
+   *
+   * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+   * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+   * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+   * 陈述，不是「请授予什么」的命令。
+   * </pre>
+   *
+   * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the consentedPermissions at the given index.
+   */
+  public com.google.protobuf.ByteString
+      getConsentedPermissionsBytes(int index) {
+    return consentedPermissions_.getByteString(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -125,6 +272,9 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(nspkgRelpath_)) {
       com.google.protobuf.GeneratedMessage.writeString(output, 1, nspkgRelpath_);
     }
+    for (int i = 0; i < consentedPermissions_.size(); i++) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 2, consentedPermissions_.getRaw(i));
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -136,6 +286,14 @@ private static final long serialVersionUID = 0L;
     size = 0;
     if (!com.google.protobuf.GeneratedMessage.isStringEmpty(nspkgRelpath_)) {
       size += com.google.protobuf.GeneratedMessage.computeStringSize(1, nspkgRelpath_);
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < consentedPermissions_.size(); i++) {
+        dataSize += computeStringSizeNoTag(consentedPermissions_.getRaw(i));
+      }
+      size += dataSize;
+      size += 1 * getConsentedPermissionsList().size();
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -154,6 +312,8 @@ private static final long serialVersionUID = 0L;
 
     if (!getNspkgRelpath()
         .equals(other.getNspkgRelpath())) return false;
+    if (!getConsentedPermissionsList()
+        .equals(other.getConsentedPermissionsList())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -167,6 +327,10 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + NSPKG_RELPATH_FIELD_NUMBER;
     hash = (53 * hash) + getNspkgRelpath().hashCode();
+    if (getConsentedPermissionsCount() > 0) {
+      hash = (37 * hash) + CONSENTED_PERMISSIONS_FIELD_NUMBER;
+      hash = (53 * hash) + getConsentedPermissionsList().hashCode();
+    }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -303,6 +467,8 @@ private static final long serialVersionUID = 0L;
       super.clear();
       bitField0_ = 0;
       nspkgRelpath_ = "";
+      consentedPermissions_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
       return this;
     }
 
@@ -339,6 +505,10 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000001) != 0)) {
         result.nspkgRelpath_ = nspkgRelpath_;
       }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        consentedPermissions_.makeImmutable();
+        result.consentedPermissions_ = consentedPermissions_;
+      }
     }
 
     @java.lang.Override
@@ -356,6 +526,16 @@ private static final long serialVersionUID = 0L;
       if (!other.getNspkgRelpath().isEmpty()) {
         nspkgRelpath_ = other.nspkgRelpath_;
         bitField0_ |= 0x00000001;
+        onChanged();
+      }
+      if (!other.consentedPermissions_.isEmpty()) {
+        if (consentedPermissions_.isEmpty()) {
+          consentedPermissions_ = other.consentedPermissions_;
+          bitField0_ |= 0x00000002;
+        } else {
+          ensureConsentedPermissionsIsMutable();
+          consentedPermissions_.addAll(other.consentedPermissions_);
+        }
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -389,6 +569,12 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000001;
               break;
             } // case 10
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureConsentedPermissionsIsMutable();
+              consentedPermissions_.add(s);
+              break;
+            } // case 18
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -529,6 +715,360 @@ private static final long serialVersionUID = 0L;
       checkByteStringIsUtf8(value);
       nspkgRelpath_ = value;
       bitField0_ |= 0x00000001;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.LazyStringArrayList consentedPermissions_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+    private void ensureConsentedPermissionsIsMutable() {
+      if (!consentedPermissions_.isModifiable()) {
+        consentedPermissions_ = new com.google.protobuf.LazyStringArrayList(consentedPermissions_);
+      }
+      bitField0_ |= 0x00000002;
+    }
+    /**
+     * <pre>
+     * 用户在安装确认屏上同意的敏感权限 ID 列表。
+     *
+     * # 它解决的是什么
+     *
+     * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+     * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+     * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+     * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+     * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+     * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+     *
+     * # 谁有资格填它
+     *
+     * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+     * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+     * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+     * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+     *
+     * # 内核还会再过滤一遍
+     *
+     * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+     * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+     * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+     * 陈述，不是「请授予什么」的命令。
+     * </pre>
+     *
+     * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+     * @return A list containing the consentedPermissions.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getConsentedPermissionsList() {
+      consentedPermissions_.makeImmutable();
+      return consentedPermissions_;
+    }
+    /**
+     * <pre>
+     * 用户在安装确认屏上同意的敏感权限 ID 列表。
+     *
+     * # 它解决的是什么
+     *
+     * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+     * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+     * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+     * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+     * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+     * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+     *
+     * # 谁有资格填它
+     *
+     * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+     * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+     * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+     * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+     *
+     * # 内核还会再过滤一遍
+     *
+     * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+     * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+     * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+     * 陈述，不是「请授予什么」的命令。
+     * </pre>
+     *
+     * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+     * @return The count of consentedPermissions.
+     */
+    public int getConsentedPermissionsCount() {
+      return consentedPermissions_.size();
+    }
+    /**
+     * <pre>
+     * 用户在安装确认屏上同意的敏感权限 ID 列表。
+     *
+     * # 它解决的是什么
+     *
+     * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+     * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+     * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+     * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+     * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+     * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+     *
+     * # 谁有资格填它
+     *
+     * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+     * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+     * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+     * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+     *
+     * # 内核还会再过滤一遍
+     *
+     * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+     * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+     * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+     * 陈述，不是「请授予什么」的命令。
+     * </pre>
+     *
+     * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+     * @param index The index of the element to return.
+     * @return The consentedPermissions at the given index.
+     */
+    public java.lang.String getConsentedPermissions(int index) {
+      return consentedPermissions_.get(index);
+    }
+    /**
+     * <pre>
+     * 用户在安装确认屏上同意的敏感权限 ID 列表。
+     *
+     * # 它解决的是什么
+     *
+     * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+     * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+     * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+     * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+     * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+     * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+     *
+     * # 谁有资格填它
+     *
+     * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+     * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+     * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+     * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+     *
+     * # 内核还会再过滤一遍
+     *
+     * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+     * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+     * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+     * 陈述，不是「请授予什么」的命令。
+     * </pre>
+     *
+     * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the consentedPermissions at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getConsentedPermissionsBytes(int index) {
+      return consentedPermissions_.getByteString(index);
+    }
+    /**
+     * <pre>
+     * 用户在安装确认屏上同意的敏感权限 ID 列表。
+     *
+     * # 它解决的是什么
+     *
+     * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+     * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+     * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+     * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+     * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+     * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+     *
+     * # 谁有资格填它
+     *
+     * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+     * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+     * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+     * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+     *
+     * # 内核还会再过滤一遍
+     *
+     * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+     * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+     * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+     * 陈述，不是「请授予什么」的命令。
+     * </pre>
+     *
+     * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+     * @param index The index to set the value at.
+     * @param value The consentedPermissions to set.
+     * @return This builder for chaining.
+     */
+    public Builder setConsentedPermissions(
+        int index, java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      ensureConsentedPermissionsIsMutable();
+      consentedPermissions_.set(index, value);
+      bitField0_ |= 0x00000002;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 用户在安装确认屏上同意的敏感权限 ID 列表。
+     *
+     * # 它解决的是什么
+     *
+     * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+     * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+     * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+     * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+     * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+     * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+     *
+     * # 谁有资格填它
+     *
+     * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+     * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+     * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+     * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+     *
+     * # 内核还会再过滤一遍
+     *
+     * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+     * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+     * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+     * 陈述，不是「请授予什么」的命令。
+     * </pre>
+     *
+     * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+     * @param value The consentedPermissions to add.
+     * @return This builder for chaining.
+     */
+    public Builder addConsentedPermissions(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      ensureConsentedPermissionsIsMutable();
+      consentedPermissions_.add(value);
+      bitField0_ |= 0x00000002;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 用户在安装确认屏上同意的敏感权限 ID 列表。
+     *
+     * # 它解决的是什么
+     *
+     * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+     * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+     * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+     * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+     * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+     * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+     *
+     * # 谁有资格填它
+     *
+     * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+     * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+     * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+     * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+     *
+     * # 内核还会再过滤一遍
+     *
+     * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+     * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+     * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+     * 陈述，不是「请授予什么」的命令。
+     * </pre>
+     *
+     * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+     * @param values The consentedPermissions to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllConsentedPermissions(
+        java.lang.Iterable<java.lang.String> values) {
+      ensureConsentedPermissionsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, consentedPermissions_);
+      bitField0_ |= 0x00000002;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 用户在安装确认屏上同意的敏感权限 ID 列表。
+     *
+     * # 它解决的是什么
+     *
+     * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+     * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+     * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+     * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+     * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+     * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+     *
+     * # 谁有资格填它
+     *
+     * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+     * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+     * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+     * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+     *
+     * # 内核还会再过滤一遍
+     *
+     * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+     * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+     * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+     * 陈述，不是「请授予什么」的命令。
+     * </pre>
+     *
+     * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearConsentedPermissions() {
+      consentedPermissions_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000002);;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 用户在安装确认屏上同意的敏感权限 ID 列表。
+     *
+     * # 它解决的是什么
+     *
+     * USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进
+     * GrantedPermissions，但运行期 AllowedAt 要求 GrantState == GRANTED，默认是
+     * NOT_REQUESTED。也就是说一个普通应用装上之后，它申请的敏感权限【永远】拿
+     * 不到——应用无法自救（SDK 没有请求权限的 API），用户也没有界面可批。本字段
+     * 让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户同意
+     * 哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+     *
+     * # 谁有资格填它
+     *
+     * 【只有系统的确认界面】。经 IPC 装包必须穿过 nervus.interface.permission.ui
+     * 的 ConfirmInstall：INSTALL 的 needs_user_confirmation 是 true，而 nervud 的
+     * 那道门只对持有 perm.permission.admin 的调用方放行，全系统只有
+     * nervus.permissionui 持有它。因此普通应用填不进来——它连 INSTALL 都调不到。
+     *
+     * # 内核还会再过滤一遍
+     *
+     * nervud 只对【同意清单 ∩ 安装期授予集合 ∩ USER_CONSENT】三者的交集落库，
+     * 越界的条目静默忽略：一条没申请过的、或不是 USER_CONSENT 的权限出现在这里，
+     * 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
+     * 陈述，不是「请授予什么」的命令。
+     * </pre>
+     *
+     * <code>repeated string consented_permissions = 2 [json_name = "consentedPermissions"];</code>
+     * @param value The bytes of the consentedPermissions to add.
+     * @return This builder for chaining.
+     */
+    public Builder addConsentedPermissionsBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      ensureConsentedPermissionsIsMutable();
+      consentedPermissions_.add(value);
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }

@@ -40,7 +40,7 @@ object StdInterfaceSchema {
         "nervus.interface.permission.ui@1" to
             "f235cbbca0035fb0feeafdec4ee1c05b59dbf929cdb30c99ef0aff081c8ac110",
         "nervus.interface.pkg.manager@1" to
-            "0b300b38a98bf7c1376d80946ba3196322ee2f70b11ffdcac5ca552010cc7018",
+            "84b8fcdeddf5fd42fff70bdfa8a46b41a351a49a2d27578720eb219c04c541a5",
         "nervus.interface.resource.directory@1" to
             "1825327bc61345aed2761aa91005b18997e4cc34dbd7eb56190e05d53dd3cc4a",
         "nervus.interface.safety.control@1" to
