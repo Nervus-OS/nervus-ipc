@@ -1,0 +1,173 @@
+// Nervus 标准接口 · PermissionAdmin@1  [REWRITE-v1 / experimental]
+//
+//   interface_id = nervus.interface.permission.admin ，major = 1
+//   Permission   = perm.permission.admin
+//   Resource     = 无
+//
+// 由 nervud 以【内建 endpoint】实现。它是 USER_CONSENT 权限的授予界面所需的
+// 唯一系统接口。
+//
+// # 它补的是一个真实的缺口
+//
+// USER_CONSENT 权限（如 perm.storage.user）的运行期状态默认是 NOT_REQUESTED，
+// 而 nervud 的 AllowedAt 对这类权限要求状态恰为 GRANTED 才放行。也就是说
+// 一个申请了 perm.storage.user 的包，装上之后【永远】拿不到那条权限——
+// 除非有人改变那个运行期状态。
+//
+// 在此接口之前，全系统能改它的只有 SetRuntimeState，而它只能从管理通道
+// （nervud-admin.sock，仅放行持 perm.pkg.admin 的包与运维 UID）进，实际
+// 只有 nervusctl 用得上。结果是文件管理器装好、权限申请也通过了裁决，
+// 却报「用户目录不可写」，而系统里没有任何界面能解决它。
+//
+// # 为什么由内核实现而不是某个系统服务
+//
+// 授予状态【就是 permission.Registry 自己的状态】。让一个服务来代管，等于把
+// 「谁能改全系统的危险权限」这件事交给一个可以被替换的包，而 perm.permission.admin
+// 的门槛（SYSTEM_ONLY + PLATFORM + platform-release 签名）正是为了不让它被替换。
+// 与 power / safety.control / resource.directory 同一形态。
+//
+// # 边界：这里只管【运行期授予状态】，不管安装期裁决
+//
+// 安装期集合（GrantedPermissions）由 pkgregistry 的 IntersectAt 算出，是
+// 「这个包有没有资格申请」。本接口改的是「用户此刻同不同意」，两者都通过
+// 才等于放行。因此对一个安装期就没拿到的权限调 SetGrantState 会失败——
+// 界面不该给用户一个按下去等于什么都没发生的开关。
+//
+// [REWRITE-v1] experimental：v2 前允许破坏性调整；正式冻结后遵循 §10.12。
+
+syntax = "proto3";
+
+package nervus.interface.permission.v1;
+
+import "nervus/ipc/v1/method_registry.proto";
+import "nervus/ipc/v1/provider_descriptor.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/permissionv1;permissionv1";
+
+// Java 包名不能含连字符，也不能用保留字 "interface" —— 用 "iface" 段。
+option java_package = "io.github.nervusos.iface.permission.v1";
+option java_multiple_files = true;
+option java_outer_classname = "PermissionAdminProto";
+
+enum PermissionAdminMethod {
+  PERMISSION_ADMIN_METHOD_UNSPECIFIED = 0;
+
+  // 列出各包的可授予权限与当前状态。纯读。
+  PERMISSION_ADMIN_METHOD_LIST_GRANTS = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    required_permission: "perm.permission.admin"
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.permission.v1.ListGrantsRequest"
+    response_type: "nervus.interface.permission.v1.GrantList"
+    error_detail_type: ""
+  }];
+
+  // 设置一条 USER_CONSENT 权限的运行期授予状态。
+  //
+  // needs_user_confirmation 是 false 而不是 true：【本方法的调用方就是那个
+  // 确认界面】。置 true 会要求内核在授予之前再弹一次确认，而那次确认还得由
+  // 同一个界面来显示——一个自己确认自己的环。
+  //
+  // 风险级取 PRIVACY_SENSITIVE：它改的是「谁能读用户的文件」这类决定。
+  PERMISSION_ADMIN_METHOD_SET_GRANT_STATE = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    required_permission: "perm.permission.admin"
+    risk_class: RISK_CLASS_PRIVACY_SENSITIVE
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    request_type: "nervus.interface.permission.v1.SetGrantStateRequest"
+    response_type: "nervus.interface.permission.v1.SetGrantStateResponse"
+    error_detail_type: ""
+  }];
+}
+
+// GrantState 是一条 USER_CONSENT 权限的运行期决定。
+//
+// 与 nervud internal/permission 的同名类型逐值对应。零值是 UNSPECIFIED 而不是
+// NOT_REQUESTED：proto3 分不出「没填」和「填了零值」，而这两者在授予语义上
+// 完全不同——把「没填」当成「用户还没被问过」会让一次编码失误看起来像一次
+// 正常的初始状态。
+enum GrantState {
+  GRANT_STATE_UNSPECIFIED = 0;
+
+  // 还没问过用户。AllowedAt 视同未授予。
+  GRANT_STATE_NOT_REQUESTED = 1;
+
+  // 用户已同意。这是 AllowedAt 唯一放行的取值。
+  GRANT_STATE_GRANTED = 2;
+
+  // 用户拒绝过一次，之后仍可再问。
+  GRANT_STATE_DENIED = 3;
+
+  // 用户选择了「不再询问」。界面不应再自动弹出，但仍可由用户主动在设置里打开。
+  GRANT_STATE_DENIED_PERMANENT = 4;
+}
+
+// ListGrantsRequest —— 过滤条件。留空表示列出全部。
+message ListGrantsRequest {
+  // 只看这一个包。空 = 列出全部已安装包。
+  string package_id = 1;
+}
+
+// PermissionGrant —— 一个包的一条可授予权限。
+//
+// 只包含 GrantMode 为 USER_CONSENT 的权限：其它模式没有运行期状态可言，
+// 列出来只会给用户一排拨不动的开关。
+message PermissionGrant {
+  // 权限 ID，如 "perm.storage.user"。
+  string permission_id = 1;
+
+  // 面向用户的名称与说明，来自 Catalog 的权限定义。
+  //
+  // 【由内核给出而不是界面自己写死】：第三方包可以定义自己的权限，
+  // 界面不可能预先知道它们的文案。
+  nervus.ipc.v1.LocalizedText display_name = 2;
+  nervus.ipc.v1.LocalizedText description = 3;
+
+  nervus.ipc.v1.RiskClass risk_class = 4;
+
+  GrantState state = 5;
+}
+
+// PackageGrants —— 一个包及其全部可授予权限。
+message PackageGrants {
+  string package_id = 1;
+
+  // 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
+  string label = 2;
+
+  // 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
+  repeated PermissionGrant permissions = 3;
+}
+
+message GrantList {
+  // 按 package_id 字典序排列。
+  //
+  // 不含【一条可授予权限都没有】的包：设置页里列一个点进去空无一物的条目，
+  // 对用户是纯噪音。
+  repeated PackageGrants packages = 1;
+}
+
+// SetGrantStateRequest —— 改一条权限的运行期状态。
+message SetGrantStateRequest {
+  string package_id = 1;
+  string permission_id = 2;
+
+  // 目标状态。UNSPECIFIED 与 NOT_REQUESTED 都会被拒绝：
+  // 前者是没填，后者是「回到从没问过」——那不是用户能做的决定，
+  // 想撤销就用 DENIED。
+  GrantState state = 3;
+}
+
+// SetGrantStateResponse —— 生效后的状态。
+//
+// 回一个显式的状态而不是空响应：授予是否真的落地由内核决定（权限可能不是
+// USER_CONSENT、包可能刚被卸载），界面拿回来的应该是【现在的事实】，
+// 而不是自己刚才请求的那个值。
+message SetGrantStateResponse {
+  GrantState state = 1;
+}
