@@ -1,0 +1,223 @@
+// Nervus 标准接口 · PermissionUi@1  [REWRITE-v1 / experimental]
+//
+// [KERNEL: WIRED] nervud 支持本接口所需的全部机制（Request/Response、
+// Dispatch/DispatchResult、endpoint 注册与路由）。本接口不是内建接口——
+// nervud 不实现它，只负责路由。
+//
+// interface_id = nervus.interface.permission.ui ，major = 1，experimental。
+//   实现者     = nervus.permissionui（系统软件，nervus-system-software 仓库，
+//                platform-release 签名）
+//   Permission = perm.pkg.install
+//
+// # 为什么与 permission.admin 分成两个接口
+//
+// 两者方向相反，实现者也不同：
+//
+//   nervus.interface.permission.admin —— nervud 内建实现，permissionui 调它
+//                                        （改运行期授予状态）
+//   nervus.interface.permission.ui    —— permissionui 实现，设置/桌面调它
+//                                        （请求向用户展示确认）
+//
+// 合成一个 interface_id 会要求它由两个不同 Provider 各实现一半，而 Catalog
+// 的模型是一个 interface_id 对应一组 endpoint 候选，Resolve 无法确定该路由
+// 到哪一侧。命名沿用 camera / camera.config 的形态：同一个域下的两个面。
+//
+// # 它补的是什么缺口
+//
+// USER_CONSENT 权限（perm.camera.capture 一类）在安装期能进 GrantedPermissions，
+// 但运行期 AllowedAt 要求 GrantState == GRANTED，默认 NOT_REQUESTED。也就是说
+// 一个普通应用装上之后，它申请的敏感权限【永远】拿不到——应用无法自救（SDK 没有
+// 请求权限的 API），用户也没有界面可批。
+//
+// 本接口让安装动作把这一问补上：装之前先把该包申请的敏感权限摊给用户看，用户
+// 同意哪些，安装成功后那些权限的运行期状态就直接落成 GRANTED。
+//
+// # 为什么确认与安装必须在同一次调用里完成
+//
+// 本接口【不返回「用户同意了」这个事实】让调用方自己去装。那样的话调用方完全
+// 可以跳过 ConfirmInstall 直接调 pkgmanager 的 INSTALL，确认框就成了纯装饰。
+//
+// 现在的形态是：只有 permissionui 持有 perm.permission.admin，而 nervud 的
+// needs_user_confirmation 门只对持有该权限者放行（internal/protocheck）。因此
+// 经 IPC 装包这条路【必须】穿过本接口——它是那道门唯一的钥匙持有者。调用方拿到
+// 的是安装的最终结果，中间的确认不可绕过。
+//
+// # 边界：本接口的实现者不做任何安全判定
+//
+// 与 pkgmanager 同一分工。签名、digest、ABI、升级裁决、权限交集全部在 nervud
+// 的 pkgregistry 里；permissionui 只做两件事：把内核给出的权限文案显示给用户，
+// 把用户的选择连同安装请求转交下去。它甚至不判断某条权限是不是 USER_CONSENT——
+// 那是 nervud 在落库时按 Catalog 定义过滤的（越界的条目会被静默忽略）。
+//
+// [REWRITE-v1] experimental：冻结前允许破坏性调整（NRCP §22.6）。
+// 兼容规则（§10.12，冻结后生效）：已发布 method_id 与字段号永不复用；
+// 删除写 reserved；新增字段须有安全默认；枚举以 *_UNSPECIFIED = 0 起始并 fail closed。
+
+syntax = "proto3";
+
+package nervus.interface.permission.v1;
+
+import "nervus/ipc/v1/method_registry.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/permissionv1;permissionv1";
+
+// 连字符在 Java 包名里非法，且 "interface" 是 Java 保留字——用 "iface" 段。
+option java_package = "io.github.nervusos.iface.permission.v1";
+option java_multiple_files = true;
+option java_outer_classname = "PermissionUiProto";
+
+// =============================================================================
+// method_id 枚举 + Method Registry 元数据
+// =============================================================================
+
+enum PermissionUiMethod {
+  PERMISSION_UI_METHOD_UNSPECIFIED = 0;
+
+  // 展示安装确认，用户接受则安装。
+  //
+  // 【长任务】：它内含一次 pkgmanager 的 INSTALL（本身就是 operation），前面
+  // 还要等用户读完权限清单再点。人的反应时间不属于任何 deadline 预算，因此
+  // returns_operation = true，以 ACCEPTED + operation_id 应答。
+  //
+  // needs_user_confirmation = false 而不是 true：【本方法就是那个确认框】。
+  // 置 true 会要求 nervud 在放行之前再要一次确认，而那次确认还得由同一个组件
+  // 显示——一个自己确认自己的环。真正的门在 INSTALL 那一侧，本方法穿过它。
+  //
+  // risk_class 取 CRITICAL_SAFETY，与 pkgmanager 的 INSTALL 一致：往系统里
+  // 引入新的可执行代码，后果的持久性远超一次运动指令。
+  PERMISSION_UI_METHOD_CONFIRM_INSTALL = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    required_permission: "perm.pkg.install"
+    risk_class: RISK_CLASS_CRITICAL_SAFETY
+    requires_control_lease: false
+    returns_operation: true
+    needs_user_confirmation: false
+    is_read_only: false
+    is_motion: false
+    request_type: "nervus.interface.permission.v1.ConfirmInstallRequest"
+    response_type: "nervus.interface.permission.v1.ConfirmInstallResult"
+    error_detail_type: "nervus.interface.permission.v1.PermissionUiErrorDetail"
+  }];
+
+  // 打开权限管理界面（某个包的，或全部包的）。
+  //
+  // 纯 UI 导航，不改任何状态：真正的授予变更由 permissionui 自己经
+  // permission.admin 完成，调用方无从干预，也拿不到结果。因此 is_read_only。
+  //
+  // 存在的理由是设置应用需要一个「管理此应用权限」的入口，而权限界面不能塞进
+  // 设置——它要 platform-release 签名才够得着 perm.permission.admin，
+  // 而系统软件仓库统一签 platform-systemapp（permissionui 是唯一例外）。
+  PERMISSION_UI_METHOD_OPEN_MANAGER = 2 [(nervus.ipc.v1.method_meta) = {
+    method_id: 2
+    required_permission: "perm.pkg.query"
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    is_read_only: true
+    is_motion: false
+    request_type: "nervus.interface.permission.v1.OpenManagerRequest"
+    response_type: ""
+    error_detail_type: "nervus.interface.permission.v1.PermissionUiErrorDetail"
+  }];
+}
+
+// =============================================================================
+// 消息
+// =============================================================================
+
+// ConfirmInstallRequest 请求「先向用户展示权限，再安装」。
+message ConfirmInstallRequest {
+  // .nspkg 在【调用方私有数据目录】中的相对路径。
+  //
+  // 语义与 pkgmanager.InstallRequest.nspkg_relpath 一致，理由也一致：绝对路径
+  // 等于让调用方指定文件系统上任意位置，而各 Provider 跑在自己的沙箱里
+  // （ProtectSystem=strict + 独立 UID），读不到别处。
+  //
+  // 【但这里多一层交接问题】：permissionui 与调用方是两个不同的 UID，它读不到
+  // 调用方的私有数据目录。因此包必须放在双方都能到的位置——服务间共享区
+  // （perm.storage.shared），本字段是相对于共享区中【调用方那个子目录】的路径。
+  //
+  // 必须是不含 ".." 的相对路径；permissionui 与 nervud 都会再校验一次。
+  string nspkg_relpath = 1;
+
+  // 交接目录的所属包 ID，即上面那个相对路径的基准。
+  //
+  // 【不由 permissionui 从调用方身份推断】：调用方身份是 nervud 在
+  // ExecutionContext 里给的可信事实，但共享区的子目录名是包 ID——把两者的
+  // 对应关系写进协议，比让 Provider 去猜一个目录名可靠。permissionui 会
+  // 核对它与调用方身份一致，不一致即拒绝（否则一个包能让确认框去读另一个包
+  // 准备好的安装包，把自己的安装伪装成对方的）。
+  string handoff_package_id = 2;
+}
+
+// ConfirmInstallResult 是确认 + 安装的终态（operation 的 result）。
+message ConfirmInstallResult {
+  // 用户是否接受了这次安装。false 时下面两个字段为空，且【没有发生安装】。
+  //
+  // 用户拒绝【不是错误】：它是一次正常完成的确认，答案是「不」。以 OK + accepted
+  // = false 表达而不是回一个失败码——失败码会让调用方分不清「用户说不」和
+  // 「确认框自己崩了」，而这两者在 UI 上该有完全不同的反应。
+  bool accepted = 1;
+
+  // 安装成功后的包 ID。accepted = false 时为空。
+  string package_id = 2;
+
+  // 用户实际同意的敏感权限 ID 列表，已由 nervud 落成 GRANTED。
+  //
+  // 是【最终事实的投影】而不是请求的回显：用户可以只勾一部分，nervud 还会
+  // 再过滤一遍（不在安装期授予集合里的、不是 USER_CONSENT 的，一律忽略）。
+  // 调用方应当以本字段为准，而不是自己记住给用户看过什么。
+  repeated string consented_permissions = 3;
+}
+
+// OpenManagerRequest 请求打开权限管理界面。
+message OpenManagerRequest {
+  // 只看这一个包的权限。空 = 打开总览（列出全部有可授予权限的包）。
+  string package_id = 1;
+}
+
+// =============================================================================
+// 错误细因
+// =============================================================================
+
+// PermissionUiErrorDetail 是本接口失败时的固定 detail 类型。
+//
+// 注意【用户拒绝不在这里】——那是 ConfirmInstallResult.accepted = false，一次
+// 成功的调用。本枚举里的每一条都是「这次确认没能正常进行到底」。
+message PermissionUiErrorDetail {
+  PermissionUiReason reason = 1;
+}
+
+enum PermissionUiReason {
+  // fail closed：未知原因按最保守处理（不重试）。
+  PERMISSION_UI_REASON_UNSPECIFIED = 0;
+
+  // 交接路径不合法：含 ".."、是绝对路径，或 handoff_package_id 与调用方身份
+  // 不一致。
+  PERMISSION_UI_REASON_HANDOFF_INVALID = 1;
+
+  // 交接位置上没有那个文件，或 permissionui 读不到它（调用方没把包放进共享区，
+  // 或没有 perm.storage.shared）。
+  PERMISSION_UI_REASON_HANDOFF_NOT_FOUND = 2;
+
+  // manifest 读不出来或结构不合法——【确认框在展示之前就需要它】：要列出权限
+  // 清单，必须先知道这个包申请了什么。这一条与 pkgmanager 的
+  // MANIFEST_INVALID 不同层：那是安装裁决拒绝，这是连问都问不出来。
+  PERMISSION_UI_REASON_MANIFEST_UNREADABLE = 3;
+
+  // 已经有一次确认正在进行。串行化是有意的：两个确认框同时开着，用户分不清
+  // 自己在给谁授权。
+  PERMISSION_UI_REASON_BUSY = 4;
+
+  // 没有可用的显示输出（无 DISPLAY，或窗口创建失败）。
+  //
+  // 【必须是一个明确的失败而不是静默放行】：显示不出确认框时，绝不能当成
+  // 「用户同意了」把包装上。
+  PERMISSION_UI_REASON_NO_DISPLAY = 5;
+
+  // 安装本身被 nervud 拒绝。细因在 pkgmanager 那一侧
+  // （PackageManagerErrorDetail），本枚举不复制一份——复制等于制造第二个
+  // 会漂移的真相源。
+  PERMISSION_UI_REASON_INSTALL_REJECTED = 6;
+}
