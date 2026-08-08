@@ -1195,13 +1195,9 @@ private static final long serialVersionUID = 0L;
    * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
    * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
    *
-   * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-   * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-   * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-   *
-   * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-   * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-   * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+   * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+   * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+   * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
    * </pre>
    *
    * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -1219,13 +1215,9 @@ private static final long serialVersionUID = 0L;
    * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
    * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
    *
-   * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-   * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-   * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-   *
-   * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-   * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-   * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+   * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+   * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+   * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
    * </pre>
    *
    * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -1246,13 +1238,9 @@ private static final long serialVersionUID = 0L;
    * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
    * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
    *
-   * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-   * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-   * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-   *
-   * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-   * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-   * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+   * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+   * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+   * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
    * </pre>
    *
    * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -7261,13 +7249,9 @@ private static final long serialVersionUID = 0L;
      * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
      * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
      *
-     * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-     * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-     * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-     *
-     * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-     * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-     * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+     * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+     * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+     * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
      * </pre>
      *
      * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -7285,13 +7269,9 @@ private static final long serialVersionUID = 0L;
      * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
      * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
      *
-     * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-     * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-     * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-     *
-     * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-     * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-     * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+     * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+     * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+     * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
      * </pre>
      *
      * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -7319,13 +7299,9 @@ private static final long serialVersionUID = 0L;
      * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
      * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
      *
-     * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-     * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-     * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-     *
-     * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-     * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-     * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+     * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+     * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+     * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
      * </pre>
      *
      * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -7351,13 +7327,9 @@ private static final long serialVersionUID = 0L;
      * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
      * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
      *
-     * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-     * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-     * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-     *
-     * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-     * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-     * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+     * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+     * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+     * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
      * </pre>
      *
      * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -7381,13 +7353,9 @@ private static final long serialVersionUID = 0L;
      * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
      * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
      *
-     * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-     * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-     * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-     *
-     * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-     * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-     * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+     * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+     * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+     * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
      * </pre>
      *
      * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -7420,13 +7388,9 @@ private static final long serialVersionUID = 0L;
      * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
      * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
      *
-     * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-     * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-     * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-     *
-     * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-     * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-     * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+     * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+     * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+     * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
      * </pre>
      *
      * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -7455,13 +7419,9 @@ private static final long serialVersionUID = 0L;
      * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
      * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
      *
-     * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-     * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-     * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-     *
-     * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-     * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-     * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+     * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+     * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+     * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
      * </pre>
      *
      * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -7477,13 +7437,9 @@ private static final long serialVersionUID = 0L;
      * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
      * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
      *
-     * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-     * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-     * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-     *
-     * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-     * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-     * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+     * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+     * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+     * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
      * </pre>
      *
      * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>
@@ -7507,13 +7463,9 @@ private static final long serialVersionUID = 0L;
      * 第一天起就是 Resource-scoped（§10.2），故 Acquire 直接携带 ResourceSelector。
      * 这四个分支只冻结 wire；conn 状态机如何处理是 nervud B1b 的活。
      *
-     * [KERNEL: NOT IMPLEMENTED] nervud 的 conn 状态机尚未接这四个分支，收到即按
-     * 未实现处理。注意内核侧 internal/control 的租约逻辑【已完整实现】，缺的只是
-     * wire 接线——所以这组是最接近可用的一组。SDK 不得发送。
-     *
-     * 影响面：运动类 operation（机械臂轨迹 / 回零 / 移到位姿）在 lease 接通前
-     * 一律被 nervud 前置拒绝（fail-closed）。但【短命令不受影响】——SetVelocity /
-     * Stop 走 Request/Response，nervud 的请求路径上没有 lease 检查。
+     * nervud 的 conn 状态机已接这四个分支（internal/ipc/conn.go handleAcquireControl
+     * / handleReleaseControl），内核侧 internal/control 的租约逻辑亦已完整实现。
+     * Acquire / Release 由调用方发送，两个 Result 由 nervud 回送（SDK 不得发送 Result）。
      * </pre>
      *
      * <code>.nervus.ipc.v1.AcquireControl acquire_control = 70 [json_name = "acquireControl"];</code>

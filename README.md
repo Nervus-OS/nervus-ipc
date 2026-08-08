@@ -79,13 +79,6 @@ JVM 侧的手写 SDK **不在本仓库**，在 `nervus-app-sdk`（`com.nervus.sd
 **改动纪律**：内核每接通一项，同一个 PR 里更新本表 + 对应 `.proto` 的
 `[KERNEL: NOT IMPLEMENTED]` / `[KERNEL: NOT WIRED]` 标记。两处不同步就等于没标。
 
-### 已知的踩坑风险
-
-`nervus-app-sdk`（Kotlin）**仍停在 protocol 1**，连不上 major 2 的 nervud——
-握手就会被拒，症状是「所有 App 都连不上」。它需要一次与本仓库 v2 对齐的升级：
-翻版本号、接上 `PublishEvent`、并核对 `SubscriptionManager` 的语义
-（订阅本身现已被内核支持，但 `sendCancel(...)` 仍然会被当成未实现 body 关连接）。
-
 ## 为什么多语言在同一个仓库
 
 因为 NRCP §22.6 要求：
