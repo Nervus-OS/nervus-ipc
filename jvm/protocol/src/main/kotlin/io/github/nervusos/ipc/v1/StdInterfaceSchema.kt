@@ -37,8 +37,10 @@ object StdInterfaceSchema {
             "57d93305011f8faac691eb73727336d276e967c47c3edef6c93daba9db2cd569",
         "nervus.interface.permission.admin@1" to
             "13417f2ef72f94093a4341313794a78169a0e313df6ff9f9d83599954a041d43",
+        "nervus.interface.permission.self@1" to
+            "ef2cf8c1a4bbac6a0be8ae4ca22bec0ab0919cfe22885268e28435e83fa1efe7",
         "nervus.interface.permission.ui@1" to
-            "f235cbbca0035fb0feeafdec4ee1c05b59dbf929cdb30c99ef0aff081c8ac110",
+            "8376df1536936b55c6ae1f50856120383581a6d4dd3375a8efc6aa1cd7a9553f",
         "nervus.interface.pkg.manager@1" to
             "1f93c26c6a854a40204e828dd8cc7c081965848f7d3f51bf9e580a3699cbd807",
         "nervus.interface.resource.directory@1" to

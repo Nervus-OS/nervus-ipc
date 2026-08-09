@@ -153,6 +153,11 @@ func All() []Interface {
 			MethodEnum: permissionv1.PermissionUiMethod(0).Descriptor(),
 		},
 		{
+			ID:         "nervus.interface.permission.self",
+			Major:      1,
+			MethodEnum: permissionv1.PermissionSelfMethod(0).Descriptor(),
+		},
+		{
 			ID:         "nervus.interface.camera",
 			Major:      1,
 			MethodEnum: camerav1.CameraMethod(0).Descriptor(),

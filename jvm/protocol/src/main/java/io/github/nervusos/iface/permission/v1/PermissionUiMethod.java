@@ -48,6 +48,44 @@ public enum PermissionUiMethod
    * <code>PERMISSION_UI_METHOD_OPEN_MANAGER = 2 [(.nervus.ipc.v1.method_meta) = { ... }</code>
    */
   PERMISSION_UI_METHOD_OPEN_MANAGER(2),
+  /**
+   * <pre>
+   * 向用户申请一批 USER_CONSENT 权限（调用方自己的）。
+   *
+   * 对应 Android 的 `requestPermissions`。配合 `permission.self` 的 Check 使用：
+   * 应用在调用需要敏感权限的方法【之前】先自查，没有再申请，有了直接调。
+   *
+   * # 为什么 required_permission 是空的
+   *
+   * 【申请自己的权限不是一种特权】。任何应用都必须能开口问——这条路是它唯一
+   * 的自救手段：USER_CONSENT 权限的运行期状态默认 NOT_REQUESTED，装完之后
+   * 若用户在权限管理里关掉了某条，应用就再也拿不回来，除非它能申请。
+   *
+   * 门是别处的，不在这里：
+   *
+   * 谁的权限     恒为调用方自己（由 nervud 的 caller 决定，请求里没有
+   * package_id 字段），因此无从替别人申请
+   * 哪些能申请   只有本包在 manifest 里申请过、且安装期裁决批了、且是
+   * USER_CONSENT 那一档的才可能成功；其余由 permissionui 与
+   * nervud 一律拒（SetGrantState 自带那两道前置校验）
+   * 给不给       用户决定。应用发起申请只能让弹窗出现，不能让它自己点确定
+   *
+   * 也就是说无门槛放行的仅仅是「弹一次窗问用户」这个动作本身。给它加一条权限
+   * 反而会造出一个环：那条权限如果也要用户同意，应用就得先有权限才能申请权限。
+   *
+   * # 为什么是长任务
+   *
+   * 它要等用户读完说明再点，而人的反应时间不属于任何 deadline 预算。与
+   * ConfirmInstall 同一理由。
+   *
+   * needs_user_confirmation = false：【本方法就是那个确认框】。置 true 会要求
+   * nervud 在放行之前再要一次确认，而那次确认还得由同一个组件显示——一个自己
+   * 确认自己的环。
+   * </pre>
+   *
+   * <code>PERMISSION_UI_METHOD_REQUEST_PERMISSION = 3 [(.nervus.ipc.v1.method_meta) = { ... }</code>
+   */
+  PERMISSION_UI_METHOD_REQUEST_PERMISSION(3),
   UNRECOGNIZED(-1),
   ;
 
@@ -98,6 +136,44 @@ public enum PermissionUiMethod
    * <code>PERMISSION_UI_METHOD_OPEN_MANAGER = 2 [(.nervus.ipc.v1.method_meta) = { ... }</code>
    */
   public static final int PERMISSION_UI_METHOD_OPEN_MANAGER_VALUE = 2;
+  /**
+   * <pre>
+   * 向用户申请一批 USER_CONSENT 权限（调用方自己的）。
+   *
+   * 对应 Android 的 `requestPermissions`。配合 `permission.self` 的 Check 使用：
+   * 应用在调用需要敏感权限的方法【之前】先自查，没有再申请，有了直接调。
+   *
+   * # 为什么 required_permission 是空的
+   *
+   * 【申请自己的权限不是一种特权】。任何应用都必须能开口问——这条路是它唯一
+   * 的自救手段：USER_CONSENT 权限的运行期状态默认 NOT_REQUESTED，装完之后
+   * 若用户在权限管理里关掉了某条，应用就再也拿不回来，除非它能申请。
+   *
+   * 门是别处的，不在这里：
+   *
+   * 谁的权限     恒为调用方自己（由 nervud 的 caller 决定，请求里没有
+   * package_id 字段），因此无从替别人申请
+   * 哪些能申请   只有本包在 manifest 里申请过、且安装期裁决批了、且是
+   * USER_CONSENT 那一档的才可能成功；其余由 permissionui 与
+   * nervud 一律拒（SetGrantState 自带那两道前置校验）
+   * 给不给       用户决定。应用发起申请只能让弹窗出现，不能让它自己点确定
+   *
+   * 也就是说无门槛放行的仅仅是「弹一次窗问用户」这个动作本身。给它加一条权限
+   * 反而会造出一个环：那条权限如果也要用户同意，应用就得先有权限才能申请权限。
+   *
+   * # 为什么是长任务
+   *
+   * 它要等用户读完说明再点，而人的反应时间不属于任何 deadline 预算。与
+   * ConfirmInstall 同一理由。
+   *
+   * needs_user_confirmation = false：【本方法就是那个确认框】。置 true 会要求
+   * nervud 在放行之前再要一次确认，而那次确认还得由同一个组件显示——一个自己
+   * 确认自己的环。
+   * </pre>
+   *
+   * <code>PERMISSION_UI_METHOD_REQUEST_PERMISSION = 3 [(.nervus.ipc.v1.method_meta) = { ... }</code>
+   */
+  public static final int PERMISSION_UI_METHOD_REQUEST_PERMISSION_VALUE = 3;
 
 
   public final int getNumber() {
@@ -127,6 +203,7 @@ public enum PermissionUiMethod
       case 0: return PERMISSION_UI_METHOD_UNSPECIFIED;
       case 1: return PERMISSION_UI_METHOD_CONFIRM_INSTALL;
       case 2: return PERMISSION_UI_METHOD_OPEN_MANAGER;
+      case 3: return PERMISSION_UI_METHOD_REQUEST_PERMISSION;
       default: return null;
     }
   }

@@ -120,6 +120,51 @@ enum PermissionUiMethod {
     response_type: ""
     error_detail_type: "nervus.interface.permission.v1.PermissionUiErrorDetail"
   }];
+
+  // 向用户申请一批 USER_CONSENT 权限（调用方自己的）。
+  //
+  // 对应 Android 的 `requestPermissions`。配合 `permission.self` 的 Check 使用：
+  // 应用在调用需要敏感权限的方法【之前】先自查，没有再申请，有了直接调。
+  //
+  // # 为什么 required_permission 是空的
+  //
+  // 【申请自己的权限不是一种特权】。任何应用都必须能开口问——这条路是它唯一
+  // 的自救手段：USER_CONSENT 权限的运行期状态默认 NOT_REQUESTED，装完之后
+  // 若用户在权限管理里关掉了某条，应用就再也拿不回来，除非它能申请。
+  //
+  // 门是别处的，不在这里：
+  //
+  //   谁的权限     恒为调用方自己（由 nervud 的 caller 决定，请求里没有
+  //                package_id 字段），因此无从替别人申请
+  //   哪些能申请   只有本包在 manifest 里申请过、且安装期裁决批了、且是
+  //                USER_CONSENT 那一档的才可能成功；其余由 permissionui 与
+  //                nervud 一律拒（SetGrantState 自带那两道前置校验）
+  //   给不给       用户决定。应用发起申请只能让弹窗出现，不能让它自己点确定
+  //
+  // 也就是说无门槛放行的仅仅是「弹一次窗问用户」这个动作本身。给它加一条权限
+  // 反而会造出一个环：那条权限如果也要用户同意，应用就得先有权限才能申请权限。
+  //
+  // # 为什么是长任务
+  //
+  // 它要等用户读完说明再点，而人的反应时间不属于任何 deadline 预算。与
+  // ConfirmInstall 同一理由。
+  //
+  // needs_user_confirmation = false：【本方法就是那个确认框】。置 true 会要求
+  // nervud 在放行之前再要一次确认，而那次确认还得由同一个组件显示——一个自己
+  // 确认自己的环。
+  PERMISSION_UI_METHOD_REQUEST_PERMISSION = 3 [(nervus.ipc.v1.method_meta) = {
+    method_id: 3
+    required_permission: ""
+    risk_class: RISK_CLASS_PRIVACY_SENSITIVE
+    requires_control_lease: false
+    returns_operation: true
+    needs_user_confirmation: false
+    is_read_only: false
+    is_motion: false
+    request_type: "nervus.interface.permission.v1.RequestPermissionRequest"
+    response_type: "nervus.interface.permission.v1.RequestPermissionResult"
+    error_detail_type: "nervus.interface.permission.v1.PermissionUiErrorDetail"
+  }];
 }
 
 // =============================================================================
@@ -175,6 +220,84 @@ message ConfirmInstallResult {
 message OpenManagerRequest {
   // 只看这一个包的权限。空 = 打开总览（列出全部有可授予权限的包）。
   string package_id = 1;
+}
+
+// RequestPermissionRequest 请求向用户申请一批权限。
+//
+// 【没有 package_id 字段】：目标恒为调用方自己。permissionui 从 nervud 给的
+// caller 取身份（那是 SO_PEERCRED 认出来的可信事实），不看请求里的自述——
+// 有那个字段的话，任何应用都能替别人申请权限，而用户在弹窗上看到的包名会是
+// 被冒充的那个。
+message RequestPermissionRequest {
+  // 要申请的权限 ID。
+  //
+  // 一次可以申请多条，弹窗把它们列在一起让用户逐条决定。批量而不是逐条弹窗
+  // 是有意的：一个功能往往同时需要摄像头与麦克风，连着弹两次窗会让用户在
+  // 不知道还有几次的情况下做决定，也更容易被无脑点掉。
+  //
+  // 空列表是错误（INVALID_ARGUMENT）而不是空操作：与 Check 不同，弹一个没有
+  // 任何条目的窗对用户没有意义，那只能是调用方的 bug。
+  repeated string permission_ids = 1;
+
+  // 面向用户的一句话理由，说明这个功能为什么需要这些权限。
+  //
+  // 【由应用给出而不是系统代写】：只有应用知道用户刚点了什么按钮。系统能说的
+  // 只有权限本身的文案（那来自 Catalog 定义，弹窗一定会显示），而
+  // 「为什么现在要」只有应用说得出。
+  //
+  // 可以为空，但强烈建议填。permissionui 会把它显示在权限清单上方，并明确标注
+  // 这是应用自称的理由——**它是不受信内容**，不能让它看起来像系统的声明。
+  string rationale = 2;
+}
+
+// RequestPermissionResult 是一次权限申请的终态（operation 的 result）。
+message RequestPermissionResult {
+  // 逐条结果。顺序按权限 ID 排序，与请求无关。
+  //
+  // 【一次申请可以部分成功】：用户完全可以同意摄像头、拒绝麦克风。调用方必须
+  // 逐条看，不能因为「这次申请成功了」就假设全部到手。
+  repeated RequestPermissionOutcome outcomes = 1;
+}
+
+// RequestPermissionOutcome 是一条权限的申请结果。
+message RequestPermissionOutcome {
+  string permission_id = 1;
+
+  // 申请之后此刻能不能用。语义与 SelfPermissionState.granted 一致，
+  // 也是**调用方唯一该拿来做分支的字段**。
+  //
+  // 它是【落库之后回读的事实】而不是用户点击的回显：用户点了同意，
+  // SetGrantState 仍可能失败（包刚被卸载、权限刚被降权）。以现状为准。
+  bool granted = 2;
+
+  // 用户的决定，或者这条为什么没被问。
+  PermissionRequestDecision decision = 3;
+}
+
+// PermissionRequestDecision 说明一条权限在这次申请里的去向。
+enum PermissionRequestDecision {
+  // fail closed：未知按「没同意」处理。
+  PERMISSION_REQUEST_DECISION_UNSPECIFIED = 0;
+
+  // 用户同意了。
+  PERMISSION_REQUEST_DECISION_GRANTED = 1;
+
+  // 用户在这次弹窗上拒绝了。可以在下次用户主动触发该功能时再申请。
+  PERMISSION_REQUEST_DECISION_DENIED = 2;
+
+  // 用户此前已永久拒绝，**这一条压根没出现在弹窗里**。
+  //
+  // 与 DENIED 分开是必须的：再申请一次不会弹窗、也不会改变结果。调用方应当
+  // 引导用户去权限管理界面（OpenManager），而不是重试。
+  PERMISSION_REQUEST_DECISION_DENIED_PERMANENT = 3;
+
+  // 申请它没有意义，**没有出现在弹窗里**。
+  //
+  // 对应 SelfPermissionState.requestable = false 的那些原因：本包没申请过它、
+  // 安装期裁决没批、或者它不是 USER_CONSENT（那一档不由用户决定）。
+  //
+  // 【不是错误】：一次申请里混进一条不可申请的权限，不该让另外几条也问不成。
+  PERMISSION_REQUEST_DECISION_NOT_REQUESTABLE = 4;
 }
 
 // =============================================================================

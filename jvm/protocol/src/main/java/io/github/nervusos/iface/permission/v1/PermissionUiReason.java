@@ -217,7 +217,7 @@ public enum PermissionUiReason
   }
   public static final com.google.protobuf.Descriptors.EnumDescriptor
       getDescriptor() {
-    return io.github.nervusos.iface.permission.v1.PermissionUiProto.getDescriptor().getEnumTypes().get(1);
+    return io.github.nervusos.iface.permission.v1.PermissionUiProto.getDescriptor().getEnumTypes().get(2);
   }
 
   private static final PermissionUiReason[] VALUES = values();

@@ -103,6 +103,38 @@ const (
 	// 设置——它要 platform-release 签名才够得着 perm.permission.admin，
 	// 而系统软件仓库统一签 platform-systemapp（permissionui 是唯一例外）。
 	PermissionUiMethod_PERMISSION_UI_METHOD_OPEN_MANAGER PermissionUiMethod = 2
+	// 向用户申请一批 USER_CONSENT 权限（调用方自己的）。
+	//
+	// 对应 Android 的 `requestPermissions`。配合 `permission.self` 的 Check 使用：
+	// 应用在调用需要敏感权限的方法【之前】先自查，没有再申请，有了直接调。
+	//
+	// # 为什么 required_permission 是空的
+	//
+	// 【申请自己的权限不是一种特权】。任何应用都必须能开口问——这条路是它唯一
+	// 的自救手段：USER_CONSENT 权限的运行期状态默认 NOT_REQUESTED，装完之后
+	// 若用户在权限管理里关掉了某条，应用就再也拿不回来，除非它能申请。
+	//
+	// 门是别处的，不在这里：
+	//
+	//	谁的权限     恒为调用方自己（由 nervud 的 caller 决定，请求里没有
+	//	             package_id 字段），因此无从替别人申请
+	//	哪些能申请   只有本包在 manifest 里申请过、且安装期裁决批了、且是
+	//	             USER_CONSENT 那一档的才可能成功；其余由 permissionui 与
+	//	             nervud 一律拒（SetGrantState 自带那两道前置校验）
+	//	给不给       用户决定。应用发起申请只能让弹窗出现，不能让它自己点确定
+	//
+	// 也就是说无门槛放行的仅仅是「弹一次窗问用户」这个动作本身。给它加一条权限
+	// 反而会造出一个环：那条权限如果也要用户同意，应用就得先有权限才能申请权限。
+	//
+	// # 为什么是长任务
+	//
+	// 它要等用户读完说明再点，而人的反应时间不属于任何 deadline 预算。与
+	// ConfirmInstall 同一理由。
+	//
+	// needs_user_confirmation = false：【本方法就是那个确认框】。置 true 会要求
+	// nervud 在放行之前再要一次确认，而那次确认还得由同一个组件显示——一个自己
+	// 确认自己的环。
+	PermissionUiMethod_PERMISSION_UI_METHOD_REQUEST_PERMISSION PermissionUiMethod = 3
 )
 
 // Enum value maps for PermissionUiMethod.
@@ -111,11 +143,13 @@ var (
 		0: "PERMISSION_UI_METHOD_UNSPECIFIED",
 		1: "PERMISSION_UI_METHOD_CONFIRM_INSTALL",
 		2: "PERMISSION_UI_METHOD_OPEN_MANAGER",
+		3: "PERMISSION_UI_METHOD_REQUEST_PERMISSION",
 	}
 	PermissionUiMethod_value = map[string]int32{
-		"PERMISSION_UI_METHOD_UNSPECIFIED":     0,
-		"PERMISSION_UI_METHOD_CONFIRM_INSTALL": 1,
-		"PERMISSION_UI_METHOD_OPEN_MANAGER":    2,
+		"PERMISSION_UI_METHOD_UNSPECIFIED":        0,
+		"PERMISSION_UI_METHOD_CONFIRM_INSTALL":    1,
+		"PERMISSION_UI_METHOD_OPEN_MANAGER":       2,
+		"PERMISSION_UI_METHOD_REQUEST_PERMISSION": 3,
 	}
 )
 
@@ -144,6 +178,75 @@ func (x PermissionUiMethod) Number() protoreflect.EnumNumber {
 // Deprecated: Use PermissionUiMethod.Descriptor instead.
 func (PermissionUiMethod) EnumDescriptor() ([]byte, []int) {
 	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP(), []int{0}
+}
+
+// PermissionRequestDecision 说明一条权限在这次申请里的去向。
+type PermissionRequestDecision int32
+
+const (
+	// fail closed：未知按「没同意」处理。
+	PermissionRequestDecision_PERMISSION_REQUEST_DECISION_UNSPECIFIED PermissionRequestDecision = 0
+	// 用户同意了。
+	PermissionRequestDecision_PERMISSION_REQUEST_DECISION_GRANTED PermissionRequestDecision = 1
+	// 用户在这次弹窗上拒绝了。可以在下次用户主动触发该功能时再申请。
+	PermissionRequestDecision_PERMISSION_REQUEST_DECISION_DENIED PermissionRequestDecision = 2
+	// 用户此前已永久拒绝，**这一条压根没出现在弹窗里**。
+	//
+	// 与 DENIED 分开是必须的：再申请一次不会弹窗、也不会改变结果。调用方应当
+	// 引导用户去权限管理界面（OpenManager），而不是重试。
+	PermissionRequestDecision_PERMISSION_REQUEST_DECISION_DENIED_PERMANENT PermissionRequestDecision = 3
+	// 申请它没有意义，**没有出现在弹窗里**。
+	//
+	// 对应 SelfPermissionState.requestable = false 的那些原因：本包没申请过它、
+	// 安装期裁决没批、或者它不是 USER_CONSENT（那一档不由用户决定）。
+	//
+	// 【不是错误】：一次申请里混进一条不可申请的权限，不该让另外几条也问不成。
+	PermissionRequestDecision_PERMISSION_REQUEST_DECISION_NOT_REQUESTABLE PermissionRequestDecision = 4
+)
+
+// Enum value maps for PermissionRequestDecision.
+var (
+	PermissionRequestDecision_name = map[int32]string{
+		0: "PERMISSION_REQUEST_DECISION_UNSPECIFIED",
+		1: "PERMISSION_REQUEST_DECISION_GRANTED",
+		2: "PERMISSION_REQUEST_DECISION_DENIED",
+		3: "PERMISSION_REQUEST_DECISION_DENIED_PERMANENT",
+		4: "PERMISSION_REQUEST_DECISION_NOT_REQUESTABLE",
+	}
+	PermissionRequestDecision_value = map[string]int32{
+		"PERMISSION_REQUEST_DECISION_UNSPECIFIED":      0,
+		"PERMISSION_REQUEST_DECISION_GRANTED":          1,
+		"PERMISSION_REQUEST_DECISION_DENIED":           2,
+		"PERMISSION_REQUEST_DECISION_DENIED_PERMANENT": 3,
+		"PERMISSION_REQUEST_DECISION_NOT_REQUESTABLE":  4,
+	}
+)
+
+func (x PermissionRequestDecision) Enum() *PermissionRequestDecision {
+	p := new(PermissionRequestDecision)
+	*p = x
+	return p
+}
+
+func (x PermissionRequestDecision) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PermissionRequestDecision) Descriptor() protoreflect.EnumDescriptor {
+	return file_nervus_interface_permission_v1_permission_ui_proto_enumTypes[1].Descriptor()
+}
+
+func (PermissionRequestDecision) Type() protoreflect.EnumType {
+	return &file_nervus_interface_permission_v1_permission_ui_proto_enumTypes[1]
+}
+
+func (x PermissionRequestDecision) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PermissionRequestDecision.Descriptor instead.
+func (PermissionRequestDecision) EnumDescriptor() ([]byte, []int) {
+	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP(), []int{1}
 }
 
 type PermissionUiReason int32
@@ -208,11 +311,11 @@ func (x PermissionUiReason) String() string {
 }
 
 func (PermissionUiReason) Descriptor() protoreflect.EnumDescriptor {
-	return file_nervus_interface_permission_v1_permission_ui_proto_enumTypes[1].Descriptor()
+	return file_nervus_interface_permission_v1_permission_ui_proto_enumTypes[2].Descriptor()
 }
 
 func (PermissionUiReason) Type() protoreflect.EnumType {
-	return &file_nervus_interface_permission_v1_permission_ui_proto_enumTypes[1]
+	return &file_nervus_interface_permission_v1_permission_ui_proto_enumTypes[2]
 }
 
 func (x PermissionUiReason) Number() protoreflect.EnumNumber {
@@ -221,7 +324,7 @@ func (x PermissionUiReason) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use PermissionUiReason.Descriptor instead.
 func (PermissionUiReason) EnumDescriptor() ([]byte, []int) {
-	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP(), []int{1}
+	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP(), []int{2}
 }
 
 // ConfirmInstallRequest 请求「先向用户展示权限，再安装」。
@@ -413,6 +516,196 @@ func (x *OpenManagerRequest) GetPackageId() string {
 	return ""
 }
 
+// RequestPermissionRequest 请求向用户申请一批权限。
+//
+// 【没有 package_id 字段】：目标恒为调用方自己。permissionui 从 nervud 给的
+// caller 取身份（那是 SO_PEERCRED 认出来的可信事实），不看请求里的自述——
+// 有那个字段的话，任何应用都能替别人申请权限，而用户在弹窗上看到的包名会是
+// 被冒充的那个。
+type RequestPermissionRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// 要申请的权限 ID。
+	//
+	// 一次可以申请多条，弹窗把它们列在一起让用户逐条决定。批量而不是逐条弹窗
+	// 是有意的：一个功能往往同时需要摄像头与麦克风，连着弹两次窗会让用户在
+	// 不知道还有几次的情况下做决定，也更容易被无脑点掉。
+	//
+	// 空列表是错误（INVALID_ARGUMENT）而不是空操作：与 Check 不同，弹一个没有
+	// 任何条目的窗对用户没有意义，那只能是调用方的 bug。
+	PermissionIds []string `protobuf:"bytes,1,rep,name=permission_ids,json=permissionIds,proto3" json:"permission_ids,omitempty"`
+	// 面向用户的一句话理由，说明这个功能为什么需要这些权限。
+	//
+	// 【由应用给出而不是系统代写】：只有应用知道用户刚点了什么按钮。系统能说的
+	// 只有权限本身的文案（那来自 Catalog 定义，弹窗一定会显示），而
+	// 「为什么现在要」只有应用说得出。
+	//
+	// 可以为空，但强烈建议填。permissionui 会把它显示在权限清单上方，并明确标注
+	// 这是应用自称的理由——**它是不受信内容**，不能让它看起来像系统的声明。
+	Rationale     string `protobuf:"bytes,2,opt,name=rationale,proto3" json:"rationale,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestPermissionRequest) Reset() {
+	*x = RequestPermissionRequest{}
+	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestPermissionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestPermissionRequest) ProtoMessage() {}
+
+func (x *RequestPermissionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestPermissionRequest.ProtoReflect.Descriptor instead.
+func (*RequestPermissionRequest) Descriptor() ([]byte, []int) {
+	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *RequestPermissionRequest) GetPermissionIds() []string {
+	if x != nil {
+		return x.PermissionIds
+	}
+	return nil
+}
+
+func (x *RequestPermissionRequest) GetRationale() string {
+	if x != nil {
+		return x.Rationale
+	}
+	return ""
+}
+
+// RequestPermissionResult 是一次权限申请的终态（operation 的 result）。
+type RequestPermissionResult struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// 逐条结果。顺序按权限 ID 排序，与请求无关。
+	//
+	// 【一次申请可以部分成功】：用户完全可以同意摄像头、拒绝麦克风。调用方必须
+	// 逐条看，不能因为「这次申请成功了」就假设全部到手。
+	Outcomes      []*RequestPermissionOutcome `protobuf:"bytes,1,rep,name=outcomes,proto3" json:"outcomes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestPermissionResult) Reset() {
+	*x = RequestPermissionResult{}
+	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestPermissionResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestPermissionResult) ProtoMessage() {}
+
+func (x *RequestPermissionResult) ProtoReflect() protoreflect.Message {
+	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestPermissionResult.ProtoReflect.Descriptor instead.
+func (*RequestPermissionResult) Descriptor() ([]byte, []int) {
+	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *RequestPermissionResult) GetOutcomes() []*RequestPermissionOutcome {
+	if x != nil {
+		return x.Outcomes
+	}
+	return nil
+}
+
+// RequestPermissionOutcome 是一条权限的申请结果。
+type RequestPermissionOutcome struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	PermissionId string                 `protobuf:"bytes,1,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"`
+	// 申请之后此刻能不能用。语义与 SelfPermissionState.granted 一致，
+	// 也是**调用方唯一该拿来做分支的字段**。
+	//
+	// 它是【落库之后回读的事实】而不是用户点击的回显：用户点了同意，
+	// SetGrantState 仍可能失败（包刚被卸载、权限刚被降权）。以现状为准。
+	Granted bool `protobuf:"varint,2,opt,name=granted,proto3" json:"granted,omitempty"`
+	// 用户的决定，或者这条为什么没被问。
+	Decision      PermissionRequestDecision `protobuf:"varint,3,opt,name=decision,proto3,enum=nervus.interface.permission.v1.PermissionRequestDecision" json:"decision,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestPermissionOutcome) Reset() {
+	*x = RequestPermissionOutcome{}
+	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestPermissionOutcome) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestPermissionOutcome) ProtoMessage() {}
+
+func (x *RequestPermissionOutcome) ProtoReflect() protoreflect.Message {
+	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestPermissionOutcome.ProtoReflect.Descriptor instead.
+func (*RequestPermissionOutcome) Descriptor() ([]byte, []int) {
+	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *RequestPermissionOutcome) GetPermissionId() string {
+	if x != nil {
+		return x.PermissionId
+	}
+	return ""
+}
+
+func (x *RequestPermissionOutcome) GetGranted() bool {
+	if x != nil {
+		return x.Granted
+	}
+	return false
+}
+
+func (x *RequestPermissionOutcome) GetDecision() PermissionRequestDecision {
+	if x != nil {
+		return x.Decision
+	}
+	return PermissionRequestDecision_PERMISSION_REQUEST_DECISION_UNSPECIFIED
+}
+
 // PermissionUiErrorDetail 是本接口失败时的固定 detail 类型。
 //
 // 注意【用户拒绝不在这里】——那是 ConfirmInstallResult.accepted = false，一次
@@ -426,7 +719,7 @@ type PermissionUiErrorDetail struct {
 
 func (x *PermissionUiErrorDetail) Reset() {
 	*x = PermissionUiErrorDetail{}
-	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[3]
+	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -438,7 +731,7 @@ func (x *PermissionUiErrorDetail) String() string {
 func (*PermissionUiErrorDetail) ProtoMessage() {}
 
 func (x *PermissionUiErrorDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[3]
+	mi := &file_nervus_interface_permission_v1_permission_ui_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -451,7 +744,7 @@ func (x *PermissionUiErrorDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PermissionUiErrorDetail.ProtoReflect.Descriptor instead.
 func (*PermissionUiErrorDetail) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP(), []int{3}
+	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *PermissionUiErrorDetail) GetReason() PermissionUiReason {
@@ -476,13 +769,29 @@ const file_nervus_interface_permission_v1_permission_ui_proto_rawDesc = "" +
 	"\x15consented_permissions\x18\x03 \x03(\tR\x14consentedPermissions\"3\n" +
 	"\x12OpenManagerRequest\x12\x1d\n" +
 	"\n" +
-	"package_id\x18\x01 \x01(\tR\tpackageId\"e\n" +
+	"package_id\x18\x01 \x01(\tR\tpackageId\"_\n" +
+	"\x18RequestPermissionRequest\x12%\n" +
+	"\x0epermission_ids\x18\x01 \x03(\tR\rpermissionIds\x12\x1c\n" +
+	"\trationale\x18\x02 \x01(\tR\trationale\"o\n" +
+	"\x17RequestPermissionResult\x12T\n" +
+	"\boutcomes\x18\x01 \x03(\v28.nervus.interface.permission.v1.RequestPermissionOutcomeR\boutcomes\"\xb0\x01\n" +
+	"\x18RequestPermissionOutcome\x12#\n" +
+	"\rpermission_id\x18\x01 \x01(\tR\fpermissionId\x12\x18\n" +
+	"\agranted\x18\x02 \x01(\bR\agranted\x12U\n" +
+	"\bdecision\x18\x03 \x01(\x0e29.nervus.interface.permission.v1.PermissionRequestDecisionR\bdecision\"e\n" +
 	"\x17PermissionUiErrorDetail\x12J\n" +
-	"\x06reason\x18\x01 \x01(\x0e22.nervus.interface.permission.v1.PermissionUiReasonR\x06reason*\xdb\x03\n" +
+	"\x06reason\x18\x01 \x01(\x0e22.nervus.interface.permission.v1.PermissionUiReasonR\x06reason*\xc1\x05\n" +
 	"\x12PermissionUiMethod\x12$\n" +
 	" PERMISSION_UI_METHOD_UNSPECIFIED\x10\x00\x12\xec\x01\n" +
 	"$PERMISSION_UI_METHOD_CONFIRM_INSTALL\x10\x01\x1a\xc1\x01\x8a\xa6\x1d\xbc\x01\b\x01\x12\x10perm.pkg.install\x18\x04(\x01:4nervus.interface.permission.v1.ConfirmInstallRequestB3nervus.interface.permission.v1.ConfirmInstallResult\x82\x016nervus.interface.permission.v1.PermissionUiErrorDetail\x12\xaf\x01\n" +
-	"!PERMISSION_UI_METHOD_OPEN_MANAGER\x10\x02\x1a\x87\x01\x8a\xa6\x1d\x82\x01\b\x02\x12\x0eperm.pkg.query\x18\x01:1nervus.interface.permission.v1.OpenManagerRequestH\x01\x82\x016nervus.interface.permission.v1.PermissionUiErrorDetail*\xad\x02\n" +
+	"!PERMISSION_UI_METHOD_OPEN_MANAGER\x10\x02\x1a\x87\x01\x8a\xa6\x1d\x82\x01\b\x02\x12\x0eperm.pkg.query\x18\x01:1nervus.interface.permission.v1.OpenManagerRequestH\x01\x82\x016nervus.interface.permission.v1.PermissionUiErrorDetail\x12\xe3\x01\n" +
+	"'PERMISSION_UI_METHOD_REQUEST_PERMISSION\x10\x03\x1a\xb5\x01\x8a\xa6\x1d\xb0\x01\b\x03\x18\x02(\x01:7nervus.interface.permission.v1.RequestPermissionRequestB6nervus.interface.permission.v1.RequestPermissionResult\x82\x016nervus.interface.permission.v1.PermissionUiErrorDetail*\xfc\x01\n" +
+	"\x19PermissionRequestDecision\x12+\n" +
+	"'PERMISSION_REQUEST_DECISION_UNSPECIFIED\x10\x00\x12'\n" +
+	"#PERMISSION_REQUEST_DECISION_GRANTED\x10\x01\x12&\n" +
+	"\"PERMISSION_REQUEST_DECISION_DENIED\x10\x02\x120\n" +
+	",PERMISSION_REQUEST_DECISION_DENIED_PERMANENT\x10\x03\x12/\n" +
+	"+PERMISSION_REQUEST_DECISION_NOT_REQUESTABLE\x10\x04*\xad\x02\n" +
 	"\x12PermissionUiReason\x12$\n" +
 	" PERMISSION_UI_REASON_UNSPECIFIED\x10\x00\x12(\n" +
 	"$PERMISSION_UI_REASON_HANDOFF_INVALID\x10\x01\x12*\n" +
@@ -505,23 +814,29 @@ func file_nervus_interface_permission_v1_permission_ui_proto_rawDescGZIP() []byt
 	return file_nervus_interface_permission_v1_permission_ui_proto_rawDescData
 }
 
-var file_nervus_interface_permission_v1_permission_ui_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_nervus_interface_permission_v1_permission_ui_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_nervus_interface_permission_v1_permission_ui_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_nervus_interface_permission_v1_permission_ui_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_nervus_interface_permission_v1_permission_ui_proto_goTypes = []any{
-	(PermissionUiMethod)(0),         // 0: nervus.interface.permission.v1.PermissionUiMethod
-	(PermissionUiReason)(0),         // 1: nervus.interface.permission.v1.PermissionUiReason
-	(*ConfirmInstallRequest)(nil),   // 2: nervus.interface.permission.v1.ConfirmInstallRequest
-	(*ConfirmInstallResult)(nil),    // 3: nervus.interface.permission.v1.ConfirmInstallResult
-	(*OpenManagerRequest)(nil),      // 4: nervus.interface.permission.v1.OpenManagerRequest
-	(*PermissionUiErrorDetail)(nil), // 5: nervus.interface.permission.v1.PermissionUiErrorDetail
+	(PermissionUiMethod)(0),          // 0: nervus.interface.permission.v1.PermissionUiMethod
+	(PermissionRequestDecision)(0),   // 1: nervus.interface.permission.v1.PermissionRequestDecision
+	(PermissionUiReason)(0),          // 2: nervus.interface.permission.v1.PermissionUiReason
+	(*ConfirmInstallRequest)(nil),    // 3: nervus.interface.permission.v1.ConfirmInstallRequest
+	(*ConfirmInstallResult)(nil),     // 4: nervus.interface.permission.v1.ConfirmInstallResult
+	(*OpenManagerRequest)(nil),       // 5: nervus.interface.permission.v1.OpenManagerRequest
+	(*RequestPermissionRequest)(nil), // 6: nervus.interface.permission.v1.RequestPermissionRequest
+	(*RequestPermissionResult)(nil),  // 7: nervus.interface.permission.v1.RequestPermissionResult
+	(*RequestPermissionOutcome)(nil), // 8: nervus.interface.permission.v1.RequestPermissionOutcome
+	(*PermissionUiErrorDetail)(nil),  // 9: nervus.interface.permission.v1.PermissionUiErrorDetail
 }
 var file_nervus_interface_permission_v1_permission_ui_proto_depIdxs = []int32{
-	1, // 0: nervus.interface.permission.v1.PermissionUiErrorDetail.reason:type_name -> nervus.interface.permission.v1.PermissionUiReason
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	8, // 0: nervus.interface.permission.v1.RequestPermissionResult.outcomes:type_name -> nervus.interface.permission.v1.RequestPermissionOutcome
+	1, // 1: nervus.interface.permission.v1.RequestPermissionOutcome.decision:type_name -> nervus.interface.permission.v1.PermissionRequestDecision
+	2, // 2: nervus.interface.permission.v1.PermissionUiErrorDetail.reason:type_name -> nervus.interface.permission.v1.PermissionUiReason
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_nervus_interface_permission_v1_permission_ui_proto_init() }
@@ -534,8 +849,8 @@ func file_nervus_interface_permission_v1_permission_ui_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nervus_interface_permission_v1_permission_ui_proto_rawDesc), len(file_nervus_interface_permission_v1_permission_ui_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   4,
+			NumEnums:      3,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

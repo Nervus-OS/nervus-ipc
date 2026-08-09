@@ -41,6 +41,21 @@ public final class PermissionUiProto {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_nervus_interface_permission_v1_OpenManagerRequest_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_nervus_interface_permission_v1_RequestPermissionRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_nervus_interface_permission_v1_RequestPermissionRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_nervus_interface_permission_v1_RequestPermissionResult_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_nervus_interface_permission_v1_RequestPermissionResult_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_nervus_interface_permission_v1_RequestPermissionOutcome_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_nervus_interface_permission_v1_RequestPermissionOutcome_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_nervus_interface_permission_v1_PermissionUiErrorDetail_descriptor;
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -64,33 +79,55 @@ public final class PermissionUiProto {
       "ed\022\035\n\npackage_id\030\002 \001(\tR\tpackageId\0223\n\025con" +
       "sented_permissions\030\003 \003(\tR\024consentedPermi" +
       "ssions\"3\n\022OpenManagerRequest\022\035\n\npackage_" +
-      "id\030\001 \001(\tR\tpackageId\"e\n\027PermissionUiError" +
-      "Detail\022J\n\006reason\030\001 \001(\01622.nervus.interfac" +
-      "e.permission.v1.PermissionUiReasonR\006reas" +
-      "on*\333\003\n\022PermissionUiMethod\022$\n PERMISSION_" +
-      "UI_METHOD_UNSPECIFIED\020\000\022\354\001\n$PERMISSION_U" +
-      "I_METHOD_CONFIRM_INSTALL\020\001\032\301\001\212\246\035\274\001\010\001\022\020pe" +
-      "rm.pkg.install\030\004(\001:4nervus.interface.per" +
-      "mission.v1.ConfirmInstallRequestB3nervus" +
-      ".interface.permission.v1.ConfirmInstallR" +
-      "esult\202\0016nervus.interface.permission.v1.P" +
-      "ermissionUiErrorDetail\022\257\001\n!PERMISSION_UI" +
-      "_METHOD_OPEN_MANAGER\020\002\032\207\001\212\246\035\202\001\010\002\022\016perm.p" +
-      "kg.query\030\001:1nervus.interface.permission." +
-      "v1.OpenManagerRequestH\001\202\0016nervus.interfa" +
-      "ce.permission.v1.PermissionUiErrorDetail" +
-      "*\255\002\n\022PermissionUiReason\022$\n PERMISSION_UI" +
-      "_REASON_UNSPECIFIED\020\000\022(\n$PERMISSION_UI_R" +
-      "EASON_HANDOFF_INVALID\020\001\022*\n&PERMISSION_UI" +
-      "_REASON_HANDOFF_NOT_FOUND\020\002\022,\n(PERMISSIO" +
-      "N_UI_REASON_MANIFEST_UNREADABLE\020\003\022\035\n\031PER" +
-      "MISSION_UI_REASON_BUSY\020\004\022#\n\037PERMISSION_U" +
-      "I_REASON_NO_DISPLAY\020\005\022)\n%PERMISSION_UI_R" +
-      "EASON_INSTALL_REJECTED\020\006B\213\001\n&io.github.n" +
-      "ervusos.iface.permission.v1B\021PermissionU" +
-      "iProtoP\001ZLgithub.com/nervus-os/nervus-ip" +
-      "c/protocol/interface/permissionv1;permis" +
-      "sionv1b\006proto3"
+      "id\030\001 \001(\tR\tpackageId\"_\n\030RequestPermission" +
+      "Request\022%\n\016permission_ids\030\001 \003(\tR\rpermiss" +
+      "ionIds\022\034\n\trationale\030\002 \001(\tR\trationale\"o\n\027" +
+      "RequestPermissionResult\022T\n\010outcomes\030\001 \003(" +
+      "\01328.nervus.interface.permission.v1.Reque" +
+      "stPermissionOutcomeR\010outcomes\"\260\001\n\030Reques" +
+      "tPermissionOutcome\022#\n\rpermission_id\030\001 \001(" +
+      "\tR\014permissionId\022\030\n\007granted\030\002 \001(\010R\007grante" +
+      "d\022U\n\010decision\030\003 \001(\01629.nervus.interface.p" +
+      "ermission.v1.PermissionRequestDecisionR\010" +
+      "decision\"e\n\027PermissionUiErrorDetail\022J\n\006r" +
+      "eason\030\001 \001(\01622.nervus.interface.permissio" +
+      "n.v1.PermissionUiReasonR\006reason*\301\005\n\022Perm" +
+      "issionUiMethod\022$\n PERMISSION_UI_METHOD_U" +
+      "NSPECIFIED\020\000\022\354\001\n$PERMISSION_UI_METHOD_CO" +
+      "NFIRM_INSTALL\020\001\032\301\001\212\246\035\274\001\010\001\022\020perm.pkg.inst" +
+      "all\030\004(\001:4nervus.interface.permission.v1." +
+      "ConfirmInstallRequestB3nervus.interface." +
+      "permission.v1.ConfirmInstallResult\202\0016ner" +
+      "vus.interface.permission.v1.PermissionUi" +
+      "ErrorDetail\022\257\001\n!PERMISSION_UI_METHOD_OPE" +
+      "N_MANAGER\020\002\032\207\001\212\246\035\202\001\010\002\022\016perm.pkg.query\030\001:" +
+      "1nervus.interface.permission.v1.OpenMana" +
+      "gerRequestH\001\202\0016nervus.interface.permissi" +
+      "on.v1.PermissionUiErrorDetail\022\343\001\n\'PERMIS" +
+      "SION_UI_METHOD_REQUEST_PERMISSION\020\003\032\265\001\212\246" +
+      "\035\260\001\010\003\030\002(\001:7nervus.interface.permission.v" +
+      "1.RequestPermissionRequestB6nervus.inter" +
+      "face.permission.v1.RequestPermissionResu" +
+      "lt\202\0016nervus.interface.permission.v1.Perm" +
+      "issionUiErrorDetail*\374\001\n\031PermissionReques" +
+      "tDecision\022+\n\'PERMISSION_REQUEST_DECISION" +
+      "_UNSPECIFIED\020\000\022\'\n#PERMISSION_REQUEST_DEC" +
+      "ISION_GRANTED\020\001\022&\n\"PERMISSION_REQUEST_DE" +
+      "CISION_DENIED\020\002\0220\n,PERMISSION_REQUEST_DE" +
+      "CISION_DENIED_PERMANENT\020\003\022/\n+PERMISSION_" +
+      "REQUEST_DECISION_NOT_REQUESTABLE\020\004*\255\002\n\022P" +
+      "ermissionUiReason\022$\n PERMISSION_UI_REASO" +
+      "N_UNSPECIFIED\020\000\022(\n$PERMISSION_UI_REASON_" +
+      "HANDOFF_INVALID\020\001\022*\n&PERMISSION_UI_REASO" +
+      "N_HANDOFF_NOT_FOUND\020\002\022,\n(PERMISSION_UI_R" +
+      "EASON_MANIFEST_UNREADABLE\020\003\022\035\n\031PERMISSIO" +
+      "N_UI_REASON_BUSY\020\004\022#\n\037PERMISSION_UI_REAS" +
+      "ON_NO_DISPLAY\020\005\022)\n%PERMISSION_UI_REASON_" +
+      "INSTALL_REJECTED\020\006B\213\001\n&io.github.nervuso" +
+      "s.iface.permission.v1B\021PermissionUiProto" +
+      "P\001ZLgithub.com/nervus-os/nervus-ipc/prot" +
+      "ocol/interface/permissionv1;permissionv1" +
+      "b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -115,8 +152,26 @@ public final class PermissionUiProto {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_permission_v1_OpenManagerRequest_descriptor,
         new java.lang.String[] { "PackageId", });
-    internal_static_nervus_interface_permission_v1_PermissionUiErrorDetail_descriptor =
+    internal_static_nervus_interface_permission_v1_RequestPermissionRequest_descriptor =
       getDescriptor().getMessageTypes().get(3);
+    internal_static_nervus_interface_permission_v1_RequestPermissionRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_nervus_interface_permission_v1_RequestPermissionRequest_descriptor,
+        new java.lang.String[] { "PermissionIds", "Rationale", });
+    internal_static_nervus_interface_permission_v1_RequestPermissionResult_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_nervus_interface_permission_v1_RequestPermissionResult_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_nervus_interface_permission_v1_RequestPermissionResult_descriptor,
+        new java.lang.String[] { "Outcomes", });
+    internal_static_nervus_interface_permission_v1_RequestPermissionOutcome_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_nervus_interface_permission_v1_RequestPermissionOutcome_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_nervus_interface_permission_v1_RequestPermissionOutcome_descriptor,
+        new java.lang.String[] { "PermissionId", "Granted", "Decision", });
+    internal_static_nervus_interface_permission_v1_PermissionUiErrorDetail_descriptor =
+      getDescriptor().getMessageTypes().get(6);
     internal_static_nervus_interface_permission_v1_PermissionUiErrorDetail_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_permission_v1_PermissionUiErrorDetail_descriptor,

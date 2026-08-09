@@ -1,0 +1,151 @@
+// Nervus 标准接口 · PermissionSelf@1  [REWRITE-v1 / experimental]
+//
+// [KERNEL: BUILTIN] 由 nervud 内建实现（internal/permissionadmin）。
+//
+// interface_id = nervus.interface.permission.self ，major = 1，experimental。
+//   实现者     = nervud（内核内建）
+//   Permission = 【无】—— 见下
+//
+// # 它是什么
+//
+// 「我有没有这条权限」的自查接口。对应 Android 的 `checkSelfPermission`：
+// 应用在调用一个需要敏感权限的方法【之前】先问一句，没有就去申请
+// （permission.ui 的 RequestPermission），有了再调。
+//
+// # 为什么必须是一个独立的 interface_id
+//
+// 不能作为方法挂到 `permission.admin` 上：那个接口的接口级门槛就是
+// `perm.permission.admin` 本身（SYSTEM_ONLY + platform-release 签名），普通应用
+// 连 Resolve 都过不去。而自查恰恰是【每个应用都要能做】的事。
+//
+// Catalog 的模型是一个 interface_id 对应一组 endpoint 候选，一个 interface_id
+// 也只能有一份门槛——要让门槛不同，就必须是两个接口。命名沿用 camera /
+// camera.config 的形态：同一个域下的两个面。
+//
+// # 为什么不设 required_permission
+//
+// 【自查本身不是一种特权】。它回答的只有「我自己有没有 X」，而调用方对自己的
+// 授权状态本来就有知情权——它随时可以试着调一次那个方法，从
+// PERMISSION_DENIED 里得到同一个答案，只是代价大得多（一次注定失败的调用，
+// 而且对有副作用的方法根本不能这么试）。
+//
+// 给它加一条权限的后果是：那条权限本身如果是 USER_CONSENT，就出现「要先有权限
+// 才能查自己有没有权限」的环；如果是 NORMAL，那这条权限等于人人都有，加它只是
+// 让每个应用的 manifest 多一行噪音。
+//
+// # 边界：只能查自己
+//
+// 请求里【没有 package_id 字段】，这是刻意的。目标包恒为调用方自己，由内核从
+// Dispatch 的 caller 取（internal/endpoint 的 BuiltinCall.Caller，那是 SO_PEERCRED
+// 认出来的身份，不是请求里的自述）。
+//
+// 有一个 package_id 字段的话，它就是一个「查任意包的授权状态」接口——那属于
+// permission.admin（`perm.permission.admin` + SYSTEM_ONLY），不该以无门槛的形式
+// 存在。权限布局是一份侦察情报：知道哪台机器上哪个应用拿到了摄像头，对攻击者
+// 有直接价值。
+//
+// [REWRITE-v1] experimental：冻结前允许破坏性调整（NRCP §22.6）。
+// 兼容规则（§10.12，冻结后生效）：已发布 method_id 与字段号永不复用；
+// 删除写 reserved；新增字段须有安全默认；枚举以 *_UNSPECIFIED = 0 起始并 fail closed。
+
+syntax = "proto3";
+
+package nervus.interface.permission.v1;
+
+import "nervus/ipc/v1/method_registry.proto";
+// GrantState：与 permission.admin 用同一个枚举。自查看到的状态与权限管理界面
+// 看到的必须是同一套取值，否则「设置里显示已拒绝」与「应用自查说未请求」会同时
+// 成立，而它们描述的是同一个事实。
+import "nervus/interface/permission/v1/permission.proto";
+
+option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/permissionv1;permissionv1";
+
+// 连字符在 Java 包名里非法，且 "interface" 是 Java 保留字——用 "iface" 段。
+option java_package = "io.github.nervusos.iface.permission.v1";
+option java_multiple_files = true;
+option java_outer_classname = "PermissionSelfProto";
+
+// =============================================================================
+// method_id 枚举 + Method Registry 元数据
+// =============================================================================
+
+enum PermissionSelfMethod {
+  PERMISSION_SELF_METHOD_UNSPECIFIED = 0;
+
+  // 查自己对一批权限的授予状态。
+  //
+  // 一次可以问多条：一个应用启动时通常要检查它申请的全部敏感权限，逐条一次
+  // 调用会让「检查权限」这件事的成本与权限数量成正比，而这是每次冷启动都要做
+  // 的事。批量还保证同一次回答来自同一个 Catalog 修订版——分多次问可能拿到
+  // 跨修订版的混合结果。
+  //
+  // 空列表回空列表，不是错误：一个不申请任何敏感权限的应用照样可以调它
+  // （通常是一段与权限数量无关的通用启动代码）。
+  PERMISSION_SELF_METHOD_CHECK = 1 [(nervus.ipc.v1.method_meta) = {
+    method_id: 1
+    required_permission: ""
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    is_read_only: true
+    is_motion: false
+    request_type: "nervus.interface.permission.v1.CheckSelfPermissionRequest"
+    response_type: "nervus.interface.permission.v1.CheckSelfPermissionResult"
+    error_detail_type: ""
+  }];
+}
+
+// =============================================================================
+// 消息
+// =============================================================================
+
+// CheckSelfPermissionRequest 问「我对这些权限各是什么状态」。
+//
+// 【没有 package_id 字段】：目标恒为调用方自己，见文件头「边界」一节。
+message CheckSelfPermissionRequest {
+  // 要查的权限 ID。重复项会被去重，未知 ID 也会得到一条结果
+  // （granted=false、requestable=false），而不是让整次调用失败——
+  // 一个拼错的权限名不该让应用连别的几条都查不到。
+  repeated string permission_ids = 1;
+}
+
+// CheckSelfPermissionResult 逐条回答。
+//
+// 顺序与请求无关（按权限 ID 排序），调用方应当按 permission_id 索引而不是按
+// 下标——请求里的重复项被去重之后，下标就对不上了。
+message CheckSelfPermissionResult {
+  repeated SelfPermissionState states = 1;
+}
+
+// SelfPermissionState 是一条权限对调用方自己的当前状态。
+message SelfPermissionState {
+  string permission_id = 1;
+
+  // 此刻能不能用。**这是应用唯一该拿来做分支的字段**。
+  //
+  // 它等价于内核 AllowedAt 的结论，已经把三件事合起来算过：在不在安装期授予
+  // 集合里、授予模式是哪一档、以及（USER_CONSENT 才有的）运行期状态是不是
+  // GRANTED。应用自己按 state 推断会漏掉前两项——一条 NORMAL 权限的
+  // state 恒为 UNSPECIFIED，但它装上即生效。
+  bool granted = 2;
+
+  // 运行期授予状态。仅 USER_CONSENT 那一档有意义，其余为 UNSPECIFIED。
+  //
+  // 给出它是为了让应用能区分「还没问过」与「用户明确拒绝了」——两者的正确
+  // 反应完全不同：前者该发起一次申请，后者不该（再问一次只会骚扰用户，而
+  // DENIED_PERMANENT 连弹窗都不会出现）。
+  GrantState state = 3;
+
+  // 申请了还有没有意义。
+  //
+  // false 表示 RequestPermission 对这一条【注定不会成功】，常见原因是：
+  // 本包压根没在 manifest 里申请过它、安装期裁决没批（信任不够/签名角色不对）、
+  // 它不是 USER_CONSENT（NORMAL 装上即生效，PRIVILEGED/SYSTEM_ONLY 由来源与
+  // 签名决定，都不是用户能改的）、或者用户已经永久拒绝。
+  //
+  // 【有这个字段是为了掐断一类真实的循环】：没有它，应用看到 granted=false
+  // 只能去申请，而申请立刻失败又不改变 granted，于是重试——一个开机就开始
+  // 空转、且每次都可能弹一次窗的循环。
+  bool requestable = 4;
+}
