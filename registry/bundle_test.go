@@ -42,8 +42,8 @@ func TestSchemaBundleBuildAndParse(t *testing.T) {
 	if schema.InterfaceID() != interfaceID || schema.Major() != 1 || schema.Methods() == nil {
 		t.Fatalf("parsed schema identity = %q@%d", schema.InterfaceID(), schema.Major())
 	}
-	if len(schema.Methods()) != 4 {
-		t.Fatalf("parsed %d methods, want 4", len(schema.Methods()))
+	if len(schema.Methods()) != 5 {
+		t.Fatalf("parsed %d methods, want 5", len(schema.Methods()))
 	}
 	install, ok := schema.Method(1)
 	if !ok || install.GetRequestType() != "nervus.interface.pkgmanager.v1.InstallRequest" {

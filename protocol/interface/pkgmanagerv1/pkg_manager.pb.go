@@ -41,7 +41,7 @@
 package pkgmanagerv1
 
 import (
-	_ "github.com/nervus-os/nervus-ipc/protocol/ipcv1"
+	ipcv1 "github.com/nervus-os/nervus-ipc/protocol/ipcv1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -84,6 +84,36 @@ const (
 	// safety.recovery）停不掉——那条底线在内核的编译期 switch 里，不由 Provider
 	// 判断。停用它们会让系统失去自我修复能力。
 	PackageManagerMethod_PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED PackageManagerMethod = 4
+	// 读一个【尚未安装】的 .nspkg，回它的身份与它申请的敏感权限。
+	//
+	// # 它补的是什么缺口
+	//
+	// 安装确认屏必须在装之前把「这个包要用摄像头和麦克风」摊给用户看。但包还没
+	// 装，它就不在 Catalog 里：permission.admin 的 ListGrants 与本接口的 LIST
+	// 都只覆盖【已装】包，谁都答不出一个待装包申请了什么。
+	//
+	// # 为什么这件事必须由内核做而不是确认屏自己读
+	//
+	// 确认屏持有 perm.permission.admin，是全系统唯一能改授予状态的进程。让它去
+	// 解 tar、解析一份【尚未验签】的 manifest、再查权限定义表，等于把不受信内容
+	// 的解析器放进权限最高的那个进程里——攻击面上最不该放解析器的位置。
+	//
+	// nervud 为了 INSTALL 本来就要解包、验签、按 Catalog 裁决权限。把那批已经
+	// 解析好的事实读出来是顺手的，而解析始终留在内核一侧。
+	//
+	// # 只读到什么程度
+	//
+	// 【不落任何状态】：不注册 Entry、不分配 UID、不改 Catalog、不建 staging 之外
+	// 的任何东西。同一个包可以 INSPECT 任意多次，结果相同。
+	//
+	// 权限取 perm.pkg.query 而不是 perm.pkg.install：读一个包申请了什么，与有权
+	// 安装它是两件事。设置类应用可以据此展示「这个包要什么权限」而不必具备装包
+	// 能力。
+	//
+	// 不是 operation：解包与验签有成本，但它【不等人】——没有用户交互，普通
+	// deadline 足够。这与 permission.ui 的 ConfirmInstall 正相反，那个要等用户
+	// 读完清单再点。
+	PackageManagerMethod_PACKAGE_MANAGER_METHOD_INSPECT PackageManagerMethod = 5
 )
 
 // Enum value maps for PackageManagerMethod.
@@ -94,6 +124,7 @@ var (
 		2: "PACKAGE_MANAGER_METHOD_UNINSTALL",
 		3: "PACKAGE_MANAGER_METHOD_LIST",
 		4: "PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED",
+		5: "PACKAGE_MANAGER_METHOD_INSPECT",
 	}
 	PackageManagerMethod_value = map[string]int32{
 		"PACKAGE_MANAGER_METHOD_UNSPECIFIED":           0,
@@ -101,6 +132,7 @@ var (
 		"PACKAGE_MANAGER_METHOD_UNINSTALL":             2,
 		"PACKAGE_MANAGER_METHOD_LIST":                  3,
 		"PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED": 4,
+		"PACKAGE_MANAGER_METHOD_INSPECT":               5,
 	}
 )
 
@@ -533,6 +565,228 @@ func (x *SetComponentEnabledRequest) GetEnabled() bool {
 	return false
 }
 
+// InspectRequest 请求读出一个【尚未安装】的 .nspkg 声明了什么。
+type InspectRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// .nspkg 的相对路径。语义与 InstallRequest.nspkg_relpath 完全一致，
+	// 校验也一致（不含 ".."、非绝对路径）。
+	//
+	// 【刻意与 InstallRequest 用同一个交接约定】：确认屏先 Inspect 再 Install，
+	// 两次指的必须是同一个文件。若两者的路径语义不同，中间就出现一个「看的是
+	// A、装的是 B」的缝——而用户看到的权限清单来自 A。
+	NspkgRelpath  string `protobuf:"bytes,1,opt,name=nspkg_relpath,json=nspkgRelpath,proto3" json:"nspkg_relpath,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InspectRequest) Reset() {
+	*x = InspectRequest{}
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InspectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InspectRequest) ProtoMessage() {}
+
+func (x *InspectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InspectRequest.ProtoReflect.Descriptor instead.
+func (*InspectRequest) Descriptor() ([]byte, []int) {
+	return file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *InspectRequest) GetNspkgRelpath() string {
+	if x != nil {
+		return x.NspkgRelpath
+	}
+	return ""
+}
+
+// InspectResult 是一个待装包的【只读声明投影】。
+//
+// # 它为什么必须由内核给出
+//
+// 唯一知道「这个包申请了什么」的地方是包内的 manifest，而它在验签之前是
+// 不受信内容。让确认屏自己解包、解析 manifest、再查权限定义表，等于把一个
+// 不受信内容的解析器放进持有 perm.permission.admin 的进程里——那是全系统
+// 最不该放解析器的地方。
+//
+// 装包路径上 nervud 本来就要解包验签，把「解析后的声明」读出来是顺手的事。
+//
+// # 它不是安装裁决的预演
+//
+// 本方法【不回答「这个包能不能装」】：签名、digest、ABI、防降级、权限交集
+// 都在 Install 那一侧裁决，而那些裁决依赖的状态（已装版本、签名血统）可能在
+// Inspect 与 Install 之间变化。把裁决结果提前给出去，会让调用方以为
+// 「Inspect 通过 = Install 会成功」，而那不成立。
+type InspectResult struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// 包自称的身份。来自 manifest，【已通过验签】但尚未经过安装裁决。
+	PackageId   string `protobuf:"bytes,1,opt,name=package_id,json=packageId,proto3" json:"package_id,omitempty"`
+	Version     string `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
+	VersionCode uint64 `protobuf:"varint,3,opt,name=version_code,json=versionCode,proto3" json:"version_code,omitempty"`
+	// 本包申请的、需要用户点头的敏感权限。
+	//
+	// 【已由内核过滤成 USER_CONSENT 这一档】：其它授予模式没有「要不要同意」
+	// 这回事——NORMAL 装上即生效，PRIVILEGED / SYSTEM_ONLY 由来源与签名决定。
+	// 把它们混进来只会让确认屏显示一堆用户无从选择的条目。
+	//
+	// 空列表是常见且正常的：一个不申请任何敏感权限的包，确认屏只需要问
+	// 「装不装」。
+	ConsentPermissions []*RequestedPermission `protobuf:"bytes,4,rep,name=consent_permissions,json=consentPermissions,proto3" json:"consent_permissions,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *InspectResult) Reset() {
+	*x = InspectResult{}
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InspectResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InspectResult) ProtoMessage() {}
+
+func (x *InspectResult) ProtoReflect() protoreflect.Message {
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InspectResult.ProtoReflect.Descriptor instead.
+func (*InspectResult) Descriptor() ([]byte, []int) {
+	return file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *InspectResult) GetPackageId() string {
+	if x != nil {
+		return x.PackageId
+	}
+	return ""
+}
+
+func (x *InspectResult) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *InspectResult) GetVersionCode() uint64 {
+	if x != nil {
+		return x.VersionCode
+	}
+	return 0
+}
+
+func (x *InspectResult) GetConsentPermissions() []*RequestedPermission {
+	if x != nil {
+		return x.ConsentPermissions
+	}
+	return nil
+}
+
+// RequestedPermission 是待装包申请的一条敏感权限。
+//
+// 与 permission.v1.PermissionGrant 形状刻意一致（ID + 中英文案 + 风险级），
+// 差别只是这里【没有 state】：包还没装，也就还没有运行期授予状态可言。
+// 形状一致让确认屏与权限管理屏能共用同一套渲染逻辑。
+type RequestedPermission struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	PermissionId string                 `protobuf:"bytes,1,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"`
+	// 面向用户的名称与说明，来自 Catalog 的权限定义。
+	//
+	// 【由内核给出而不是界面自己写死】：第三方包可以定义自己的权限，
+	// 界面不可能预先知道它们的文案。
+	DisplayName   *ipcv1.LocalizedText `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Description   *ipcv1.LocalizedText `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	RiskClass     ipcv1.RiskClass      `protobuf:"varint,4,opt,name=risk_class,json=riskClass,proto3,enum=nervus.ipc.v1.RiskClass" json:"risk_class,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestedPermission) Reset() {
+	*x = RequestedPermission{}
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestedPermission) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestedPermission) ProtoMessage() {}
+
+func (x *RequestedPermission) ProtoReflect() protoreflect.Message {
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestedPermission.ProtoReflect.Descriptor instead.
+func (*RequestedPermission) Descriptor() ([]byte, []int) {
+	return file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *RequestedPermission) GetPermissionId() string {
+	if x != nil {
+		return x.PermissionId
+	}
+	return ""
+}
+
+func (x *RequestedPermission) GetDisplayName() *ipcv1.LocalizedText {
+	if x != nil {
+		return x.DisplayName
+	}
+	return nil
+}
+
+func (x *RequestedPermission) GetDescription() *ipcv1.LocalizedText {
+	if x != nil {
+		return x.Description
+	}
+	return nil
+}
+
+func (x *RequestedPermission) GetRiskClass() ipcv1.RiskClass {
+	if x != nil {
+		return x.RiskClass
+	}
+	return ipcv1.RiskClass(0)
+}
+
 // PackageInfo 是一个已装 Package 的【对外投影】。
 //
 // 刻意不含：安装路径、UID、签名密钥、digest 清单。这些是内核的内部状态，
@@ -559,7 +813,7 @@ type PackageInfo struct {
 
 func (x *PackageInfo) Reset() {
 	*x = PackageInfo{}
-	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[6]
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -571,7 +825,7 @@ func (x *PackageInfo) String() string {
 func (*PackageInfo) ProtoMessage() {}
 
 func (x *PackageInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[6]
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -584,7 +838,7 @@ func (x *PackageInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PackageInfo.ProtoReflect.Descriptor instead.
 func (*PackageInfo) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDescGZIP(), []int{6}
+	return file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *PackageInfo) GetPackageId() string {
@@ -651,7 +905,7 @@ type PackageManagerErrorDetail struct {
 
 func (x *PackageManagerErrorDetail) Reset() {
 	*x = PackageManagerErrorDetail{}
-	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[7]
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -663,7 +917,7 @@ func (x *PackageManagerErrorDetail) String() string {
 func (*PackageManagerErrorDetail) ProtoMessage() {}
 
 func (x *PackageManagerErrorDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[7]
+	mi := &file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -676,7 +930,7 @@ func (x *PackageManagerErrorDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PackageManagerErrorDetail.ProtoReflect.Descriptor instead.
 func (*PackageManagerErrorDetail) Descriptor() ([]byte, []int) {
-	return file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDescGZIP(), []int{7}
+	return file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *PackageManagerErrorDetail) GetReason() PackageManagerReason {
@@ -690,7 +944,7 @@ var File_nervus_interface_pkgmanager_v1_pkg_manager_proto protoreflect.FileDescr
 
 const file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc = "" +
 	"\n" +
-	"0nervus/interface/pkgmanager/v1/pkg_manager.proto\x12\x1enervus.interface.pkgmanager.v1\x1a#nervus/ipc/v1/method_registry.proto\"j\n" +
+	"0nervus/interface/pkgmanager/v1/pkg_manager.proto\x12\x1enervus.interface.pkgmanager.v1\x1a#nervus/ipc/v1/method_registry.proto\x1a'nervus/ipc/v1/provider_descriptor.proto\"j\n" +
 	"\x0eInstallRequest\x12#\n" +
 	"\rnspkg_relpath\x18\x01 \x01(\tR\fnspkgRelpath\x123\n" +
 	"\x15consented_permissions\x18\x02 \x03(\tR\x14consentedPermissions\"V\n" +
@@ -707,7 +961,21 @@ const file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc = "" +
 	"\n" +
 	"package_id\x18\x01 \x01(\tR\tpackageId\x12!\n" +
 	"\fcomponent_id\x18\x02 \x01(\tR\vcomponentId\x12\x18\n" +
-	"\aenabled\x18\x03 \x01(\bR\aenabled\"\xf9\x01\n" +
+	"\aenabled\x18\x03 \x01(\bR\aenabled\"5\n" +
+	"\x0eInspectRequest\x12#\n" +
+	"\rnspkg_relpath\x18\x01 \x01(\tR\fnspkgRelpath\"\xd1\x01\n" +
+	"\rInspectResult\x12\x1d\n" +
+	"\n" +
+	"package_id\x18\x01 \x01(\tR\tpackageId\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\tR\aversion\x12!\n" +
+	"\fversion_code\x18\x03 \x01(\x04R\vversionCode\x12d\n" +
+	"\x13consent_permissions\x18\x04 \x03(\v23.nervus.interface.pkgmanager.v1.RequestedPermissionR\x12consentPermissions\"\xf4\x01\n" +
+	"\x13RequestedPermission\x12#\n" +
+	"\rpermission_id\x18\x01 \x01(\tR\fpermissionId\x12?\n" +
+	"\fdisplay_name\x18\x02 \x01(\v2\x1c.nervus.ipc.v1.LocalizedTextR\vdisplayName\x12>\n" +
+	"\vdescription\x18\x03 \x01(\v2\x1c.nervus.ipc.v1.LocalizedTextR\vdescription\x127\n" +
+	"\n" +
+	"risk_class\x18\x04 \x01(\x0e2\x18.nervus.ipc.v1.RiskClassR\triskClass\"\xf9\x01\n" +
 	"\vPackageInfo\x12\x1d\n" +
 	"\n" +
 	"package_id\x18\x01 \x01(\tR\tpackageId\x12\x18\n" +
@@ -718,13 +986,14 @@ const file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc = "" +
 	"\x13granted_permissions\x18\x06 \x03(\tR\x12grantedPermissions\x12/\n" +
 	"\x13disabled_components\x18\a \x03(\tR\x12disabledComponents\"i\n" +
 	"\x19PackageManagerErrorDetail\x12L\n" +
-	"\x06reason\x18\x01 \x01(\x0e24.nervus.interface.pkgmanager.v1.PackageManagerReasonR\x06reason*\xeb\x06\n" +
+	"\x06reason\x18\x01 \x01(\x0e24.nervus.interface.pkgmanager.v1.PackageManagerReasonR\x06reason*\xc6\b\n" +
 	"\x14PackageManagerMethod\x12&\n" +
 	"\"PACKAGE_MANAGER_METHOD_UNSPECIFIED\x10\x00\x12\xdc\x01\n" +
 	"\x1ePACKAGE_MANAGER_METHOD_INSTALL\x10\x01\x1a\xb7\x01\x8a\xa6\x1d\xb2\x01\b\x01\x12\x10perm.pkg.install\x18\x04(\x010\x01:-nervus.interface.pkgmanager.v1.InstallRequestB,nervus.interface.pkgmanager.v1.InstallResult\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail\x12\xb0\x01\n" +
 	" PACKAGE_MANAGER_METHOD_UNINSTALL\x10\x02\x1a\x89\x01\x8a\xa6\x1d\x84\x01\b\x02\x12\x10perm.pkg.install\x18\x040\x01:/nervus.interface.pkgmanager.v1.UninstallRequest\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail\x12\xcf\x01\n" +
 	"\x1bPACKAGE_MANAGER_METHOD_LIST\x10\x03\x1a\xad\x01\x8a\xa6\x1d\xa8\x01\b\x03\x12\x0eperm.pkg.query\x18\x01:*nervus.interface.pkgmanager.v1.ListRequestB)nervus.interface.pkgmanager.v1.ListResultH\x01\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail\x12\xc6\x01\n" +
-	",PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED\x10\x04\x1a\x93\x01\x8a\xa6\x1d\x8e\x01\b\x04\x12\x10perm.pkg.install\x18\x040\x01:9nervus.interface.pkgmanager.v1.SetComponentEnabledRequest\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail*\xbf\x03\n" +
+	",PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED\x10\x04\x1a\x93\x01\x8a\xa6\x1d\x8e\x01\b\x04\x12\x10perm.pkg.install\x18\x040\x01:9nervus.interface.pkgmanager.v1.SetComponentEnabledRequest\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail\x12\xd8\x01\n" +
+	"\x1ePACKAGE_MANAGER_METHOD_INSPECT\x10\x05\x1a\xb3\x01\x8a\xa6\x1d\xae\x01\b\x05\x12\x0eperm.pkg.query\x18\x01:-nervus.interface.pkgmanager.v1.InspectRequestB,nervus.interface.pkgmanager.v1.InspectResultH\x01\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail*\xbf\x03\n" +
 	"\x14PackageManagerReason\x12&\n" +
 	"\"PACKAGE_MANAGER_REASON_UNSPECIFIED\x10\x00\x12,\n" +
 	"(PACKAGE_MANAGER_REASON_SIGNATURE_INVALID\x10\x01\x12*\n" +
@@ -751,7 +1020,7 @@ func file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDescGZIP() []byte 
 }
 
 var file_nervus_interface_pkgmanager_v1_pkg_manager_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_nervus_interface_pkgmanager_v1_pkg_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_nervus_interface_pkgmanager_v1_pkg_manager_proto_goTypes = []any{
 	(PackageManagerMethod)(0),          // 0: nervus.interface.pkgmanager.v1.PackageManagerMethod
 	(PackageManagerReason)(0),          // 1: nervus.interface.pkgmanager.v1.PackageManagerReason
@@ -761,18 +1030,27 @@ var file_nervus_interface_pkgmanager_v1_pkg_manager_proto_goTypes = []any{
 	(*ListRequest)(nil),                // 5: nervus.interface.pkgmanager.v1.ListRequest
 	(*ListResult)(nil),                 // 6: nervus.interface.pkgmanager.v1.ListResult
 	(*SetComponentEnabledRequest)(nil), // 7: nervus.interface.pkgmanager.v1.SetComponentEnabledRequest
-	(*PackageInfo)(nil),                // 8: nervus.interface.pkgmanager.v1.PackageInfo
-	(*PackageManagerErrorDetail)(nil),  // 9: nervus.interface.pkgmanager.v1.PackageManagerErrorDetail
+	(*InspectRequest)(nil),             // 8: nervus.interface.pkgmanager.v1.InspectRequest
+	(*InspectResult)(nil),              // 9: nervus.interface.pkgmanager.v1.InspectResult
+	(*RequestedPermission)(nil),        // 10: nervus.interface.pkgmanager.v1.RequestedPermission
+	(*PackageInfo)(nil),                // 11: nervus.interface.pkgmanager.v1.PackageInfo
+	(*PackageManagerErrorDetail)(nil),  // 12: nervus.interface.pkgmanager.v1.PackageManagerErrorDetail
+	(*ipcv1.LocalizedText)(nil),        // 13: nervus.ipc.v1.LocalizedText
+	(ipcv1.RiskClass)(0),               // 14: nervus.ipc.v1.RiskClass
 }
 var file_nervus_interface_pkgmanager_v1_pkg_manager_proto_depIdxs = []int32{
-	8, // 0: nervus.interface.pkgmanager.v1.InstallResult.package:type_name -> nervus.interface.pkgmanager.v1.PackageInfo
-	8, // 1: nervus.interface.pkgmanager.v1.ListResult.packages:type_name -> nervus.interface.pkgmanager.v1.PackageInfo
-	1, // 2: nervus.interface.pkgmanager.v1.PackageManagerErrorDetail.reason:type_name -> nervus.interface.pkgmanager.v1.PackageManagerReason
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	11, // 0: nervus.interface.pkgmanager.v1.InstallResult.package:type_name -> nervus.interface.pkgmanager.v1.PackageInfo
+	11, // 1: nervus.interface.pkgmanager.v1.ListResult.packages:type_name -> nervus.interface.pkgmanager.v1.PackageInfo
+	10, // 2: nervus.interface.pkgmanager.v1.InspectResult.consent_permissions:type_name -> nervus.interface.pkgmanager.v1.RequestedPermission
+	13, // 3: nervus.interface.pkgmanager.v1.RequestedPermission.display_name:type_name -> nervus.ipc.v1.LocalizedText
+	13, // 4: nervus.interface.pkgmanager.v1.RequestedPermission.description:type_name -> nervus.ipc.v1.LocalizedText
+	14, // 5: nervus.interface.pkgmanager.v1.RequestedPermission.risk_class:type_name -> nervus.ipc.v1.RiskClass
+	1,  // 6: nervus.interface.pkgmanager.v1.PackageManagerErrorDetail.reason:type_name -> nervus.interface.pkgmanager.v1.PackageManagerReason
+	7,  // [7:7] is the sub-list for method output_type
+	7,  // [7:7] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_nervus_interface_pkgmanager_v1_pkg_manager_proto_init() }
@@ -786,7 +1064,7 @@ func file_nervus_interface_pkgmanager_v1_pkg_manager_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc), len(file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   8,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

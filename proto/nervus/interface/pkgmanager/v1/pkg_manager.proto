@@ -37,6 +37,10 @@ syntax = "proto3";
 package nervus.interface.pkgmanager.v1;
 
 import "nervus/ipc/v1/method_registry.proto";
+// LocalizedText：Inspect 回给确认屏的权限文案。文案由内核从 Catalog 的权限
+// 定义里取，界面不自己写死——第三方包可以定义自己的权限，界面不可能预先
+// 知道它们的名称与说明。
+import "nervus/ipc/v1/provider_descriptor.proto";
 
 option go_package = "github.com/nervus-os/nervus-ipc/protocol/interface/pkgmanagerv1;pkgmanagerv1";
 
@@ -127,6 +131,49 @@ enum PackageManagerMethod {
     response_type: ""
     error_detail_type: "nervus.interface.pkgmanager.v1.PackageManagerErrorDetail"
   }];
+
+  // 读一个【尚未安装】的 .nspkg，回它的身份与它申请的敏感权限。
+  //
+  // # 它补的是什么缺口
+  //
+  // 安装确认屏必须在装之前把「这个包要用摄像头和麦克风」摊给用户看。但包还没
+  // 装，它就不在 Catalog 里：permission.admin 的 ListGrants 与本接口的 LIST
+  // 都只覆盖【已装】包，谁都答不出一个待装包申请了什么。
+  //
+  // # 为什么这件事必须由内核做而不是确认屏自己读
+  //
+  // 确认屏持有 perm.permission.admin，是全系统唯一能改授予状态的进程。让它去
+  // 解 tar、解析一份【尚未验签】的 manifest、再查权限定义表，等于把不受信内容
+  // 的解析器放进权限最高的那个进程里——攻击面上最不该放解析器的位置。
+  //
+  // nervud 为了 INSTALL 本来就要解包、验签、按 Catalog 裁决权限。把那批已经
+  // 解析好的事实读出来是顺手的，而解析始终留在内核一侧。
+  //
+  // # 只读到什么程度
+  //
+  // 【不落任何状态】：不注册 Entry、不分配 UID、不改 Catalog、不建 staging 之外
+  // 的任何东西。同一个包可以 INSPECT 任意多次，结果相同。
+  //
+  // 权限取 perm.pkg.query 而不是 perm.pkg.install：读一个包申请了什么，与有权
+  // 安装它是两件事。设置类应用可以据此展示「这个包要什么权限」而不必具备装包
+  // 能力。
+  //
+  // 不是 operation：解包与验签有成本，但它【不等人】——没有用户交互，普通
+  // deadline 足够。这与 permission.ui 的 ConfirmInstall 正相反，那个要等用户
+  // 读完清单再点。
+  PACKAGE_MANAGER_METHOD_INSPECT = 5 [(nervus.ipc.v1.method_meta) = {
+    method_id: 5
+    required_permission: "perm.pkg.query"
+    risk_class: RISK_CLASS_NORMAL
+    requires_control_lease: false
+    returns_operation: false
+    needs_user_confirmation: false
+    is_read_only: true
+    is_motion: false
+    request_type: "nervus.interface.pkgmanager.v1.InspectRequest"
+    response_type: "nervus.interface.pkgmanager.v1.InspectResult"
+    error_detail_type: "nervus.interface.pkgmanager.v1.PackageManagerErrorDetail"
+  }];
 }
 
 // =============================================================================
@@ -198,6 +245,69 @@ message SetComponentEnabledRequest {
   string package_id = 1;
   string component_id = 2;
   bool enabled = 3;
+}
+
+// InspectRequest 请求读出一个【尚未安装】的 .nspkg 声明了什么。
+message InspectRequest {
+  // .nspkg 的相对路径。语义与 InstallRequest.nspkg_relpath 完全一致，
+  // 校验也一致（不含 ".."、非绝对路径）。
+  //
+  // 【刻意与 InstallRequest 用同一个交接约定】：确认屏先 Inspect 再 Install，
+  // 两次指的必须是同一个文件。若两者的路径语义不同，中间就出现一个「看的是
+  // A、装的是 B」的缝——而用户看到的权限清单来自 A。
+  string nspkg_relpath = 1;
+}
+
+// InspectResult 是一个待装包的【只读声明投影】。
+//
+// # 它为什么必须由内核给出
+//
+// 唯一知道「这个包申请了什么」的地方是包内的 manifest，而它在验签之前是
+// 不受信内容。让确认屏自己解包、解析 manifest、再查权限定义表，等于把一个
+// 不受信内容的解析器放进持有 perm.permission.admin 的进程里——那是全系统
+// 最不该放解析器的地方。
+//
+// 装包路径上 nervud 本来就要解包验签，把「解析后的声明」读出来是顺手的事。
+//
+// # 它不是安装裁决的预演
+//
+// 本方法【不回答「这个包能不能装」】：签名、digest、ABI、防降级、权限交集
+// 都在 Install 那一侧裁决，而那些裁决依赖的状态（已装版本、签名血统）可能在
+// Inspect 与 Install 之间变化。把裁决结果提前给出去，会让调用方以为
+// 「Inspect 通过 = Install 会成功」，而那不成立。
+message InspectResult {
+  // 包自称的身份。来自 manifest，【已通过验签】但尚未经过安装裁决。
+  string package_id = 1;
+  string version = 2;
+  uint64 version_code = 3;
+
+  // 本包申请的、需要用户点头的敏感权限。
+  //
+  // 【已由内核过滤成 USER_CONSENT 这一档】：其它授予模式没有「要不要同意」
+  // 这回事——NORMAL 装上即生效，PRIVILEGED / SYSTEM_ONLY 由来源与签名决定。
+  // 把它们混进来只会让确认屏显示一堆用户无从选择的条目。
+  //
+  // 空列表是常见且正常的：一个不申请任何敏感权限的包，确认屏只需要问
+  // 「装不装」。
+  repeated RequestedPermission consent_permissions = 4;
+}
+
+// RequestedPermission 是待装包申请的一条敏感权限。
+//
+// 与 permission.v1.PermissionGrant 形状刻意一致（ID + 中英文案 + 风险级），
+// 差别只是这里【没有 state】：包还没装，也就还没有运行期授予状态可言。
+// 形状一致让确认屏与权限管理屏能共用同一套渲染逻辑。
+message RequestedPermission {
+  string permission_id = 1;
+
+  // 面向用户的名称与说明，来自 Catalog 的权限定义。
+  //
+  // 【由内核给出而不是界面自己写死】：第三方包可以定义自己的权限，
+  // 界面不可能预先知道它们的文案。
+  nervus.ipc.v1.LocalizedText display_name = 2;
+  nervus.ipc.v1.LocalizedText description = 3;
+
+  nervus.ipc.v1.RiskClass risk_class = 4;
 }
 
 // PackageInfo 是一个已装 Package 的【对外投影】。

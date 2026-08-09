@@ -12,7 +12,7 @@ import (
 // .proto 里挂 (method_meta)，nervud 一行 Go 都不用改。
 //
 // 本测试就是那句话的可执行证据：PackageManager 是本轮新加的接口，抽取代码
-// 一个字没动，它的四个 method 元数据就出来了。
+// 一个字没动，它的 method 元数据就出来了。
 func TestExtractMethodMetas_PackageManager(t *testing.T) {
 	metas, err := registry.ExtractMethodMetas(
 		pkgv1.PackageManagerMethod(0).Descriptor(),
@@ -20,8 +20,8 @@ func TestExtractMethodMetas_PackageManager(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ExtractMethodMetas: %v", err)
 	}
-	if len(metas) != 4 {
-		t.Fatalf("抽出 %d 条 method_meta, want 4", len(metas))
+	if len(metas) != 5 {
+		t.Fatalf("抽出 %d 条 method_meta, want 5", len(metas))
 	}
 
 	byID := make(map[uint32]*ipcv1.MethodMeta, len(metas))
@@ -67,7 +67,29 @@ func TestExtractMethodMetas_PackageManager(t *testing.T) {
 		t.Errorf("List risk_class = %v, want NORMAL", list.GetRiskClass())
 	}
 
-	// 全部写操作都必须要求确认
+	// Inspect：只读预检，不装任何东西
+	//
+	// 它是安装确认屏的信息来源——确认屏必须先知道待装包申请了哪些敏感权限，
+	// 才能摊给用户看。因此它【绝不能】弹确认框：为"要不要看看这个包申请了
+	// 什么"再问一次用户，是个没有意义的环。
+	inspect := byID[5]
+	if inspect == nil {
+		t.Fatal("缺少 method_id=5 (Inspect)")
+	}
+	if !inspect.GetIsReadOnly() {
+		t.Error("Inspect 必须标记 is_read_only：它只解析不提交")
+	}
+	if inspect.GetNeedsUserConfirmation() {
+		t.Error("Inspect 不该弹确认框：它本身就是为了给确认框提供内容")
+	}
+	if inspect.GetRiskClass() != ipcv1.RiskClass_RISK_CLASS_NORMAL {
+		t.Errorf("Inspect risk_class = %v, want NORMAL", inspect.GetRiskClass())
+	}
+	if inspect.GetReturnsOperation() {
+		t.Error("Inspect 不是 operation：只读 manifest 与验签，不解全量 digest")
+	}
+
+	// 全部写操作都必须要求确认。5 (Inspect) 不在其中：它是只读的
 	for _, id := range []uint32{1, 2, 4} {
 		if m := byID[id]; m != nil && !m.GetNeedsUserConfirmation() {
 			t.Errorf("method_id=%d 是写操作，必须 needs_user_confirmation", id)

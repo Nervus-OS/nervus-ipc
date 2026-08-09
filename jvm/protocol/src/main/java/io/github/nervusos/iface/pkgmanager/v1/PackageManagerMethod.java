@@ -62,6 +62,42 @@ public enum PackageManagerMethod
    * <code>PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED = 4 [(.nervus.ipc.v1.method_meta) = { ... }</code>
    */
   PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED(4),
+  /**
+   * <pre>
+   * 读一个【尚未安装】的 .nspkg，回它的身份与它申请的敏感权限。
+   *
+   * # 它补的是什么缺口
+   *
+   * 安装确认屏必须在装之前把「这个包要用摄像头和麦克风」摊给用户看。但包还没
+   * 装，它就不在 Catalog 里：permission.admin 的 ListGrants 与本接口的 LIST
+   * 都只覆盖【已装】包，谁都答不出一个待装包申请了什么。
+   *
+   * # 为什么这件事必须由内核做而不是确认屏自己读
+   *
+   * 确认屏持有 perm.permission.admin，是全系统唯一能改授予状态的进程。让它去
+   * 解 tar、解析一份【尚未验签】的 manifest、再查权限定义表，等于把不受信内容
+   * 的解析器放进权限最高的那个进程里——攻击面上最不该放解析器的位置。
+   *
+   * nervud 为了 INSTALL 本来就要解包、验签、按 Catalog 裁决权限。把那批已经
+   * 解析好的事实读出来是顺手的，而解析始终留在内核一侧。
+   *
+   * # 只读到什么程度
+   *
+   * 【不落任何状态】：不注册 Entry、不分配 UID、不改 Catalog、不建 staging 之外
+   * 的任何东西。同一个包可以 INSPECT 任意多次，结果相同。
+   *
+   * 权限取 perm.pkg.query 而不是 perm.pkg.install：读一个包申请了什么，与有权
+   * 安装它是两件事。设置类应用可以据此展示「这个包要什么权限」而不必具备装包
+   * 能力。
+   *
+   * 不是 operation：解包与验签有成本，但它【不等人】——没有用户交互，普通
+   * deadline 足够。这与 permission.ui 的 ConfirmInstall 正相反，那个要等用户
+   * 读完清单再点。
+   * </pre>
+   *
+   * <code>PACKAGE_MANAGER_METHOD_INSPECT = 5 [(.nervus.ipc.v1.method_meta) = { ... }</code>
+   */
+  PACKAGE_MANAGER_METHOD_INSPECT(5),
   UNRECOGNIZED(-1),
   ;
 
@@ -126,6 +162,42 @@ public enum PackageManagerMethod
    * <code>PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED = 4 [(.nervus.ipc.v1.method_meta) = { ... }</code>
    */
   public static final int PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED_VALUE = 4;
+  /**
+   * <pre>
+   * 读一个【尚未安装】的 .nspkg，回它的身份与它申请的敏感权限。
+   *
+   * # 它补的是什么缺口
+   *
+   * 安装确认屏必须在装之前把「这个包要用摄像头和麦克风」摊给用户看。但包还没
+   * 装，它就不在 Catalog 里：permission.admin 的 ListGrants 与本接口的 LIST
+   * 都只覆盖【已装】包，谁都答不出一个待装包申请了什么。
+   *
+   * # 为什么这件事必须由内核做而不是确认屏自己读
+   *
+   * 确认屏持有 perm.permission.admin，是全系统唯一能改授予状态的进程。让它去
+   * 解 tar、解析一份【尚未验签】的 manifest、再查权限定义表，等于把不受信内容
+   * 的解析器放进权限最高的那个进程里——攻击面上最不该放解析器的位置。
+   *
+   * nervud 为了 INSTALL 本来就要解包、验签、按 Catalog 裁决权限。把那批已经
+   * 解析好的事实读出来是顺手的，而解析始终留在内核一侧。
+   *
+   * # 只读到什么程度
+   *
+   * 【不落任何状态】：不注册 Entry、不分配 UID、不改 Catalog、不建 staging 之外
+   * 的任何东西。同一个包可以 INSPECT 任意多次，结果相同。
+   *
+   * 权限取 perm.pkg.query 而不是 perm.pkg.install：读一个包申请了什么，与有权
+   * 安装它是两件事。设置类应用可以据此展示「这个包要什么权限」而不必具备装包
+   * 能力。
+   *
+   * 不是 operation：解包与验签有成本，但它【不等人】——没有用户交互，普通
+   * deadline 足够。这与 permission.ui 的 ConfirmInstall 正相反，那个要等用户
+   * 读完清单再点。
+   * </pre>
+   *
+   * <code>PACKAGE_MANAGER_METHOD_INSPECT = 5 [(.nervus.ipc.v1.method_meta) = { ... }</code>
+   */
+  public static final int PACKAGE_MANAGER_METHOD_INSPECT_VALUE = 5;
 
 
   public final int getNumber() {
@@ -157,6 +229,7 @@ public enum PackageManagerMethod
       case 2: return PACKAGE_MANAGER_METHOD_UNINSTALL;
       case 3: return PACKAGE_MANAGER_METHOD_LIST;
       case 4: return PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED;
+      case 5: return PACKAGE_MANAGER_METHOD_INSPECT;
       default: return null;
     }
   }
