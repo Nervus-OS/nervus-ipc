@@ -187,21 +187,29 @@ const (
 	PackageManagerReason_PACKAGE_MANAGER_REASON_LINEAGE_BROKEN PackageManagerReason = 8
 	// 解包失败：压缩格式错误，或条目试图逃出目标目录（tar-slip）。
 	PackageManagerReason_PACKAGE_MANAGER_REASON_ARCHIVE_INVALID PackageManagerReason = 9
+	// 包内容在用户确认之后被换过：expected_manifest_digest 与实际不符。
+	//
+	// 【与 DIGEST_MISMATCH 是两件事】。那条是"包坏了或被篡改"（内容与自己的
+	// manifest 声明不符）；这条的包可能完全有效、签名正确，只是它不是确认屏
+	// 摊给用户看的那一份。前者提示用户重新下载，后者必须重新走一次确认——
+	// 混成一条会让界面给出错误的补救建议。
+	PackageManagerReason_PACKAGE_MANAGER_REASON_CONTENT_CHANGED PackageManagerReason = 10
 )
 
 // Enum value maps for PackageManagerReason.
 var (
 	PackageManagerReason_name = map[int32]string{
-		0: "PACKAGE_MANAGER_REASON_UNSPECIFIED",
-		1: "PACKAGE_MANAGER_REASON_SIGNATURE_INVALID",
-		2: "PACKAGE_MANAGER_REASON_DIGEST_MISMATCH",
-		3: "PACKAGE_MANAGER_REASON_DOWNGRADE",
-		4: "PACKAGE_MANAGER_REASON_ABI_MISMATCH",
-		5: "PACKAGE_MANAGER_REASON_MANIFEST_INVALID",
-		6: "PACKAGE_MANAGER_REASON_PACKAGE_NOT_FOUND",
-		7: "PACKAGE_MANAGER_REASON_IMMUTABLE",
-		8: "PACKAGE_MANAGER_REASON_LINEAGE_BROKEN",
-		9: "PACKAGE_MANAGER_REASON_ARCHIVE_INVALID",
+		0:  "PACKAGE_MANAGER_REASON_UNSPECIFIED",
+		1:  "PACKAGE_MANAGER_REASON_SIGNATURE_INVALID",
+		2:  "PACKAGE_MANAGER_REASON_DIGEST_MISMATCH",
+		3:  "PACKAGE_MANAGER_REASON_DOWNGRADE",
+		4:  "PACKAGE_MANAGER_REASON_ABI_MISMATCH",
+		5:  "PACKAGE_MANAGER_REASON_MANIFEST_INVALID",
+		6:  "PACKAGE_MANAGER_REASON_PACKAGE_NOT_FOUND",
+		7:  "PACKAGE_MANAGER_REASON_IMMUTABLE",
+		8:  "PACKAGE_MANAGER_REASON_LINEAGE_BROKEN",
+		9:  "PACKAGE_MANAGER_REASON_ARCHIVE_INVALID",
+		10: "PACKAGE_MANAGER_REASON_CONTENT_CHANGED",
 	}
 	PackageManagerReason_value = map[string]int32{
 		"PACKAGE_MANAGER_REASON_UNSPECIFIED":       0,
@@ -214,6 +222,7 @@ var (
 		"PACKAGE_MANAGER_REASON_IMMUTABLE":         7,
 		"PACKAGE_MANAGER_REASON_LINEAGE_BROKEN":    8,
 		"PACKAGE_MANAGER_REASON_ARCHIVE_INVALID":   9,
+		"PACKAGE_MANAGER_REASON_CONTENT_CHANGED":   10,
 	}
 )
 
@@ -247,12 +256,22 @@ func (PackageManagerReason) EnumDescriptor() ([]byte, []int) {
 // InstallRequest 请求安装一个 .nspkg。
 type InstallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// .nspkg 在调用方【私有数据目录】中的相对路径。
+	// .nspkg 在【用户文档区】(user-data) 中的相对路径。
+	//
+	// # 交接目录是 user-data，不是调用方的私有目录
+	//
+	// 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+	// 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+	// 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+	// Provider 能读的位置调用方写不进。
+	//
+	// 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+	// 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+	// 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
 	//
 	// 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-	// Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-	// 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-	// "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+	// Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+	// 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
 	//
 	// 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
 	NspkgRelpath string `protobuf:"bytes,1,opt,name=nspkg_relpath,json=nspkgRelpath,proto3" json:"nspkg_relpath,omitempty"`
@@ -281,8 +300,22 @@ type InstallRequest struct {
 	// 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
 	// 陈述，不是「请授予什么」的命令。
 	ConsentedPermissions []string `protobuf:"bytes,2,rep,name=consented_permissions,json=consentedPermissions,proto3" json:"consented_permissions,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+	//
+	// # 它关的是"看的是 A、装的是 B"
+	//
+	// .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+	// 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+	// ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+	//
+	// 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+	//
+	// 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+	// INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+	// 调用方都【必须】带上它，否则那次确认没有约束力。
+	ExpectedManifestDigest string `protobuf:"bytes,3,opt,name=expected_manifest_digest,json=expectedManifestDigest,proto3" json:"expected_manifest_digest,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *InstallRequest) Reset() {
@@ -327,6 +360,13 @@ func (x *InstallRequest) GetConsentedPermissions() []string {
 		return x.ConsentedPermissions
 	}
 	return nil
+}
+
+func (x *InstallRequest) GetExpectedManifestDigest() string {
+	if x != nil {
+		return x.ExpectedManifestDigest
+	}
+	return ""
 }
 
 // InstallResult 是安装成功的终态（operation 的 result）。
@@ -648,8 +688,17 @@ type InspectResult struct {
 	// 空列表是常见且正常的：一个不申请任何敏感权限的包，确认屏只需要问
 	// 「装不装」。
 	ConsentPermissions []*RequestedPermission `protobuf:"bytes,4,rep,name=consent_permissions,json=consentPermissions,proto3" json:"consent_permissions,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	// 本次检视到的内容的摘要，供 INSTALL 绑定用。
+	//
+	// 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+	// 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+	// 不留任何痕迹。
+	//
+	// 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+	// digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+	ManifestDigest string `protobuf:"bytes,5,opt,name=manifest_digest,json=manifestDigest,proto3" json:"manifest_digest,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *InspectResult) Reset() {
@@ -708,6 +757,13 @@ func (x *InspectResult) GetConsentPermissions() []*RequestedPermission {
 		return x.ConsentPermissions
 	}
 	return nil
+}
+
+func (x *InspectResult) GetManifestDigest() string {
+	if x != nil {
+		return x.ManifestDigest
+	}
+	return ""
 }
 
 // RequestedPermission 是待装包申请的一条敏感权限。
@@ -944,10 +1000,11 @@ var File_nervus_interface_pkgmanager_v1_pkg_manager_proto protoreflect.FileDescr
 
 const file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc = "" +
 	"\n" +
-	"0nervus/interface/pkgmanager/v1/pkg_manager.proto\x12\x1enervus.interface.pkgmanager.v1\x1a#nervus/ipc/v1/method_registry.proto\x1a'nervus/ipc/v1/provider_descriptor.proto\"j\n" +
+	"0nervus/interface/pkgmanager/v1/pkg_manager.proto\x12\x1enervus.interface.pkgmanager.v1\x1a#nervus/ipc/v1/method_registry.proto\x1a'nervus/ipc/v1/provider_descriptor.proto\"\xa4\x01\n" +
 	"\x0eInstallRequest\x12#\n" +
 	"\rnspkg_relpath\x18\x01 \x01(\tR\fnspkgRelpath\x123\n" +
-	"\x15consented_permissions\x18\x02 \x03(\tR\x14consentedPermissions\"V\n" +
+	"\x15consented_permissions\x18\x02 \x03(\tR\x14consentedPermissions\x128\n" +
+	"\x18expected_manifest_digest\x18\x03 \x01(\tR\x16expectedManifestDigest\"V\n" +
 	"\rInstallResult\x12E\n" +
 	"\apackage\x18\x01 \x01(\v2+.nervus.interface.pkgmanager.v1.PackageInfoR\apackage\"1\n" +
 	"\x10UninstallRequest\x12\x1d\n" +
@@ -963,13 +1020,14 @@ const file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc = "" +
 	"\fcomponent_id\x18\x02 \x01(\tR\vcomponentId\x12\x18\n" +
 	"\aenabled\x18\x03 \x01(\bR\aenabled\"5\n" +
 	"\x0eInspectRequest\x12#\n" +
-	"\rnspkg_relpath\x18\x01 \x01(\tR\fnspkgRelpath\"\xd1\x01\n" +
+	"\rnspkg_relpath\x18\x01 \x01(\tR\fnspkgRelpath\"\xfa\x01\n" +
 	"\rInspectResult\x12\x1d\n" +
 	"\n" +
 	"package_id\x18\x01 \x01(\tR\tpackageId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\tR\aversion\x12!\n" +
 	"\fversion_code\x18\x03 \x01(\x04R\vversionCode\x12d\n" +
-	"\x13consent_permissions\x18\x04 \x03(\v23.nervus.interface.pkgmanager.v1.RequestedPermissionR\x12consentPermissions\"\xf4\x01\n" +
+	"\x13consent_permissions\x18\x04 \x03(\v23.nervus.interface.pkgmanager.v1.RequestedPermissionR\x12consentPermissions\x12'\n" +
+	"\x0fmanifest_digest\x18\x05 \x01(\tR\x0emanifestDigest\"\xf4\x01\n" +
 	"\x13RequestedPermission\x12#\n" +
 	"\rpermission_id\x18\x01 \x01(\tR\fpermissionId\x12?\n" +
 	"\fdisplay_name\x18\x02 \x01(\v2\x1c.nervus.ipc.v1.LocalizedTextR\vdisplayName\x12>\n" +
@@ -993,7 +1051,7 @@ const file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc = "" +
 	" PACKAGE_MANAGER_METHOD_UNINSTALL\x10\x02\x1a\x89\x01\x8a\xa6\x1d\x84\x01\b\x02\x12\x10perm.pkg.install\x18\x040\x01:/nervus.interface.pkgmanager.v1.UninstallRequest\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail\x12\xcf\x01\n" +
 	"\x1bPACKAGE_MANAGER_METHOD_LIST\x10\x03\x1a\xad\x01\x8a\xa6\x1d\xa8\x01\b\x03\x12\x0eperm.pkg.query\x18\x01:*nervus.interface.pkgmanager.v1.ListRequestB)nervus.interface.pkgmanager.v1.ListResultH\x01\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail\x12\xc6\x01\n" +
 	",PACKAGE_MANAGER_METHOD_SET_COMPONENT_ENABLED\x10\x04\x1a\x93\x01\x8a\xa6\x1d\x8e\x01\b\x04\x12\x10perm.pkg.install\x18\x040\x01:9nervus.interface.pkgmanager.v1.SetComponentEnabledRequest\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail\x12\xd8\x01\n" +
-	"\x1ePACKAGE_MANAGER_METHOD_INSPECT\x10\x05\x1a\xb3\x01\x8a\xa6\x1d\xae\x01\b\x05\x12\x0eperm.pkg.query\x18\x01:-nervus.interface.pkgmanager.v1.InspectRequestB,nervus.interface.pkgmanager.v1.InspectResultH\x01\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail*\xbf\x03\n" +
+	"\x1ePACKAGE_MANAGER_METHOD_INSPECT\x10\x05\x1a\xb3\x01\x8a\xa6\x1d\xae\x01\b\x05\x12\x0eperm.pkg.query\x18\x01:-nervus.interface.pkgmanager.v1.InspectRequestB,nervus.interface.pkgmanager.v1.InspectResultH\x01\x82\x018nervus.interface.pkgmanager.v1.PackageManagerErrorDetail*\xeb\x03\n" +
 	"\x14PackageManagerReason\x12&\n" +
 	"\"PACKAGE_MANAGER_REASON_UNSPECIFIED\x10\x00\x12,\n" +
 	"(PACKAGE_MANAGER_REASON_SIGNATURE_INVALID\x10\x01\x12*\n" +
@@ -1004,7 +1062,9 @@ const file_nervus_interface_pkgmanager_v1_pkg_manager_proto_rawDesc = "" +
 	"(PACKAGE_MANAGER_REASON_PACKAGE_NOT_FOUND\x10\x06\x12$\n" +
 	" PACKAGE_MANAGER_REASON_IMMUTABLE\x10\a\x12)\n" +
 	"%PACKAGE_MANAGER_REASON_LINEAGE_BROKEN\x10\b\x12*\n" +
-	"&PACKAGE_MANAGER_REASON_ARCHIVE_INVALID\x10\tB\x8d\x01\n" +
+	"&PACKAGE_MANAGER_REASON_ARCHIVE_INVALID\x10\t\x12*\n" +
+	"&PACKAGE_MANAGER_REASON_CONTENT_CHANGED\x10\n" +
+	"B\x8d\x01\n" +
 	"&io.github.nervusos.iface.pkgmanager.v1B\x13PackageManagerProtoP\x01ZLgithub.com/nervus-os/nervus-ipc/protocol/interface/pkgmanagerv1;pkgmanagerv1b\x06proto3"
 
 var (

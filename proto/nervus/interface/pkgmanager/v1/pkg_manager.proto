@@ -182,12 +182,22 @@ enum PackageManagerMethod {
 
 // InstallRequest 请求安装一个 .nspkg。
 message InstallRequest {
-  // .nspkg 在调用方【私有数据目录】中的相对路径。
+  // .nspkg 在【用户文档区】(user-data) 中的相对路径。
+  //
+  // # 交接目录是 user-data，不是调用方的私有目录
+  //
+  // 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+  // 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+  // 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+  // Provider 能读的位置调用方写不进。
+  //
+  // 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+  // 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+  // 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
   //
   // 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-  // Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-  // 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-  // "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+  // Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+  // 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
   //
   // 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
   string nspkg_relpath = 1;
@@ -217,6 +227,20 @@ message InstallRequest {
   // 不该因为确认界面写错就变成一次真实授予。因此本字段是「用户同意了什么」的
   // 陈述，不是「请授予什么」的命令。
   repeated string consented_permissions = 2;
+  // 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+  //
+  // # 它关的是"看的是 A、装的是 B"
+  //
+  // .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+  // 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+  // ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+  //
+  // 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+  //
+  // 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+  // INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+  // 调用方都【必须】带上它，否则那次确认没有约束力。
+  string expected_manifest_digest = 3;
 }
 
 // InstallResult 是安装成功的终态（operation 的 result）。
@@ -290,6 +314,15 @@ message InspectResult {
   // 空列表是常见且正常的：一个不申请任何敏感权限的包，确认屏只需要问
   // 「装不装」。
   repeated RequestedPermission consent_permissions = 4;
+  // 本次检视到的内容的摘要，供 INSTALL 绑定用。
+  //
+  // 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+  // 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+  // 不留任何痕迹。
+  //
+  // 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+  // digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+  string manifest_digest = 5;
 }
 
 // RequestedPermission 是待装包申请的一条敏感权限。
@@ -380,4 +413,12 @@ enum PackageManagerReason {
 
   // 解包失败：压缩格式错误，或条目试图逃出目标目录（tar-slip）。
   PACKAGE_MANAGER_REASON_ARCHIVE_INVALID = 9;
+
+  // 包内容在用户确认之后被换过：expected_manifest_digest 与实际不符。
+  //
+  // 【与 DIGEST_MISMATCH 是两件事】。那条是"包坏了或被篡改"（内容与自己的
+  // manifest 声明不符）；这条的包可能完全有效、签名正确，只是它不是确认屏
+  // 摊给用户看的那一份。前者提示用户重新下载，后者必须重新走一次确认——
+  // 混成一条会让界面给出错误的补救建议。
+  PACKAGE_MANAGER_REASON_CONTENT_CHANGED = 10;
 }
