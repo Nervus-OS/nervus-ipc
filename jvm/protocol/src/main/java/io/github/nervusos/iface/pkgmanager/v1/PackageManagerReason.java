@@ -91,6 +91,19 @@ public enum PackageManagerReason
    * <code>PACKAGE_MANAGER_REASON_ARCHIVE_INVALID = 9;</code>
    */
   PACKAGE_MANAGER_REASON_ARCHIVE_INVALID(9),
+  /**
+   * <pre>
+   * 包内容在用户确认之后被换过：expected_manifest_digest 与实际不符。
+   *
+   * 【与 DIGEST_MISMATCH 是两件事】。那条是"包坏了或被篡改"（内容与自己的
+   * manifest 声明不符）；这条的包可能完全有效、签名正确，只是它不是确认屏
+   * 摊给用户看的那一份。前者提示用户重新下载，后者必须重新走一次确认——
+   * 混成一条会让界面给出错误的补救建议。
+   * </pre>
+   *
+   * <code>PACKAGE_MANAGER_REASON_CONTENT_CHANGED = 10;</code>
+   */
+  PACKAGE_MANAGER_REASON_CONTENT_CHANGED(10),
   UNRECOGNIZED(-1),
   ;
 
@@ -184,6 +197,19 @@ public enum PackageManagerReason
    * <code>PACKAGE_MANAGER_REASON_ARCHIVE_INVALID = 9;</code>
    */
   public static final int PACKAGE_MANAGER_REASON_ARCHIVE_INVALID_VALUE = 9;
+  /**
+   * <pre>
+   * 包内容在用户确认之后被换过：expected_manifest_digest 与实际不符。
+   *
+   * 【与 DIGEST_MISMATCH 是两件事】。那条是"包坏了或被篡改"（内容与自己的
+   * manifest 声明不符）；这条的包可能完全有效、签名正确，只是它不是确认屏
+   * 摊给用户看的那一份。前者提示用户重新下载，后者必须重新走一次确认——
+   * 混成一条会让界面给出错误的补救建议。
+   * </pre>
+   *
+   * <code>PACKAGE_MANAGER_REASON_CONTENT_CHANGED = 10;</code>
+   */
+  public static final int PACKAGE_MANAGER_REASON_CONTENT_CHANGED_VALUE = 10;
 
 
   public final int getNumber() {
@@ -220,6 +246,7 @@ public enum PackageManagerReason
       case 7: return PACKAGE_MANAGER_REASON_IMMUTABLE;
       case 8: return PACKAGE_MANAGER_REASON_LINEAGE_BROKEN;
       case 9: return PACKAGE_MANAGER_REASON_ARCHIVE_INVALID;
+      case 10: return PACKAGE_MANAGER_REASON_CONTENT_CHANGED;
       default: return null;
     }
   }

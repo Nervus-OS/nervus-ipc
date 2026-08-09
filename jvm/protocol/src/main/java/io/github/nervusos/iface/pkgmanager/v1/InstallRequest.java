@@ -34,6 +34,7 @@ private static final long serialVersionUID = 0L;
     nspkgRelpath_ = "";
     consentedPermissions_ =
         com.google.protobuf.LazyStringArrayList.emptyList();
+    expectedManifestDigest_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -54,12 +55,22 @@ private static final long serialVersionUID = 0L;
   private volatile java.lang.Object nspkgRelpath_ = "";
   /**
    * <pre>
-   * .nspkg 在调用方【私有数据目录】中的相对路径。
+   * .nspkg 在【用户文档区】(user-data) 中的相对路径。
+   *
+   * # 交接目录是 user-data，不是调用方的私有目录
+   *
+   * 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+   * 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+   * 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+   * Provider 能读的位置调用方写不进。
+   *
+   * 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+   * 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+   * 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
    *
    * 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-   * Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-   * 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-   * "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+   * Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+   * 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
    *
    * 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
    * </pre>
@@ -82,12 +93,22 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * .nspkg 在调用方【私有数据目录】中的相对路径。
+   * .nspkg 在【用户文档区】(user-data) 中的相对路径。
+   *
+   * # 交接目录是 user-data，不是调用方的私有目录
+   *
+   * 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+   * 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+   * 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+   * Provider 能读的位置调用方写不进。
+   *
+   * 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+   * 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+   * 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
    *
    * 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-   * Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-   * 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-   * "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+   * Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+   * 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
    *
    * 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
    * </pre>
@@ -255,6 +276,77 @@ private static final long serialVersionUID = 0L;
     return consentedPermissions_.getByteString(index);
   }
 
+  public static final int EXPECTED_MANIFEST_DIGEST_FIELD_NUMBER = 3;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object expectedManifestDigest_ = "";
+  /**
+   * <pre>
+   * 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+   *
+   * # 它关的是"看的是 A、装的是 B"
+   *
+   * .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+   * 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+   * ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+   *
+   * 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+   *
+   * 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+   * INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+   * 调用方都【必须】带上它，否则那次确认没有约束力。
+   * </pre>
+   *
+   * <code>string expected_manifest_digest = 3 [json_name = "expectedManifestDigest"];</code>
+   * @return The expectedManifestDigest.
+   */
+  @java.lang.Override
+  public java.lang.String getExpectedManifestDigest() {
+    java.lang.Object ref = expectedManifestDigest_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      expectedManifestDigest_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+   *
+   * # 它关的是"看的是 A、装的是 B"
+   *
+   * .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+   * 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+   * ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+   *
+   * 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+   *
+   * 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+   * INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+   * 调用方都【必须】带上它，否则那次确认没有约束力。
+   * </pre>
+   *
+   * <code>string expected_manifest_digest = 3 [json_name = "expectedManifestDigest"];</code>
+   * @return The bytes for expectedManifestDigest.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getExpectedManifestDigestBytes() {
+    java.lang.Object ref = expectedManifestDigest_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      expectedManifestDigest_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -274,6 +366,9 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < consentedPermissions_.size(); i++) {
       com.google.protobuf.GeneratedMessage.writeString(output, 2, consentedPermissions_.getRaw(i));
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(expectedManifestDigest_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 3, expectedManifestDigest_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -295,6 +390,9 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getConsentedPermissionsList().size();
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(expectedManifestDigest_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(3, expectedManifestDigest_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -314,6 +412,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getNspkgRelpath())) return false;
     if (!getConsentedPermissionsList()
         .equals(other.getConsentedPermissionsList())) return false;
+    if (!getExpectedManifestDigest()
+        .equals(other.getExpectedManifestDigest())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -331,6 +431,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + CONSENTED_PERMISSIONS_FIELD_NUMBER;
       hash = (53 * hash) + getConsentedPermissionsList().hashCode();
     }
+    hash = (37 * hash) + EXPECTED_MANIFEST_DIGEST_FIELD_NUMBER;
+    hash = (53 * hash) + getExpectedManifestDigest().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -469,6 +571,7 @@ private static final long serialVersionUID = 0L;
       nspkgRelpath_ = "";
       consentedPermissions_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
+      expectedManifestDigest_ = "";
       return this;
     }
 
@@ -509,6 +612,9 @@ private static final long serialVersionUID = 0L;
         consentedPermissions_.makeImmutable();
         result.consentedPermissions_ = consentedPermissions_;
       }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.expectedManifestDigest_ = expectedManifestDigest_;
+      }
     }
 
     @java.lang.Override
@@ -536,6 +642,11 @@ private static final long serialVersionUID = 0L;
           ensureConsentedPermissionsIsMutable();
           consentedPermissions_.addAll(other.consentedPermissions_);
         }
+        onChanged();
+      }
+      if (!other.getExpectedManifestDigest().isEmpty()) {
+        expectedManifestDigest_ = other.expectedManifestDigest_;
+        bitField0_ |= 0x00000004;
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -575,6 +686,11 @@ private static final long serialVersionUID = 0L;
               consentedPermissions_.add(s);
               break;
             } // case 18
+            case 26: {
+              expectedManifestDigest_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000004;
+              break;
+            } // case 26
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -595,12 +711,22 @@ private static final long serialVersionUID = 0L;
     private java.lang.Object nspkgRelpath_ = "";
     /**
      * <pre>
-     * .nspkg 在调用方【私有数据目录】中的相对路径。
+     * .nspkg 在【用户文档区】(user-data) 中的相对路径。
+     *
+     * # 交接目录是 user-data，不是调用方的私有目录
+     *
+     * 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+     * 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+     * 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+     * Provider 能读的位置调用方写不进。
+     *
+     * 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+     * 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+     * 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
      *
      * 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-     * Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-     * 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-     * "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+     * Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+     * 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
      *
      * 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
      * </pre>
@@ -622,12 +748,22 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * .nspkg 在调用方【私有数据目录】中的相对路径。
+     * .nspkg 在【用户文档区】(user-data) 中的相对路径。
+     *
+     * # 交接目录是 user-data，不是调用方的私有目录
+     *
+     * 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+     * 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+     * 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+     * Provider 能读的位置调用方写不进。
+     *
+     * 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+     * 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+     * 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
      *
      * 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-     * Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-     * 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-     * "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+     * Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+     * 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
      *
      * 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
      * </pre>
@@ -650,12 +786,22 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * .nspkg 在调用方【私有数据目录】中的相对路径。
+     * .nspkg 在【用户文档区】(user-data) 中的相对路径。
+     *
+     * # 交接目录是 user-data，不是调用方的私有目录
+     *
+     * 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+     * 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+     * 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+     * Provider 能读的位置调用方写不进。
+     *
+     * 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+     * 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+     * 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
      *
      * 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-     * Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-     * 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-     * "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+     * Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+     * 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
      *
      * 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
      * </pre>
@@ -674,12 +820,22 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * .nspkg 在调用方【私有数据目录】中的相对路径。
+     * .nspkg 在【用户文档区】(user-data) 中的相对路径。
+     *
+     * # 交接目录是 user-data，不是调用方的私有目录
+     *
+     * 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+     * 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+     * 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+     * Provider 能读的位置调用方写不进。
+     *
+     * 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+     * 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+     * 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
      *
      * 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-     * Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-     * 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-     * "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+     * Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+     * 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
      *
      * 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
      * </pre>
@@ -695,12 +851,22 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * .nspkg 在调用方【私有数据目录】中的相对路径。
+     * .nspkg 在【用户文档区】(user-data) 中的相对路径。
+     *
+     * # 交接目录是 user-data，不是调用方的私有目录
+     *
+     * 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+     * 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+     * 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+     * Provider 能读的位置调用方写不进。
+     *
+     * 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+     * 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+     * 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
      *
      * 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-     * Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-     * 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-     * "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+     * Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+     * 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
      *
      * 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
      * </pre>
@@ -1069,6 +1235,158 @@ private static final long serialVersionUID = 0L;
       ensureConsentedPermissionsIsMutable();
       consentedPermissions_.add(value);
       bitField0_ |= 0x00000002;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object expectedManifestDigest_ = "";
+    /**
+     * <pre>
+     * 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+     *
+     * # 它关的是"看的是 A、装的是 B"
+     *
+     * .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+     * 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+     * ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+     *
+     * 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+     *
+     * 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+     * INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+     * 调用方都【必须】带上它，否则那次确认没有约束力。
+     * </pre>
+     *
+     * <code>string expected_manifest_digest = 3 [json_name = "expectedManifestDigest"];</code>
+     * @return The expectedManifestDigest.
+     */
+    public java.lang.String getExpectedManifestDigest() {
+      java.lang.Object ref = expectedManifestDigest_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        expectedManifestDigest_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+     *
+     * # 它关的是"看的是 A、装的是 B"
+     *
+     * .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+     * 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+     * ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+     *
+     * 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+     *
+     * 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+     * INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+     * 调用方都【必须】带上它，否则那次确认没有约束力。
+     * </pre>
+     *
+     * <code>string expected_manifest_digest = 3 [json_name = "expectedManifestDigest"];</code>
+     * @return The bytes for expectedManifestDigest.
+     */
+    public com.google.protobuf.ByteString
+        getExpectedManifestDigestBytes() {
+      java.lang.Object ref = expectedManifestDigest_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        expectedManifestDigest_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+     *
+     * # 它关的是"看的是 A、装的是 B"
+     *
+     * .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+     * 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+     * ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+     *
+     * 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+     *
+     * 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+     * INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+     * 调用方都【必须】带上它，否则那次确认没有约束力。
+     * </pre>
+     *
+     * <code>string expected_manifest_digest = 3 [json_name = "expectedManifestDigest"];</code>
+     * @param value The expectedManifestDigest to set.
+     * @return This builder for chaining.
+     */
+    public Builder setExpectedManifestDigest(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      expectedManifestDigest_ = value;
+      bitField0_ |= 0x00000004;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+     *
+     * # 它关的是"看的是 A、装的是 B"
+     *
+     * .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+     * 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+     * ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+     *
+     * 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+     *
+     * 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+     * INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+     * 调用方都【必须】带上它，否则那次确认没有约束力。
+     * </pre>
+     *
+     * <code>string expected_manifest_digest = 3 [json_name = "expectedManifestDigest"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearExpectedManifestDigest() {
+      expectedManifestDigest_ = getDefaultInstance().getExpectedManifestDigest();
+      bitField0_ = (bitField0_ & ~0x00000004);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+     *
+     * # 它关的是"看的是 A、装的是 B"
+     *
+     * .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+     * 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+     * ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+     *
+     * 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+     *
+     * 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+     * INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+     * 调用方都【必须】带上它，否则那次确认没有约束力。
+     * </pre>
+     *
+     * <code>string expected_manifest_digest = 3 [json_name = "expectedManifestDigest"];</code>
+     * @param value The bytes for expectedManifestDigest to set.
+     * @return This builder for chaining.
+     */
+    public Builder setExpectedManifestDigestBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      expectedManifestDigest_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }

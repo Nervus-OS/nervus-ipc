@@ -50,6 +50,7 @@ private static final long serialVersionUID = 0L;
     packageId_ = "";
     version_ = "";
     consentPermissions_ = java.util.Collections.emptyList();
+    manifestDigest_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -258,6 +259,67 @@ private static final long serialVersionUID = 0L;
     return consentPermissions_.get(index);
   }
 
+  public static final int MANIFEST_DIGEST_FIELD_NUMBER = 5;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object manifestDigest_ = "";
+  /**
+   * <pre>
+   * 本次检视到的内容的摘要，供 INSTALL 绑定用。
+   *
+   * 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+   * 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+   * 不留任何痕迹。
+   *
+   * 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+   * digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+   * </pre>
+   *
+   * <code>string manifest_digest = 5 [json_name = "manifestDigest"];</code>
+   * @return The manifestDigest.
+   */
+  @java.lang.Override
+  public java.lang.String getManifestDigest() {
+    java.lang.Object ref = manifestDigest_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      manifestDigest_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * 本次检视到的内容的摘要，供 INSTALL 绑定用。
+   *
+   * 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+   * 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+   * 不留任何痕迹。
+   *
+   * 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+   * digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+   * </pre>
+   *
+   * <code>string manifest_digest = 5 [json_name = "manifestDigest"];</code>
+   * @return The bytes for manifestDigest.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getManifestDigestBytes() {
+    java.lang.Object ref = manifestDigest_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      manifestDigest_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -284,6 +346,9 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < consentPermissions_.size(); i++) {
       output.writeMessage(4, consentPermissions_.get(i));
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(manifestDigest_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 5, manifestDigest_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -306,6 +371,9 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < consentPermissions_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(4, consentPermissions_.get(i));
+    }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(manifestDigest_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(5, manifestDigest_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -330,6 +398,8 @@ private static final long serialVersionUID = 0L;
         != other.getVersionCode()) return false;
     if (!getConsentPermissionsList()
         .equals(other.getConsentPermissionsList())) return false;
+    if (!getManifestDigest()
+        .equals(other.getManifestDigest())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -352,6 +422,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + CONSENT_PERMISSIONS_FIELD_NUMBER;
       hash = (53 * hash) + getConsentPermissionsList().hashCode();
     }
+    hash = (37 * hash) + MANIFEST_DIGEST_FIELD_NUMBER;
+    hash = (53 * hash) + getManifestDigest().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -513,6 +585,7 @@ private static final long serialVersionUID = 0L;
         consentPermissionsBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000008);
+      manifestDigest_ = "";
       return this;
     }
 
@@ -568,6 +641,9 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000004) != 0)) {
         result.versionCode_ = versionCode_;
       }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.manifestDigest_ = manifestDigest_;
+      }
     }
 
     @java.lang.Override
@@ -620,6 +696,11 @@ private static final long serialVersionUID = 0L;
             consentPermissionsBuilder_.addAllMessages(other.consentPermissions_);
           }
         }
+      }
+      if (!other.getManifestDigest().isEmpty()) {
+        manifestDigest_ = other.manifestDigest_;
+        bitField0_ |= 0x00000010;
+        onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -675,6 +756,11 @@ private static final long serialVersionUID = 0L;
               }
               break;
             } // case 34
+            case 42: {
+              manifestDigest_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000010;
+              break;
+            } // case 42
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1324,6 +1410,133 @@ private static final long serialVersionUID = 0L;
         consentPermissions_ = null;
       }
       return consentPermissionsBuilder_;
+    }
+
+    private java.lang.Object manifestDigest_ = "";
+    /**
+     * <pre>
+     * 本次检视到的内容的摘要，供 INSTALL 绑定用。
+     *
+     * 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+     * 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+     * 不留任何痕迹。
+     *
+     * 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+     * digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+     * </pre>
+     *
+     * <code>string manifest_digest = 5 [json_name = "manifestDigest"];</code>
+     * @return The manifestDigest.
+     */
+    public java.lang.String getManifestDigest() {
+      java.lang.Object ref = manifestDigest_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        manifestDigest_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 本次检视到的内容的摘要，供 INSTALL 绑定用。
+     *
+     * 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+     * 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+     * 不留任何痕迹。
+     *
+     * 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+     * digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+     * </pre>
+     *
+     * <code>string manifest_digest = 5 [json_name = "manifestDigest"];</code>
+     * @return The bytes for manifestDigest.
+     */
+    public com.google.protobuf.ByteString
+        getManifestDigestBytes() {
+      java.lang.Object ref = manifestDigest_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        manifestDigest_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * 本次检视到的内容的摘要，供 INSTALL 绑定用。
+     *
+     * 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+     * 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+     * 不留任何痕迹。
+     *
+     * 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+     * digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+     * </pre>
+     *
+     * <code>string manifest_digest = 5 [json_name = "manifestDigest"];</code>
+     * @param value The manifestDigest to set.
+     * @return This builder for chaining.
+     */
+    public Builder setManifestDigest(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      manifestDigest_ = value;
+      bitField0_ |= 0x00000010;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 本次检视到的内容的摘要，供 INSTALL 绑定用。
+     *
+     * 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+     * 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+     * 不留任何痕迹。
+     *
+     * 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+     * digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+     * </pre>
+     *
+     * <code>string manifest_digest = 5 [json_name = "manifestDigest"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearManifestDigest() {
+      manifestDigest_ = getDefaultInstance().getManifestDigest();
+      bitField0_ = (bitField0_ & ~0x00000010);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 本次检视到的内容的摘要，供 INSTALL 绑定用。
+     *
+     * 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+     * 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+     * 不留任何痕迹。
+     *
+     * 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+     * digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+     * </pre>
+     *
+     * <code>string manifest_digest = 5 [json_name = "manifestDigest"];</code>
+     * @param value The bytes for manifestDigest to set.
+     * @return This builder for chaining.
+     */
+    public Builder setManifestDigestBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      manifestDigest_ = value;
+      bitField0_ |= 0x00000010;
+      onChanged();
+      return this;
     }
 
     // @@protoc_insertion_point(builder_scope:nervus.interface.pkgmanager.v1.InspectResult)

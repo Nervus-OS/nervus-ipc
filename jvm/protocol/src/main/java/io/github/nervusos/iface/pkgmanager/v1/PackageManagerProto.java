@@ -93,83 +93,86 @@ public final class PackageManagerProto {
       "ager.proto\022\036nervus.interface.pkgmanager." +
       "v1\032#nervus/ipc/v1/method_registry.proto\032" +
       "\'nervus/ipc/v1/provider_descriptor.proto" +
-      "\"j\n\016InstallRequest\022#\n\rnspkg_relpath\030\001 \001(" +
-      "\tR\014nspkgRelpath\0223\n\025consented_permissions" +
-      "\030\002 \003(\tR\024consentedPermissions\"V\n\rInstallR" +
-      "esult\022E\n\007package\030\001 \001(\0132+.nervus.interfac" +
-      "e.pkgmanager.v1.PackageInfoR\007package\"1\n\020" +
-      "UninstallRequest\022\035\n\npackage_id\030\001 \001(\tR\tpa" +
-      "ckageId\"\r\n\013ListRequest\"U\n\nListResult\022G\n\010" +
-      "packages\030\001 \003(\0132+.nervus.interface.pkgman" +
-      "ager.v1.PackageInfoR\010packages\"x\n\032SetComp" +
-      "onentEnabledRequest\022\035\n\npackage_id\030\001 \001(\tR" +
-      "\tpackageId\022!\n\014component_id\030\002 \001(\tR\013compon" +
-      "entId\022\030\n\007enabled\030\003 \001(\010R\007enabled\"5\n\016Inspe" +
-      "ctRequest\022#\n\rnspkg_relpath\030\001 \001(\tR\014nspkgR" +
-      "elpath\"\321\001\n\rInspectResult\022\035\n\npackage_id\030\001" +
-      " \001(\tR\tpackageId\022\030\n\007version\030\002 \001(\tR\007versio" +
-      "n\022!\n\014version_code\030\003 \001(\004R\013versionCode\022d\n\023" +
-      "consent_permissions\030\004 \003(\01323.nervus.inter" +
-      "face.pkgmanager.v1.RequestedPermissionR\022" +
-      "consentPermissions\"\364\001\n\023RequestedPermissi" +
-      "on\022#\n\rpermission_id\030\001 \001(\tR\014permissionId\022" +
-      "?\n\014display_name\030\002 \001(\0132\034.nervus.ipc.v1.Lo" +
-      "calizedTextR\013displayName\022>\n\013description\030" +
-      "\003 \001(\0132\034.nervus.ipc.v1.LocalizedTextR\013des" +
-      "cription\0227\n\nrisk_class\030\004 \001(\0162\030.nervus.ip" +
-      "c.v1.RiskClassR\triskClass\"\371\001\n\013PackageInf" +
-      "o\022\035\n\npackage_id\030\001 \001(\tR\tpackageId\022\030\n\007vers" +
-      "ion\030\002 \001(\tR\007version\022!\n\014version_code\030\003 \001(\004" +
-      "R\013versionCode\022\024\n\005trust\030\004 \001(\tR\005trust\022\026\n\006s" +
-      "ource\030\005 \001(\tR\006source\022/\n\023granted_permissio" +
-      "ns\030\006 \003(\tR\022grantedPermissions\022/\n\023disabled" +
-      "_components\030\007 \003(\tR\022disabledComponents\"i\n" +
-      "\031PackageManagerErrorDetail\022L\n\006reason\030\001 \001" +
-      "(\01624.nervus.interface.pkgmanager.v1.Pack" +
-      "ageManagerReasonR\006reason*\306\010\n\024PackageMana" +
-      "gerMethod\022&\n\"PACKAGE_MANAGER_METHOD_UNSP" +
-      "ECIFIED\020\000\022\334\001\n\036PACKAGE_MANAGER_METHOD_INS" +
-      "TALL\020\001\032\267\001\212\246\035\262\001\010\001\022\020perm.pkg.install\030\004(\0010\001" +
-      ":-nervus.interface.pkgmanager.v1.Install" +
-      "RequestB,nervus.interface.pkgmanager.v1." +
-      "InstallResult\202\0018nervus.interface.pkgmana" +
-      "ger.v1.PackageManagerErrorDetail\022\260\001\n PAC" +
-      "KAGE_MANAGER_METHOD_UNINSTALL\020\002\032\211\001\212\246\035\204\001\010" +
-      "\002\022\020perm.pkg.install\030\0040\001:/nervus.interfac" +
-      "e.pkgmanager.v1.UninstallRequest\202\0018nervu" +
-      "s.interface.pkgmanager.v1.PackageManager" +
-      "ErrorDetail\022\317\001\n\033PACKAGE_MANAGER_METHOD_L" +
-      "IST\020\003\032\255\001\212\246\035\250\001\010\003\022\016perm.pkg.query\030\001:*nervu" +
-      "s.interface.pkgmanager.v1.ListRequestB)n" +
-      "ervus.interface.pkgmanager.v1.ListResult" +
-      "H\001\202\0018nervus.interface.pkgmanager.v1.Pack" +
-      "ageManagerErrorDetail\022\306\001\n,PACKAGE_MANAGE" +
-      "R_METHOD_SET_COMPONENT_ENABLED\020\004\032\223\001\212\246\035\216\001" +
-      "\010\004\022\020perm.pkg.install\030\0040\001:9nervus.interfa" +
-      "ce.pkgmanager.v1.SetComponentEnabledRequ" +
-      "est\202\0018nervus.interface.pkgmanager.v1.Pac" +
-      "kageManagerErrorDetail\022\330\001\n\036PACKAGE_MANAG" +
-      "ER_METHOD_INSPECT\020\005\032\263\001\212\246\035\256\001\010\005\022\016perm.pkg." +
-      "query\030\001:-nervus.interface.pkgmanager.v1." +
-      "InspectRequestB,nervus.interface.pkgmana" +
-      "ger.v1.InspectResultH\001\202\0018nervus.interfac" +
+      "\"\244\001\n\016InstallRequest\022#\n\rnspkg_relpath\030\001 \001" +
+      "(\tR\014nspkgRelpath\0223\n\025consented_permission" +
+      "s\030\002 \003(\tR\024consentedPermissions\0228\n\030expecte" +
+      "d_manifest_digest\030\003 \001(\tR\026expectedManifes" +
+      "tDigest\"V\n\rInstallResult\022E\n\007package\030\001 \001(" +
+      "\0132+.nervus.interface.pkgmanager.v1.Packa" +
+      "geInfoR\007package\"1\n\020UninstallRequest\022\035\n\np" +
+      "ackage_id\030\001 \001(\tR\tpackageId\"\r\n\013ListReques" +
+      "t\"U\n\nListResult\022G\n\010packages\030\001 \003(\0132+.nerv" +
+      "us.interface.pkgmanager.v1.PackageInfoR\010" +
+      "packages\"x\n\032SetComponentEnabledRequest\022\035" +
+      "\n\npackage_id\030\001 \001(\tR\tpackageId\022!\n\014compone" +
+      "nt_id\030\002 \001(\tR\013componentId\022\030\n\007enabled\030\003 \001(" +
+      "\010R\007enabled\"5\n\016InspectRequest\022#\n\rnspkg_re" +
+      "lpath\030\001 \001(\tR\014nspkgRelpath\"\372\001\n\rInspectRes" +
+      "ult\022\035\n\npackage_id\030\001 \001(\tR\tpackageId\022\030\n\007ve" +
+      "rsion\030\002 \001(\tR\007version\022!\n\014version_code\030\003 \001" +
+      "(\004R\013versionCode\022d\n\023consent_permissions\030\004" +
+      " \003(\01323.nervus.interface.pkgmanager.v1.Re" +
+      "questedPermissionR\022consentPermissions\022\'\n" +
+      "\017manifest_digest\030\005 \001(\tR\016manifestDigest\"\364" +
+      "\001\n\023RequestedPermission\022#\n\rpermission_id\030" +
+      "\001 \001(\tR\014permissionId\022?\n\014display_name\030\002 \001(" +
+      "\0132\034.nervus.ipc.v1.LocalizedTextR\013display" +
+      "Name\022>\n\013description\030\003 \001(\0132\034.nervus.ipc.v" +
+      "1.LocalizedTextR\013description\0227\n\nrisk_cla" +
+      "ss\030\004 \001(\0162\030.nervus.ipc.v1.RiskClassR\trisk" +
+      "Class\"\371\001\n\013PackageInfo\022\035\n\npackage_id\030\001 \001(" +
+      "\tR\tpackageId\022\030\n\007version\030\002 \001(\tR\007version\022!" +
+      "\n\014version_code\030\003 \001(\004R\013versionCode\022\024\n\005tru" +
+      "st\030\004 \001(\tR\005trust\022\026\n\006source\030\005 \001(\tR\006source\022" +
+      "/\n\023granted_permissions\030\006 \003(\tR\022grantedPer" +
+      "missions\022/\n\023disabled_components\030\007 \003(\tR\022d" +
+      "isabledComponents\"i\n\031PackageManagerError" +
+      "Detail\022L\n\006reason\030\001 \001(\01624.nervus.interfac" +
+      "e.pkgmanager.v1.PackageManagerReasonR\006re" +
+      "ason*\306\010\n\024PackageManagerMethod\022&\n\"PACKAGE" +
+      "_MANAGER_METHOD_UNSPECIFIED\020\000\022\334\001\n\036PACKAG" +
+      "E_MANAGER_METHOD_INSTALL\020\001\032\267\001\212\246\035\262\001\010\001\022\020pe" +
+      "rm.pkg.install\030\004(\0010\001:-nervus.interface.p" +
+      "kgmanager.v1.InstallRequestB,nervus.inte" +
+      "rface.pkgmanager.v1.InstallResult\202\0018nerv" +
+      "us.interface.pkgmanager.v1.PackageManage" +
+      "rErrorDetail\022\260\001\n PACKAGE_MANAGER_METHOD_" +
+      "UNINSTALL\020\002\032\211\001\212\246\035\204\001\010\002\022\020perm.pkg.install\030" +
+      "\0040\001:/nervus.interface.pkgmanager.v1.Unin" +
+      "stallRequest\202\0018nervus.interface.pkgmanag" +
+      "er.v1.PackageManagerErrorDetail\022\317\001\n\033PACK" +
+      "AGE_MANAGER_METHOD_LIST\020\003\032\255\001\212\246\035\250\001\010\003\022\016per" +
+      "m.pkg.query\030\001:*nervus.interface.pkgmanag" +
+      "er.v1.ListRequestB)nervus.interface.pkgm" +
+      "anager.v1.ListResultH\001\202\0018nervus.interfac" +
       "e.pkgmanager.v1.PackageManagerErrorDetai" +
-      "l*\277\003\n\024PackageManagerReason\022&\n\"PACKAGE_MA" +
-      "NAGER_REASON_UNSPECIFIED\020\000\022,\n(PACKAGE_MA" +
-      "NAGER_REASON_SIGNATURE_INVALID\020\001\022*\n&PACK" +
-      "AGE_MANAGER_REASON_DIGEST_MISMATCH\020\002\022$\n " +
-      "PACKAGE_MANAGER_REASON_DOWNGRADE\020\003\022\'\n#PA" +
-      "CKAGE_MANAGER_REASON_ABI_MISMATCH\020\004\022+\n\'P" +
-      "ACKAGE_MANAGER_REASON_MANIFEST_INVALID\020\005" +
-      "\022,\n(PACKAGE_MANAGER_REASON_PACKAGE_NOT_F" +
-      "OUND\020\006\022$\n PACKAGE_MANAGER_REASON_IMMUTAB" +
-      "LE\020\007\022)\n%PACKAGE_MANAGER_REASON_LINEAGE_B" +
-      "ROKEN\020\010\022*\n&PACKAGE_MANAGER_REASON_ARCHIV" +
-      "E_INVALID\020\tB\215\001\n&io.github.nervusos.iface" +
-      ".pkgmanager.v1B\023PackageManagerProtoP\001ZLg" +
-      "ithub.com/nervus-os/nervus-ipc/protocol/" +
-      "interface/pkgmanagerv1;pkgmanagerv1b\006pro" +
-      "to3"
+      "l\022\306\001\n,PACKAGE_MANAGER_METHOD_SET_COMPONE" +
+      "NT_ENABLED\020\004\032\223\001\212\246\035\216\001\010\004\022\020perm.pkg.install" +
+      "\030\0040\001:9nervus.interface.pkgmanager.v1.Set" +
+      "ComponentEnabledRequest\202\0018nervus.interfa" +
+      "ce.pkgmanager.v1.PackageManagerErrorDeta" +
+      "il\022\330\001\n\036PACKAGE_MANAGER_METHOD_INSPECT\020\005\032" +
+      "\263\001\212\246\035\256\001\010\005\022\016perm.pkg.query\030\001:-nervus.inte" +
+      "rface.pkgmanager.v1.InspectRequestB,nerv" +
+      "us.interface.pkgmanager.v1.InspectResult" +
+      "H\001\202\0018nervus.interface.pkgmanager.v1.Pack" +
+      "ageManagerErrorDetail*\353\003\n\024PackageManager" +
+      "Reason\022&\n\"PACKAGE_MANAGER_REASON_UNSPECI" +
+      "FIED\020\000\022,\n(PACKAGE_MANAGER_REASON_SIGNATU" +
+      "RE_INVALID\020\001\022*\n&PACKAGE_MANAGER_REASON_D" +
+      "IGEST_MISMATCH\020\002\022$\n PACKAGE_MANAGER_REAS" +
+      "ON_DOWNGRADE\020\003\022\'\n#PACKAGE_MANAGER_REASON" +
+      "_ABI_MISMATCH\020\004\022+\n\'PACKAGE_MANAGER_REASO" +
+      "N_MANIFEST_INVALID\020\005\022,\n(PACKAGE_MANAGER_" +
+      "REASON_PACKAGE_NOT_FOUND\020\006\022$\n PACKAGE_MA" +
+      "NAGER_REASON_IMMUTABLE\020\007\022)\n%PACKAGE_MANA" +
+      "GER_REASON_LINEAGE_BROKEN\020\010\022*\n&PACKAGE_M" +
+      "ANAGER_REASON_ARCHIVE_INVALID\020\t\022*\n&PACKA" +
+      "GE_MANAGER_REASON_CONTENT_CHANGED\020\nB\215\001\n&" +
+      "io.github.nervusos.iface.pkgmanager.v1B\023" +
+      "PackageManagerProtoP\001ZLgithub.com/nervus" +
+      "-os/nervus-ipc/protocol/interface/pkgman" +
+      "agerv1;pkgmanagerv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -182,7 +185,7 @@ public final class PackageManagerProto {
     internal_static_nervus_interface_pkgmanager_v1_InstallRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_pkgmanager_v1_InstallRequest_descriptor,
-        new java.lang.String[] { "NspkgRelpath", "ConsentedPermissions", });
+        new java.lang.String[] { "NspkgRelpath", "ConsentedPermissions", "ExpectedManifestDigest", });
     internal_static_nervus_interface_pkgmanager_v1_InstallResult_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_nervus_interface_pkgmanager_v1_InstallResult_fieldAccessorTable = new
@@ -224,7 +227,7 @@ public final class PackageManagerProto {
     internal_static_nervus_interface_pkgmanager_v1_InspectResult_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_pkgmanager_v1_InspectResult_descriptor,
-        new java.lang.String[] { "PackageId", "Version", "VersionCode", "ConsentPermissions", });
+        new java.lang.String[] { "PackageId", "Version", "VersionCode", "ConsentPermissions", "ManifestDigest", });
     internal_static_nervus_interface_pkgmanager_v1_RequestedPermission_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_nervus_interface_pkgmanager_v1_RequestedPermission_fieldAccessorTable = new

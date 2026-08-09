@@ -11,12 +11,22 @@ public interface InstallRequestOrBuilder extends
 
   /**
    * <pre>
-   * .nspkg 在调用方【私有数据目录】中的相对路径。
+   * .nspkg 在【用户文档区】(user-data) 中的相对路径。
+   *
+   * # 交接目录是 user-data，不是调用方的私有目录
+   *
+   * 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+   * 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+   * 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+   * Provider 能读的位置调用方写不进。
+   *
+   * 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+   * 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+   * 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
    *
    * 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-   * Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-   * 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-   * "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+   * Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+   * 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
    *
    * 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
    * </pre>
@@ -27,12 +37,22 @@ public interface InstallRequestOrBuilder extends
   java.lang.String getNspkgRelpath();
   /**
    * <pre>
-   * .nspkg 在调用方【私有数据目录】中的相对路径。
+   * .nspkg 在【用户文档区】(user-data) 中的相对路径。
+   *
+   * # 交接目录是 user-data，不是调用方的私有目录
+   *
+   * 此前这里写的是"调用方私有数据目录"，而那是错的：每个包的私有目录是 0700、
+   * 属主为该包 UID，Provider 读不进去。于是协议与实现指的是两个不同的地方，
+   * 【任何 App 发起的安装都不可能成功】——调用方能写的位置 Provider 读不到，
+   * Provider 能读的位置调用方写不进。
+   *
+   * 用 user-data 而不是新造一个专用交接目录：它已经是"跨包共享的用户文件"
+   * 那块地，用户下载或拷进来的 .nspkg 本来就落在这里，文件管理器也在这里。
+   * 再造一个只会多出一次纯粹的复制，换不来任何隔离（两者都全系统可读）。
    *
    * 【刻意不是绝对路径】。绝对路径等于让调用方指定文件系统上任意位置，而
-   * Provider 跑在自己的沙箱里（ProtectSystem=strict + 独立 UID），能读到的
-   * 只有自己的数据目录——一个它读不到的绝对路径只会得到一个含义模糊的
-   * "打不开"。用相对路径把交接位置写进协议：App 先把包放进约定位置。
+   * Provider 跑在 ProtectSystem=strict 的沙箱里，一个它读不到的绝对路径只会
+   * 得到含义模糊的"打不开"。相对路径把交接位置写进协议本身。
    *
    * 必须是不含 ".." 的相对路径；Provider 与 nervud 都会再校验一次。
    * </pre>
@@ -175,4 +195,48 @@ public interface InstallRequestOrBuilder extends
    */
   com.google.protobuf.ByteString
       getConsentedPermissionsBytes(int index);
+
+  /**
+   * <pre>
+   * 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+   *
+   * # 它关的是"看的是 A、装的是 B"
+   *
+   * .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+   * 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+   * ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+   *
+   * 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+   *
+   * 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+   * INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+   * 调用方都【必须】带上它，否则那次确认没有约束力。
+   * </pre>
+   *
+   * <code>string expected_manifest_digest = 3 [json_name = "expectedManifestDigest"];</code>
+   * @return The expectedManifestDigest.
+   */
+  java.lang.String getExpectedManifestDigest();
+  /**
+   * <pre>
+   * 确认屏那次 INSPECT 回的 InspectResult.manifest_digest，原样回传。
+   *
+   * # 它关的是"看的是 A、装的是 B"
+   *
+   * .nspkg 放在跨包共享的 user-data 里，因此调用方在 INSPECT 与 INSTALL
+   * 【之间】完全可以把文件换掉。两次调用各自都合法，单看任何一次都发现不了
+   * ——而用户是基于 A 的权限清单点的头，consented_permissions 却会被用到 B 上。
+   *
+   * 带上它，内核会比对；不符即拒（PACKAGE_MANAGER_REASON_CONTENT_CHANGED）。
+   *
+   * 【为空表示不校验】。必须允许为空：系统装机脚本与 deploy 直接装包，从来没有
+   * INSPECT 那一步，强制要求会把它们全部打断。凡是先给用户看过权限清单的
+   * 调用方都【必须】带上它，否则那次确认没有约束力。
+   * </pre>
+   *
+   * <code>string expected_manifest_digest = 3 [json_name = "expectedManifestDigest"];</code>
+   * @return The bytes for expectedManifestDigest.
+   */
+  com.google.protobuf.ByteString
+      getExpectedManifestDigestBytes();
 }

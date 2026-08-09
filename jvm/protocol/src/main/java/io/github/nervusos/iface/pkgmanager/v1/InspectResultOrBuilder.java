@@ -125,4 +125,38 @@ public interface InspectResultOrBuilder extends
    */
   io.github.nervusos.iface.pkgmanager.v1.RequestedPermissionOrBuilder getConsentPermissionsOrBuilder(
       int index);
+
+  /**
+   * <pre>
+   * 本次检视到的内容的摘要，供 INSTALL 绑定用。
+   *
+   * 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+   * 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+   * 不留任何痕迹。
+   *
+   * 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+   * digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+   * </pre>
+   *
+   * <code>string manifest_digest = 5 [json_name = "manifestDigest"];</code>
+   * @return The manifestDigest.
+   */
+  java.lang.String getManifestDigest();
+  /**
+   * <pre>
+   * 本次检视到的内容的摘要，供 INSTALL 绑定用。
+   *
+   * 确认屏【必须】把它原样放进 InstallRequest.expected_manifest_digest：
+   * 否则用户看到的权限清单与真正装进去的包可能不是同一份，而中间那次替换
+   * 不留任何痕迹。
+   *
+   * 是 sha256(manifest 原始字节) 的十六进制串。manifest 里含全部文件的
+   * digests 且自身被签名覆盖，因此它等价于整包内容的标识——不需要遍历文件树。
+   * </pre>
+   *
+   * <code>string manifest_digest = 5 [json_name = "manifestDigest"];</code>
+   * @return The bytes for manifestDigest.
+   */
+  com.google.protobuf.ByteString
+      getManifestDigestBytes();
 }
