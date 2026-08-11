@@ -68,46 +68,43 @@ public final class PermissionAdminProto {
       "ion.proto\022\036nervus.interface.permission.v" +
       "1\032#nervus/ipc/v1/method_registry.proto\032\'" +
       "nervus/ipc/v1/provider_descriptor.proto\"" +
-      "2\n\021ListGrantsRequest\022\035\n\npackage_id\030\001 \001(\t" +
-      "R\tpackageId\"\262\002\n\017PermissionGrant\022#\n\rpermi" +
-      "ssion_id\030\001 \001(\tR\014permissionId\022?\n\014display_" +
-      "name\030\002 \001(\0132\034.nervus.ipc.v1.LocalizedText" +
-      "R\013displayName\022>\n\013description\030\003 \001(\0132\034.ner" +
-      "vus.ipc.v1.LocalizedTextR\013description\0227\n" +
-      "\nrisk_class\030\004 \001(\0162\030.nervus.ipc.v1.RiskCl" +
-      "assR\triskClass\022@\n\005state\030\005 \001(\0162*.nervus.i" +
-      "nterface.permission.v1.GrantStateR\005state" +
-      "\"\227\001\n\rPackageGrants\022\035\n\npackage_id\030\001 \001(\tR\t" +
-      "packageId\022\024\n\005label\030\002 \001(\tR\005label\022Q\n\013permi" +
-      "ssions\030\003 \003(\0132/.nervus.interface.permissi" +
-      "on.v1.PermissionGrantR\013permissions\"V\n\tGr" +
-      "antList\022I\n\010packages\030\001 \003(\0132-.nervus.inter" +
-      "face.permission.v1.PackageGrantsR\010packag" +
-      "es\"\234\001\n\024SetGrantStateRequest\022\035\n\npackage_i" +
-      "d\030\001 \001(\tR\tpackageId\022#\n\rpermission_id\030\002 \001(" +
-      "\tR\014permissionId\022@\n\005state\030\003 \001(\0162*.nervus." +
-      "interface.permission.v1.GrantStateR\005stat" +
-      "e\"Y\n\025SetGrantStateResponse\022@\n\005state\030\001 \001(" +
-      "\0162*.nervus.interface.permission.v1.Grant" +
-      "StateR\005state*\243\003\n\025PermissionAdminMethod\022\'" +
-      "\n#PERMISSION_ADMIN_METHOD_UNSPECIFIED\020\000\022" +
-      "\244\001\n#PERMISSION_ADMIN_METHOD_LIST_GRANTS\020" +
-      "\001\032{\212\246\035w\010\001\022\025perm.permission.admin\030\001:0nerv" +
-      "us.interface.permission.v1.ListGrantsReq" +
-      "uestB(nervus.interface.permission.v1.Gra" +
-      "ntList\022\271\001\n\'PERMISSION_ADMIN_METHOD_SET_G" +
-      "RANT_STATE\020\002\032\213\001\212\246\035\206\001\010\002\022\025perm.permission." +
-      "admin\030\002:3nervus.interface.permission.v1." +
-      "SetGrantStateRequestB4nervus.interface.p" +
-      "ermission.v1.SetGrantStateResponse*\233\001\n\nG" +
-      "rantState\022\033\n\027GRANT_STATE_UNSPECIFIED\020\000\022\035" +
-      "\n\031GRANT_STATE_NOT_REQUESTED\020\001\022\027\n\023GRANT_S" +
-      "TATE_GRANTED\020\002\022\026\n\022GRANT_STATE_DENIED\020\003\022 " +
-      "\n\034GRANT_STATE_DENIED_PERMANENT\020\004B\216\001\n&io." +
-      "github.nervusos.iface.permission.v1B\024Per" +
-      "missionAdminProtoP\001ZLgithub.com/nervus-o" +
-      "s/nervus-ipc/protocol/interface/permissi" +
-      "onv1;permissionv1b\006proto3"
+      "\'\n\021ListGrantsRequest\022\022\n\npackage_id\030\001 \001(\t" +
+      "\"\223\002\n\017PermissionGrant\022\025\n\rpermission_id\030\001 " +
+      "\001(\t\0222\n\014display_name\030\002 \001(\0132\034.nervus.ipc.v" +
+      "1.LocalizedText\0221\n\013description\030\003 \001(\0132\034.n" +
+      "ervus.ipc.v1.LocalizedText\022,\n\nrisk_class" +
+      "\030\004 \001(\0162\030.nervus.ipc.v1.RiskClass\0229\n\005stat" +
+      "e\030\005 \001(\0162*.nervus.interface.permission.v1" +
+      ".GrantState\022\031\n\021effective_granted\030\006 \001(\010\"x" +
+      "\n\rPackageGrants\022\022\n\npackage_id\030\001 \001(\t\022\r\n\005l" +
+      "abel\030\002 \001(\t\022D\n\013permissions\030\003 \003(\0132/.nervus" +
+      ".interface.permission.v1.PermissionGrant" +
+      "\"L\n\tGrantList\022?\n\010packages\030\001 \003(\0132-.nervus" +
+      ".interface.permission.v1.PackageGrants\"|" +
+      "\n\024SetGrantStateRequest\022\022\n\npackage_id\030\001 \001" +
+      "(\t\022\025\n\rpermission_id\030\002 \001(\t\0229\n\005state\030\003 \001(\016" +
+      "2*.nervus.interface.permission.v1.GrantS" +
+      "tate\"R\n\025SetGrantStateResponse\0229\n\005state\030\001" +
+      " \001(\0162*.nervus.interface.permission.v1.Gr" +
+      "antState*\243\003\n\025PermissionAdminMethod\022\'\n#PE" +
+      "RMISSION_ADMIN_METHOD_UNSPECIFIED\020\000\022\244\001\n#" +
+      "PERMISSION_ADMIN_METHOD_LIST_GRANTS\020\001\032{\212" +
+      "\246\035w\010\001\022\025perm.permission.admin\030\001:0nervus.i" +
+      "nterface.permission.v1.ListGrantsRequest" +
+      "B(nervus.interface.permission.v1.GrantLi" +
+      "st\022\271\001\n\'PERMISSION_ADMIN_METHOD_SET_GRANT" +
+      "_STATE\020\002\032\213\001\212\246\035\206\001\010\002\022\025perm.permission.admi" +
+      "n\030\002:3nervus.interface.permission.v1.SetG" +
+      "rantStateRequestB4nervus.interface.permi" +
+      "ssion.v1.SetGrantStateResponse*\233\001\n\nGrant" +
+      "State\022\033\n\027GRANT_STATE_UNSPECIFIED\020\000\022\035\n\031GR" +
+      "ANT_STATE_NOT_REQUESTED\020\001\022\027\n\023GRANT_STATE" +
+      "_GRANTED\020\002\022\026\n\022GRANT_STATE_DENIED\020\003\022 \n\034GR" +
+      "ANT_STATE_DENIED_PERMANENT\020\004B\216\001\n&io.gith" +
+      "ub.nervusos.iface.permission.v1B\024Permiss" +
+      "ionAdminProtoP\001ZLgithub.com/nervus-os/ne" +
+      "rvus-ipc/protocol/interface/permissionv1" +
+      ";permissionv1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -126,7 +123,7 @@ public final class PermissionAdminProto {
     internal_static_nervus_interface_permission_v1_PermissionGrant_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_nervus_interface_permission_v1_PermissionGrant_descriptor,
-        new java.lang.String[] { "PermissionId", "DisplayName", "Description", "RiskClass", "State", });
+        new java.lang.String[] { "PermissionId", "DisplayName", "Description", "RiskClass", "State", "EffectiveGranted", });
     internal_static_nervus_interface_permission_v1_PackageGrants_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_nervus_interface_permission_v1_PackageGrants_fieldAccessorTable = new

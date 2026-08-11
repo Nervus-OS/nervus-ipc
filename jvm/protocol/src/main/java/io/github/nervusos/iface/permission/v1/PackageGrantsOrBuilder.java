@@ -10,12 +10,12 @@ public interface PackageGrantsOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The packageId.
    */
   java.lang.String getPackageId();
   /**
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The bytes for packageId.
    */
   com.google.protobuf.ByteString
@@ -26,7 +26,7 @@ public interface PackageGrantsOrBuilder extends
    * 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
    * </pre>
    *
-   * <code>string label = 2 [json_name = "label"];</code>
+   * <code>string label = 2;</code>
    * @return The label.
    */
   java.lang.String getLabel();
@@ -35,7 +35,7 @@ public interface PackageGrantsOrBuilder extends
    * 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
    * </pre>
    *
-   * <code>string label = 2 [json_name = "label"];</code>
+   * <code>string label = 2;</code>
    * @return The bytes for label.
    */
   com.google.protobuf.ByteString
@@ -46,7 +46,7 @@ public interface PackageGrantsOrBuilder extends
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   java.util.List<io.github.nervusos.iface.permission.v1.PermissionGrant> 
       getPermissionsList();
@@ -55,7 +55,7 @@ public interface PackageGrantsOrBuilder extends
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   io.github.nervusos.iface.permission.v1.PermissionGrant getPermissions(int index);
   /**
@@ -63,7 +63,7 @@ public interface PackageGrantsOrBuilder extends
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   int getPermissionsCount();
   /**
@@ -71,7 +71,7 @@ public interface PackageGrantsOrBuilder extends
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   java.util.List<? extends io.github.nervusos.iface.permission.v1.PermissionGrantOrBuilder> 
       getPermissionsOrBuilderList();
@@ -80,7 +80,7 @@ public interface PackageGrantsOrBuilder extends
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   io.github.nervusos.iface.permission.v1.PermissionGrantOrBuilder getPermissionsOrBuilder(
       int index);

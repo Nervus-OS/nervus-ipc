@@ -54,7 +54,7 @@ private static final long serialVersionUID = 0L;
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   @java.lang.Override
   public java.util.List<io.github.nervusos.iface.permission.v1.PackageGrants> getPackagesList() {
@@ -68,7 +68,7 @@ private static final long serialVersionUID = 0L;
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   @java.lang.Override
   public java.util.List<? extends io.github.nervusos.iface.permission.v1.PackageGrantsOrBuilder> 
@@ -83,7 +83,7 @@ private static final long serialVersionUID = 0L;
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   @java.lang.Override
   public int getPackagesCount() {
@@ -97,7 +97,7 @@ private static final long serialVersionUID = 0L;
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   @java.lang.Override
   public io.github.nervusos.iface.permission.v1.PackageGrants getPackages(int index) {
@@ -111,7 +111,7 @@ private static final long serialVersionUID = 0L;
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   @java.lang.Override
   public io.github.nervusos.iface.permission.v1.PackageGrantsOrBuilder getPackagesOrBuilder(
@@ -481,7 +481,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public java.util.List<io.github.nervusos.iface.permission.v1.PackageGrants> getPackagesList() {
       if (packagesBuilder_ == null) {
@@ -498,7 +498,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public int getPackagesCount() {
       if (packagesBuilder_ == null) {
@@ -515,7 +515,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public io.github.nervusos.iface.permission.v1.PackageGrants getPackages(int index) {
       if (packagesBuilder_ == null) {
@@ -532,7 +532,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public Builder setPackages(
         int index, io.github.nervusos.iface.permission.v1.PackageGrants value) {
@@ -556,7 +556,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public Builder setPackages(
         int index, io.github.nervusos.iface.permission.v1.PackageGrants.Builder builderForValue) {
@@ -577,7 +577,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public Builder addPackages(io.github.nervusos.iface.permission.v1.PackageGrants value) {
       if (packagesBuilder_ == null) {
@@ -600,7 +600,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public Builder addPackages(
         int index, io.github.nervusos.iface.permission.v1.PackageGrants value) {
@@ -624,7 +624,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public Builder addPackages(
         io.github.nervusos.iface.permission.v1.PackageGrants.Builder builderForValue) {
@@ -645,7 +645,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public Builder addPackages(
         int index, io.github.nervusos.iface.permission.v1.PackageGrants.Builder builderForValue) {
@@ -666,7 +666,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public Builder addAllPackages(
         java.lang.Iterable<? extends io.github.nervusos.iface.permission.v1.PackageGrants> values) {
@@ -688,7 +688,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public Builder clearPackages() {
       if (packagesBuilder_ == null) {
@@ -708,7 +708,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public Builder removePackages(int index) {
       if (packagesBuilder_ == null) {
@@ -728,7 +728,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public io.github.nervusos.iface.permission.v1.PackageGrants.Builder getPackagesBuilder(
         int index) {
@@ -742,7 +742,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public io.github.nervusos.iface.permission.v1.PackageGrantsOrBuilder getPackagesOrBuilder(
         int index) {
@@ -759,7 +759,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public java.util.List<? extends io.github.nervusos.iface.permission.v1.PackageGrantsOrBuilder> 
          getPackagesOrBuilderList() {
@@ -777,7 +777,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public io.github.nervusos.iface.permission.v1.PackageGrants.Builder addPackagesBuilder() {
       return getPackagesFieldBuilder().addBuilder(
@@ -791,7 +791,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public io.github.nervusos.iface.permission.v1.PackageGrants.Builder addPackagesBuilder(
         int index) {
@@ -806,7 +806,7 @@ private static final long serialVersionUID = 0L;
      * 对用户是纯噪音。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
      */
     public java.util.List<io.github.nervusos.iface.permission.v1.PackageGrants.Builder> 
          getPackagesBuilderList() {

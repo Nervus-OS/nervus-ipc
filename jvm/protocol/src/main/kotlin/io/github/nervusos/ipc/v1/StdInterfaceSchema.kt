@@ -36,13 +36,13 @@ object StdInterfaceSchema {
         "nervus.interface.operation.control@1" to
             "57d93305011f8faac691eb73727336d276e967c47c3edef6c93daba9db2cd569",
         "nervus.interface.permission.admin@1" to
-            "13417f2ef72f94093a4341313794a78169a0e313df6ff9f9d83599954a041d43",
+            "9437a5ba8cc90b5a5ad1dfbd22dd525f948ef4613fb63e1fc25689cae22bdc1e",
         "nervus.interface.permission.self@1" to
-            "ef2cf8c1a4bbac6a0be8ae4ca22bec0ab0919cfe22885268e28435e83fa1efe7",
+            "a1078c890ff7accb4072899f41989e3a6d1b6d11f73171a5f5f60fbb67ae2ab0",
         "nervus.interface.permission.ui@1" to
             "8376df1536936b55c6ae1f50856120383581a6d4dd3375a8efc6aa1cd7a9553f",
         "nervus.interface.pkg.manager@1" to
-            "1f93c26c6a854a40204e828dd8cc7c081965848f7d3f51bf9e580a3699cbd807",
+            "6f5452d045eee4c899fdd7a005427cb5d45879d89e1a5c025836bd6b2593b64a",
         "nervus.interface.resource.directory@1" to
             "1825327bc61345aed2761aa91005b18997e4cc34dbd7eb56190e05d53dd3cc4a",
         "nervus.interface.safety.control@1" to

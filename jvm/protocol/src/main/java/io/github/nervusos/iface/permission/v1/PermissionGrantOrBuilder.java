@@ -14,7 +14,7 @@ public interface PermissionGrantOrBuilder extends
    * 权限 ID，如 "perm.storage.user"。
    * </pre>
    *
-   * <code>string permission_id = 1 [json_name = "permissionId"];</code>
+   * <code>string permission_id = 1;</code>
    * @return The permissionId.
    */
   java.lang.String getPermissionId();
@@ -23,7 +23,7 @@ public interface PermissionGrantOrBuilder extends
    * 权限 ID，如 "perm.storage.user"。
    * </pre>
    *
-   * <code>string permission_id = 1 [json_name = "permissionId"];</code>
+   * <code>string permission_id = 1;</code>
    * @return The bytes for permissionId.
    */
   com.google.protobuf.ByteString
@@ -37,7 +37,7 @@ public interface PermissionGrantOrBuilder extends
    * 界面不可能预先知道它们的文案。
    * </pre>
    *
-   * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
    * @return Whether the displayName field is set.
    */
   boolean hasDisplayName();
@@ -49,7 +49,7 @@ public interface PermissionGrantOrBuilder extends
    * 界面不可能预先知道它们的文案。
    * </pre>
    *
-   * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
    * @return The displayName.
    */
   io.github.nervusos.ipc.v1.LocalizedText getDisplayName();
@@ -61,44 +61,93 @@ public interface PermissionGrantOrBuilder extends
    * 界面不可能预先知道它们的文案。
    * </pre>
    *
-   * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
    */
   io.github.nervusos.ipc.v1.LocalizedTextOrBuilder getDisplayNameOrBuilder();
 
   /**
-   * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
    * @return Whether the description field is set.
    */
   boolean hasDescription();
   /**
-   * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
    * @return The description.
    */
   io.github.nervusos.ipc.v1.LocalizedText getDescription();
   /**
-   * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
    */
   io.github.nervusos.ipc.v1.LocalizedTextOrBuilder getDescriptionOrBuilder();
 
   /**
-   * <code>.nervus.ipc.v1.RiskClass risk_class = 4 [json_name = "riskClass"];</code>
+   * <code>.nervus.ipc.v1.RiskClass risk_class = 4;</code>
    * @return The enum numeric value on the wire for riskClass.
    */
   int getRiskClassValue();
   /**
-   * <code>.nervus.ipc.v1.RiskClass risk_class = 4 [json_name = "riskClass"];</code>
+   * <code>.nervus.ipc.v1.RiskClass risk_class = 4;</code>
    * @return The riskClass.
    */
   io.github.nervusos.ipc.v1.RiskClass getRiskClass();
 
   /**
-   * <code>.nervus.interface.permission.v1.GrantState state = 5 [json_name = "state"];</code>
+   * <pre>
+   * 用户的决定。**不是**「此刻能不能用」——那是 effective_granted。
+   *
+   * 对系统软件（随只读系统镜像发布 + Platform 信任 + 平台角色签名）这一条恒为
+   * NOT_REQUESTED：consent 豁免【不伪造一条授予记录】，它绕过的是「要不要问
+   * 用户」这一步本身。所以拿本字段判断开关是否打开，会把一个实际可访问的权限
+   * 显示成「关闭」。
+   * </pre>
+   *
+   * <code>.nervus.interface.permission.v1.GrantState state = 5;</code>
    * @return The enum numeric value on the wire for state.
    */
   int getStateValue();
   /**
-   * <code>.nervus.interface.permission.v1.GrantState state = 5 [json_name = "state"];</code>
+   * <pre>
+   * 用户的决定。**不是**「此刻能不能用」——那是 effective_granted。
+   *
+   * 对系统软件（随只读系统镜像发布 + Platform 信任 + 平台角色签名）这一条恒为
+   * NOT_REQUESTED：consent 豁免【不伪造一条授予记录】，它绕过的是「要不要问
+   * 用户」这一步本身。所以拿本字段判断开关是否打开，会把一个实际可访问的权限
+   * 显示成「关闭」。
+   * </pre>
+   *
+   * <code>.nervus.interface.permission.v1.GrantState state = 5;</code>
    * @return The state.
    */
   io.github.nervusos.iface.permission.v1.GrantState getState();
+
+  /**
+   * <pre>
+   * 此刻能不能用——nervud `AllowedAt` 的结论。
+   *
+   * # 为什么必须与 state 分成两个字段
+   *
+   * 两者对系统软件【不一致】，而界面需要同时知道这两件事：
+   *
+   * state             用户的决定。系统软件恒为 NOT_REQUESTED
+   * effective_granted 实际能不能访问。系统软件恒为 true（consent 豁免）
+   *
+   * 曾经界面只有 state 可看，于是文件管理器的「用户文件」开关显示为关闭，
+   * 而它实际能读写用户目录——开关与事实相反。把 state 的语义改成「实际能不能
+   * 用」也不行：那会丢掉「用户到底做过什么决定」，而普通应用的界面要靠它区分
+   * 「还没问过」与「问过被拒」（后者不该自动再弹窗）。
+   *
+   * # 界面该怎么用
+   *
+   * 开关的**显示状态**取本字段；`state == NOT_REQUESTED` 且本字段为 true 就是
+   * 豁免，此时开关应当显示为开且**不可拨动**——拨它没有意义，SetGrantState 会
+   * 以 FAILED_PRECONDITION 拒掉（系统软件的运行期状态不由用户决定）。
+   *
+   * 【已授予】与【豁免】在界面上必须可区分：前者是用户点过头，可以撤回；
+   * 后者是装机时就接受的系统组成部分，撤不掉。
+   * </pre>
+   *
+   * <code>bool effective_granted = 6;</code>
+   * @return The effectiveGranted.
+   */
+  boolean getEffectiveGranted();
 }

@@ -54,14 +54,14 @@ private static final long serialVersionUID = 0L;
   public static final int STATE_FIELD_NUMBER = 1;
   private int state_ = 0;
   /**
-   * <code>.nervus.interface.permission.v1.GrantState state = 1 [json_name = "state"];</code>
+   * <code>.nervus.interface.permission.v1.GrantState state = 1;</code>
    * @return The enum numeric value on the wire for state.
    */
   @java.lang.Override public int getStateValue() {
     return state_;
   }
   /**
-   * <code>.nervus.interface.permission.v1.GrantState state = 1 [json_name = "state"];</code>
+   * <code>.nervus.interface.permission.v1.GrantState state = 1;</code>
    * @return The state.
    */
   @java.lang.Override public io.github.nervusos.iface.permission.v1.GrantState getState() {
@@ -371,14 +371,14 @@ private static final long serialVersionUID = 0L;
 
     private int state_ = 0;
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 1 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 1;</code>
      * @return The enum numeric value on the wire for state.
      */
     @java.lang.Override public int getStateValue() {
       return state_;
     }
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 1 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 1;</code>
      * @param value The enum numeric value on the wire for state to set.
      * @return This builder for chaining.
      */
@@ -389,7 +389,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 1 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 1;</code>
      * @return The state.
      */
     @java.lang.Override
@@ -398,7 +398,7 @@ private static final long serialVersionUID = 0L;
       return result == null ? io.github.nervusos.iface.permission.v1.GrantState.UNRECOGNIZED : result;
     }
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 1 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 1;</code>
      * @param value The state to set.
      * @return This builder for chaining.
      */
@@ -412,7 +412,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 1 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearState() {

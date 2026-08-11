@@ -14,7 +14,7 @@ public interface ListGrantsRequestOrBuilder extends
    * 只看这一个包。空 = 列出全部已安装包。
    * </pre>
    *
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The packageId.
    */
   java.lang.String getPackageId();
@@ -23,7 +23,7 @@ public interface ListGrantsRequestOrBuilder extends
    * 只看这一个包。空 = 列出全部已安装包。
    * </pre>
    *
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The bytes for packageId.
    */
   com.google.protobuf.ByteString

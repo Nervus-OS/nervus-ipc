@@ -10,12 +10,12 @@ public interface SetGrantStateResponseOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>.nervus.interface.permission.v1.GrantState state = 1 [json_name = "state"];</code>
+   * <code>.nervus.interface.permission.v1.GrantState state = 1;</code>
    * @return The enum numeric value on the wire for state.
    */
   int getStateValue();
   /**
-   * <code>.nervus.interface.permission.v1.GrantState state = 1 [json_name = "state"];</code>
+   * <code>.nervus.interface.permission.v1.GrantState state = 1;</code>
    * @return The state.
    */
   io.github.nervusos.iface.permission.v1.GrantState getState();

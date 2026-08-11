@@ -53,7 +53,7 @@ private static final long serialVersionUID = 0L;
   @SuppressWarnings("serial")
   private volatile java.lang.Object packageId_ = "";
   /**
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The packageId.
    */
   @java.lang.Override
@@ -70,7 +70,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The bytes for packageId.
    */
   @java.lang.Override
@@ -92,7 +92,7 @@ private static final long serialVersionUID = 0L;
   @SuppressWarnings("serial")
   private volatile java.lang.Object permissionId_ = "";
   /**
-   * <code>string permission_id = 2 [json_name = "permissionId"];</code>
+   * <code>string permission_id = 2;</code>
    * @return The permissionId.
    */
   @java.lang.Override
@@ -109,7 +109,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string permission_id = 2 [json_name = "permissionId"];</code>
+   * <code>string permission_id = 2;</code>
    * @return The bytes for permissionId.
    */
   @java.lang.Override
@@ -136,7 +136,7 @@ private static final long serialVersionUID = 0L;
    * 想撤销就用 DENIED。
    * </pre>
    *
-   * <code>.nervus.interface.permission.v1.GrantState state = 3 [json_name = "state"];</code>
+   * <code>.nervus.interface.permission.v1.GrantState state = 3;</code>
    * @return The enum numeric value on the wire for state.
    */
   @java.lang.Override public int getStateValue() {
@@ -149,7 +149,7 @@ private static final long serialVersionUID = 0L;
    * 想撤销就用 DENIED。
    * </pre>
    *
-   * <code>.nervus.interface.permission.v1.GrantState state = 3 [json_name = "state"];</code>
+   * <code>.nervus.interface.permission.v1.GrantState state = 3;</code>
    * @return The state.
    */
   @java.lang.Override public io.github.nervusos.iface.permission.v1.GrantState getState() {
@@ -503,7 +503,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object packageId_ = "";
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @return The packageId.
      */
     public java.lang.String getPackageId() {
@@ -519,7 +519,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @return The bytes for packageId.
      */
     public com.google.protobuf.ByteString
@@ -536,7 +536,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @param value The packageId to set.
      * @return This builder for chaining.
      */
@@ -549,7 +549,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearPackageId() {
@@ -559,7 +559,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @param value The bytes for packageId to set.
      * @return This builder for chaining.
      */
@@ -575,7 +575,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object permissionId_ = "";
     /**
-     * <code>string permission_id = 2 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 2;</code>
      * @return The permissionId.
      */
     public java.lang.String getPermissionId() {
@@ -591,7 +591,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string permission_id = 2 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 2;</code>
      * @return The bytes for permissionId.
      */
     public com.google.protobuf.ByteString
@@ -608,7 +608,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string permission_id = 2 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 2;</code>
      * @param value The permissionId to set.
      * @return This builder for chaining.
      */
@@ -621,7 +621,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string permission_id = 2 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearPermissionId() {
@@ -631,7 +631,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string permission_id = 2 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 2;</code>
      * @param value The bytes for permissionId to set.
      * @return This builder for chaining.
      */
@@ -653,7 +653,7 @@ private static final long serialVersionUID = 0L;
      * 想撤销就用 DENIED。
      * </pre>
      *
-     * <code>.nervus.interface.permission.v1.GrantState state = 3 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 3;</code>
      * @return The enum numeric value on the wire for state.
      */
     @java.lang.Override public int getStateValue() {
@@ -666,7 +666,7 @@ private static final long serialVersionUID = 0L;
      * 想撤销就用 DENIED。
      * </pre>
      *
-     * <code>.nervus.interface.permission.v1.GrantState state = 3 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 3;</code>
      * @param value The enum numeric value on the wire for state to set.
      * @return This builder for chaining.
      */
@@ -683,7 +683,7 @@ private static final long serialVersionUID = 0L;
      * 想撤销就用 DENIED。
      * </pre>
      *
-     * <code>.nervus.interface.permission.v1.GrantState state = 3 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 3;</code>
      * @return The state.
      */
     @java.lang.Override
@@ -698,7 +698,7 @@ private static final long serialVersionUID = 0L;
      * 想撤销就用 DENIED。
      * </pre>
      *
-     * <code>.nervus.interface.permission.v1.GrantState state = 3 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 3;</code>
      * @param value The state to set.
      * @return This builder for chaining.
      */
@@ -718,7 +718,7 @@ private static final long serialVersionUID = 0L;
      * 想撤销就用 DENIED。
      * </pre>
      *
-     * <code>.nervus.interface.permission.v1.GrantState state = 3 [json_name = "state"];</code>
+     * <code>.nervus.interface.permission.v1.GrantState state = 3;</code>
      * @return This builder for chaining.
      */
     public Builder clearState() {

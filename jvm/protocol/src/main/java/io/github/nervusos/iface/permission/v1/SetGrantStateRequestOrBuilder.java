@@ -10,24 +10,24 @@ public interface SetGrantStateRequestOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The packageId.
    */
   java.lang.String getPackageId();
   /**
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The bytes for packageId.
    */
   com.google.protobuf.ByteString
       getPackageIdBytes();
 
   /**
-   * <code>string permission_id = 2 [json_name = "permissionId"];</code>
+   * <code>string permission_id = 2;</code>
    * @return The permissionId.
    */
   java.lang.String getPermissionId();
   /**
-   * <code>string permission_id = 2 [json_name = "permissionId"];</code>
+   * <code>string permission_id = 2;</code>
    * @return The bytes for permissionId.
    */
   com.google.protobuf.ByteString
@@ -40,7 +40,7 @@ public interface SetGrantStateRequestOrBuilder extends
    * 想撤销就用 DENIED。
    * </pre>
    *
-   * <code>.nervus.interface.permission.v1.GrantState state = 3 [json_name = "state"];</code>
+   * <code>.nervus.interface.permission.v1.GrantState state = 3;</code>
    * @return The enum numeric value on the wire for state.
    */
   int getStateValue();
@@ -51,7 +51,7 @@ public interface SetGrantStateRequestOrBuilder extends
    * 想撤销就用 DENIED。
    * </pre>
    *
-   * <code>.nervus.interface.permission.v1.GrantState state = 3 [json_name = "state"];</code>
+   * <code>.nervus.interface.permission.v1.GrantState state = 3;</code>
    * @return The state.
    */
   io.github.nervusos.iface.permission.v1.GrantState getState();

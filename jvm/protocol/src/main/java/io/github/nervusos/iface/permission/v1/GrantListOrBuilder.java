@@ -17,7 +17,7 @@ public interface GrantListOrBuilder extends
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   java.util.List<io.github.nervusos.iface.permission.v1.PackageGrants> 
       getPackagesList();
@@ -29,7 +29,7 @@ public interface GrantListOrBuilder extends
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   io.github.nervusos.iface.permission.v1.PackageGrants getPackages(int index);
   /**
@@ -40,7 +40,7 @@ public interface GrantListOrBuilder extends
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   int getPackagesCount();
   /**
@@ -51,7 +51,7 @@ public interface GrantListOrBuilder extends
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   java.util.List<? extends io.github.nervusos.iface.permission.v1.PackageGrantsOrBuilder> 
       getPackagesOrBuilderList();
@@ -63,7 +63,7 @@ public interface GrantListOrBuilder extends
    * 对用户是纯噪音。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1 [json_name = "packages"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PackageGrants packages = 1;</code>
    */
   io.github.nervusos.iface.permission.v1.PackageGrantsOrBuilder getPackagesOrBuilder(
       int index);

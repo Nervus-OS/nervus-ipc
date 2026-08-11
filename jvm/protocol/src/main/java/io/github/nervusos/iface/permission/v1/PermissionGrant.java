@@ -61,7 +61,7 @@ private static final long serialVersionUID = 0L;
    * 权限 ID，如 "perm.storage.user"。
    * </pre>
    *
-   * <code>string permission_id = 1 [json_name = "permissionId"];</code>
+   * <code>string permission_id = 1;</code>
    * @return The permissionId.
    */
   @java.lang.Override
@@ -82,7 +82,7 @@ private static final long serialVersionUID = 0L;
    * 权限 ID，如 "perm.storage.user"。
    * </pre>
    *
-   * <code>string permission_id = 1 [json_name = "permissionId"];</code>
+   * <code>string permission_id = 1;</code>
    * @return The bytes for permissionId.
    */
   @java.lang.Override
@@ -110,7 +110,7 @@ private static final long serialVersionUID = 0L;
    * 界面不可能预先知道它们的文案。
    * </pre>
    *
-   * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
    * @return Whether the displayName field is set.
    */
   @java.lang.Override
@@ -125,7 +125,7 @@ private static final long serialVersionUID = 0L;
    * 界面不可能预先知道它们的文案。
    * </pre>
    *
-   * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
    * @return The displayName.
    */
   @java.lang.Override
@@ -140,7 +140,7 @@ private static final long serialVersionUID = 0L;
    * 界面不可能预先知道它们的文案。
    * </pre>
    *
-   * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
    */
   @java.lang.Override
   public io.github.nervusos.ipc.v1.LocalizedTextOrBuilder getDisplayNameOrBuilder() {
@@ -150,7 +150,7 @@ private static final long serialVersionUID = 0L;
   public static final int DESCRIPTION_FIELD_NUMBER = 3;
   private io.github.nervusos.ipc.v1.LocalizedText description_;
   /**
-   * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
    * @return Whether the description field is set.
    */
   @java.lang.Override
@@ -158,7 +158,7 @@ private static final long serialVersionUID = 0L;
     return ((bitField0_ & 0x00000002) != 0);
   }
   /**
-   * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
    * @return The description.
    */
   @java.lang.Override
@@ -166,7 +166,7 @@ private static final long serialVersionUID = 0L;
     return description_ == null ? io.github.nervusos.ipc.v1.LocalizedText.getDefaultInstance() : description_;
   }
   /**
-   * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+   * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
    */
   @java.lang.Override
   public io.github.nervusos.ipc.v1.LocalizedTextOrBuilder getDescriptionOrBuilder() {
@@ -176,14 +176,14 @@ private static final long serialVersionUID = 0L;
   public static final int RISK_CLASS_FIELD_NUMBER = 4;
   private int riskClass_ = 0;
   /**
-   * <code>.nervus.ipc.v1.RiskClass risk_class = 4 [json_name = "riskClass"];</code>
+   * <code>.nervus.ipc.v1.RiskClass risk_class = 4;</code>
    * @return The enum numeric value on the wire for riskClass.
    */
   @java.lang.Override public int getRiskClassValue() {
     return riskClass_;
   }
   /**
-   * <code>.nervus.ipc.v1.RiskClass risk_class = 4 [json_name = "riskClass"];</code>
+   * <code>.nervus.ipc.v1.RiskClass risk_class = 4;</code>
    * @return The riskClass.
    */
   @java.lang.Override public io.github.nervusos.ipc.v1.RiskClass getRiskClass() {
@@ -194,19 +194,73 @@ private static final long serialVersionUID = 0L;
   public static final int STATE_FIELD_NUMBER = 5;
   private int state_ = 0;
   /**
-   * <code>.nervus.interface.permission.v1.GrantState state = 5 [json_name = "state"];</code>
+   * <pre>
+   * 用户的决定。**不是**「此刻能不能用」——那是 effective_granted。
+   *
+   * 对系统软件（随只读系统镜像发布 + Platform 信任 + 平台角色签名）这一条恒为
+   * NOT_REQUESTED：consent 豁免【不伪造一条授予记录】，它绕过的是「要不要问
+   * 用户」这一步本身。所以拿本字段判断开关是否打开，会把一个实际可访问的权限
+   * 显示成「关闭」。
+   * </pre>
+   *
+   * <code>.nervus.interface.permission.v1.GrantState state = 5;</code>
    * @return The enum numeric value on the wire for state.
    */
   @java.lang.Override public int getStateValue() {
     return state_;
   }
   /**
-   * <code>.nervus.interface.permission.v1.GrantState state = 5 [json_name = "state"];</code>
+   * <pre>
+   * 用户的决定。**不是**「此刻能不能用」——那是 effective_granted。
+   *
+   * 对系统软件（随只读系统镜像发布 + Platform 信任 + 平台角色签名）这一条恒为
+   * NOT_REQUESTED：consent 豁免【不伪造一条授予记录】，它绕过的是「要不要问
+   * 用户」这一步本身。所以拿本字段判断开关是否打开，会把一个实际可访问的权限
+   * 显示成「关闭」。
+   * </pre>
+   *
+   * <code>.nervus.interface.permission.v1.GrantState state = 5;</code>
    * @return The state.
    */
   @java.lang.Override public io.github.nervusos.iface.permission.v1.GrantState getState() {
     io.github.nervusos.iface.permission.v1.GrantState result = io.github.nervusos.iface.permission.v1.GrantState.forNumber(state_);
     return result == null ? io.github.nervusos.iface.permission.v1.GrantState.UNRECOGNIZED : result;
+  }
+
+  public static final int EFFECTIVE_GRANTED_FIELD_NUMBER = 6;
+  private boolean effectiveGranted_ = false;
+  /**
+   * <pre>
+   * 此刻能不能用——nervud `AllowedAt` 的结论。
+   *
+   * # 为什么必须与 state 分成两个字段
+   *
+   * 两者对系统软件【不一致】，而界面需要同时知道这两件事：
+   *
+   * state             用户的决定。系统软件恒为 NOT_REQUESTED
+   * effective_granted 实际能不能访问。系统软件恒为 true（consent 豁免）
+   *
+   * 曾经界面只有 state 可看，于是文件管理器的「用户文件」开关显示为关闭，
+   * 而它实际能读写用户目录——开关与事实相反。把 state 的语义改成「实际能不能
+   * 用」也不行：那会丢掉「用户到底做过什么决定」，而普通应用的界面要靠它区分
+   * 「还没问过」与「问过被拒」（后者不该自动再弹窗）。
+   *
+   * # 界面该怎么用
+   *
+   * 开关的**显示状态**取本字段；`state == NOT_REQUESTED` 且本字段为 true 就是
+   * 豁免，此时开关应当显示为开且**不可拨动**——拨它没有意义，SetGrantState 会
+   * 以 FAILED_PRECONDITION 拒掉（系统软件的运行期状态不由用户决定）。
+   *
+   * 【已授予】与【豁免】在界面上必须可区分：前者是用户点过头，可以撤回；
+   * 后者是装机时就接受的系统组成部分，撤不掉。
+   * </pre>
+   *
+   * <code>bool effective_granted = 6;</code>
+   * @return The effectiveGranted.
+   */
+  @java.lang.Override
+  public boolean getEffectiveGranted() {
+    return effectiveGranted_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -238,6 +292,9 @@ private static final long serialVersionUID = 0L;
     if (state_ != io.github.nervusos.iface.permission.v1.GrantState.GRANT_STATE_UNSPECIFIED.getNumber()) {
       output.writeEnum(5, state_);
     }
+    if (effectiveGranted_ != false) {
+      output.writeBool(6, effectiveGranted_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -265,6 +322,10 @@ private static final long serialVersionUID = 0L;
     if (state_ != io.github.nervusos.iface.permission.v1.GrantState.GRANT_STATE_UNSPECIFIED.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(5, state_);
+    }
+    if (effectiveGranted_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(6, effectiveGranted_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -295,6 +356,8 @@ private static final long serialVersionUID = 0L;
     }
     if (riskClass_ != other.riskClass_) return false;
     if (state_ != other.state_) return false;
+    if (getEffectiveGranted()
+        != other.getEffectiveGranted()) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -320,6 +383,9 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + riskClass_;
     hash = (37 * hash) + STATE_FIELD_NUMBER;
     hash = (53 * hash) + state_;
+    hash = (37 * hash) + EFFECTIVE_GRANTED_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getEffectiveGranted());
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -478,6 +544,7 @@ private static final long serialVersionUID = 0L;
       }
       riskClass_ = 0;
       state_ = 0;
+      effectiveGranted_ = false;
       return this;
     }
 
@@ -533,6 +600,9 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000010) != 0)) {
         result.state_ = state_;
       }
+      if (((from_bitField0_ & 0x00000020) != 0)) {
+        result.effectiveGranted_ = effectiveGranted_;
+      }
       result.bitField0_ |= to_bitField0_;
     }
 
@@ -564,6 +634,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.state_ != 0) {
         setStateValue(other.getStateValue());
+      }
+      if (other.getEffectiveGranted() != false) {
+        setEffectiveGranted(other.getEffectiveGranted());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -620,6 +693,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000010;
               break;
             } // case 40
+            case 48: {
+              effectiveGranted_ = input.readBool();
+              bitField0_ |= 0x00000020;
+              break;
+            } // case 48
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -643,7 +721,7 @@ private static final long serialVersionUID = 0L;
      * 权限 ID，如 "perm.storage.user"。
      * </pre>
      *
-     * <code>string permission_id = 1 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 1;</code>
      * @return The permissionId.
      */
     public java.lang.String getPermissionId() {
@@ -663,7 +741,7 @@ private static final long serialVersionUID = 0L;
      * 权限 ID，如 "perm.storage.user"。
      * </pre>
      *
-     * <code>string permission_id = 1 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 1;</code>
      * @return The bytes for permissionId.
      */
     public com.google.protobuf.ByteString
@@ -684,7 +762,7 @@ private static final long serialVersionUID = 0L;
      * 权限 ID，如 "perm.storage.user"。
      * </pre>
      *
-     * <code>string permission_id = 1 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 1;</code>
      * @param value The permissionId to set.
      * @return This builder for chaining.
      */
@@ -701,7 +779,7 @@ private static final long serialVersionUID = 0L;
      * 权限 ID，如 "perm.storage.user"。
      * </pre>
      *
-     * <code>string permission_id = 1 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearPermissionId() {
@@ -715,7 +793,7 @@ private static final long serialVersionUID = 0L;
      * 权限 ID，如 "perm.storage.user"。
      * </pre>
      *
-     * <code>string permission_id = 1 [json_name = "permissionId"];</code>
+     * <code>string permission_id = 1;</code>
      * @param value The bytes for permissionId to set.
      * @return This builder for chaining.
      */
@@ -740,7 +818,7 @@ private static final long serialVersionUID = 0L;
      * 界面不可能预先知道它们的文案。
      * </pre>
      *
-     * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
      * @return Whether the displayName field is set.
      */
     public boolean hasDisplayName() {
@@ -754,7 +832,7 @@ private static final long serialVersionUID = 0L;
      * 界面不可能预先知道它们的文案。
      * </pre>
      *
-     * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
      * @return The displayName.
      */
     public io.github.nervusos.ipc.v1.LocalizedText getDisplayName() {
@@ -772,7 +850,7 @@ private static final long serialVersionUID = 0L;
      * 界面不可能预先知道它们的文案。
      * </pre>
      *
-     * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
      */
     public Builder setDisplayName(io.github.nervusos.ipc.v1.LocalizedText value) {
       if (displayNameBuilder_ == null) {
@@ -795,7 +873,7 @@ private static final long serialVersionUID = 0L;
      * 界面不可能预先知道它们的文案。
      * </pre>
      *
-     * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
      */
     public Builder setDisplayName(
         io.github.nervusos.ipc.v1.LocalizedText.Builder builderForValue) {
@@ -816,7 +894,7 @@ private static final long serialVersionUID = 0L;
      * 界面不可能预先知道它们的文案。
      * </pre>
      *
-     * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
      */
     public Builder mergeDisplayName(io.github.nervusos.ipc.v1.LocalizedText value) {
       if (displayNameBuilder_ == null) {
@@ -844,7 +922,7 @@ private static final long serialVersionUID = 0L;
      * 界面不可能预先知道它们的文案。
      * </pre>
      *
-     * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
      */
     public Builder clearDisplayName() {
       bitField0_ = (bitField0_ & ~0x00000002);
@@ -864,7 +942,7 @@ private static final long serialVersionUID = 0L;
      * 界面不可能预先知道它们的文案。
      * </pre>
      *
-     * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
      */
     public io.github.nervusos.ipc.v1.LocalizedText.Builder getDisplayNameBuilder() {
       bitField0_ |= 0x00000002;
@@ -879,7 +957,7 @@ private static final long serialVersionUID = 0L;
      * 界面不可能预先知道它们的文案。
      * </pre>
      *
-     * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
      */
     public io.github.nervusos.ipc.v1.LocalizedTextOrBuilder getDisplayNameOrBuilder() {
       if (displayNameBuilder_ != null) {
@@ -897,7 +975,7 @@ private static final long serialVersionUID = 0L;
      * 界面不可能预先知道它们的文案。
      * </pre>
      *
-     * <code>.nervus.ipc.v1.LocalizedText display_name = 2 [json_name = "displayName"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText display_name = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilder<
         io.github.nervusos.ipc.v1.LocalizedText, io.github.nervusos.ipc.v1.LocalizedText.Builder, io.github.nervusos.ipc.v1.LocalizedTextOrBuilder> 
@@ -917,14 +995,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilder<
         io.github.nervusos.ipc.v1.LocalizedText, io.github.nervusos.ipc.v1.LocalizedText.Builder, io.github.nervusos.ipc.v1.LocalizedTextOrBuilder> descriptionBuilder_;
     /**
-     * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
      * @return Whether the description field is set.
      */
     public boolean hasDescription() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
-     * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
      * @return The description.
      */
     public io.github.nervusos.ipc.v1.LocalizedText getDescription() {
@@ -935,7 +1013,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
      */
     public Builder setDescription(io.github.nervusos.ipc.v1.LocalizedText value) {
       if (descriptionBuilder_ == null) {
@@ -951,7 +1029,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
      */
     public Builder setDescription(
         io.github.nervusos.ipc.v1.LocalizedText.Builder builderForValue) {
@@ -965,7 +1043,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
      */
     public Builder mergeDescription(io.github.nervusos.ipc.v1.LocalizedText value) {
       if (descriptionBuilder_ == null) {
@@ -986,7 +1064,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
      */
     public Builder clearDescription() {
       bitField0_ = (bitField0_ & ~0x00000004);
@@ -999,7 +1077,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
      */
     public io.github.nervusos.ipc.v1.LocalizedText.Builder getDescriptionBuilder() {
       bitField0_ |= 0x00000004;
@@ -1007,7 +1085,7 @@ private static final long serialVersionUID = 0L;
       return getDescriptionFieldBuilder().getBuilder();
     }
     /**
-     * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
      */
     public io.github.nervusos.ipc.v1.LocalizedTextOrBuilder getDescriptionOrBuilder() {
       if (descriptionBuilder_ != null) {
@@ -1018,7 +1096,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.nervus.ipc.v1.LocalizedText description = 3 [json_name = "description"];</code>
+     * <code>.nervus.ipc.v1.LocalizedText description = 3;</code>
      */
     private com.google.protobuf.SingleFieldBuilder<
         io.github.nervusos.ipc.v1.LocalizedText, io.github.nervusos.ipc.v1.LocalizedText.Builder, io.github.nervusos.ipc.v1.LocalizedTextOrBuilder> 
@@ -1036,14 +1114,14 @@ private static final long serialVersionUID = 0L;
 
     private int riskClass_ = 0;
     /**
-     * <code>.nervus.ipc.v1.RiskClass risk_class = 4 [json_name = "riskClass"];</code>
+     * <code>.nervus.ipc.v1.RiskClass risk_class = 4;</code>
      * @return The enum numeric value on the wire for riskClass.
      */
     @java.lang.Override public int getRiskClassValue() {
       return riskClass_;
     }
     /**
-     * <code>.nervus.ipc.v1.RiskClass risk_class = 4 [json_name = "riskClass"];</code>
+     * <code>.nervus.ipc.v1.RiskClass risk_class = 4;</code>
      * @param value The enum numeric value on the wire for riskClass to set.
      * @return This builder for chaining.
      */
@@ -1054,7 +1132,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.ipc.v1.RiskClass risk_class = 4 [json_name = "riskClass"];</code>
+     * <code>.nervus.ipc.v1.RiskClass risk_class = 4;</code>
      * @return The riskClass.
      */
     @java.lang.Override
@@ -1063,7 +1141,7 @@ private static final long serialVersionUID = 0L;
       return result == null ? io.github.nervusos.ipc.v1.RiskClass.UNRECOGNIZED : result;
     }
     /**
-     * <code>.nervus.ipc.v1.RiskClass risk_class = 4 [json_name = "riskClass"];</code>
+     * <code>.nervus.ipc.v1.RiskClass risk_class = 4;</code>
      * @param value The riskClass to set.
      * @return This builder for chaining.
      */
@@ -1077,7 +1155,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.ipc.v1.RiskClass risk_class = 4 [json_name = "riskClass"];</code>
+     * <code>.nervus.ipc.v1.RiskClass risk_class = 4;</code>
      * @return This builder for chaining.
      */
     public Builder clearRiskClass() {
@@ -1089,14 +1167,32 @@ private static final long serialVersionUID = 0L;
 
     private int state_ = 0;
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 5 [json_name = "state"];</code>
+     * <pre>
+     * 用户的决定。**不是**「此刻能不能用」——那是 effective_granted。
+     *
+     * 对系统软件（随只读系统镜像发布 + Platform 信任 + 平台角色签名）这一条恒为
+     * NOT_REQUESTED：consent 豁免【不伪造一条授予记录】，它绕过的是「要不要问
+     * 用户」这一步本身。所以拿本字段判断开关是否打开，会把一个实际可访问的权限
+     * 显示成「关闭」。
+     * </pre>
+     *
+     * <code>.nervus.interface.permission.v1.GrantState state = 5;</code>
      * @return The enum numeric value on the wire for state.
      */
     @java.lang.Override public int getStateValue() {
       return state_;
     }
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 5 [json_name = "state"];</code>
+     * <pre>
+     * 用户的决定。**不是**「此刻能不能用」——那是 effective_granted。
+     *
+     * 对系统软件（随只读系统镜像发布 + Platform 信任 + 平台角色签名）这一条恒为
+     * NOT_REQUESTED：consent 豁免【不伪造一条授予记录】，它绕过的是「要不要问
+     * 用户」这一步本身。所以拿本字段判断开关是否打开，会把一个实际可访问的权限
+     * 显示成「关闭」。
+     * </pre>
+     *
+     * <code>.nervus.interface.permission.v1.GrantState state = 5;</code>
      * @param value The enum numeric value on the wire for state to set.
      * @return This builder for chaining.
      */
@@ -1107,7 +1203,16 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 5 [json_name = "state"];</code>
+     * <pre>
+     * 用户的决定。**不是**「此刻能不能用」——那是 effective_granted。
+     *
+     * 对系统软件（随只读系统镜像发布 + Platform 信任 + 平台角色签名）这一条恒为
+     * NOT_REQUESTED：consent 豁免【不伪造一条授予记录】，它绕过的是「要不要问
+     * 用户」这一步本身。所以拿本字段判断开关是否打开，会把一个实际可访问的权限
+     * 显示成「关闭」。
+     * </pre>
+     *
+     * <code>.nervus.interface.permission.v1.GrantState state = 5;</code>
      * @return The state.
      */
     @java.lang.Override
@@ -1116,7 +1221,16 @@ private static final long serialVersionUID = 0L;
       return result == null ? io.github.nervusos.iface.permission.v1.GrantState.UNRECOGNIZED : result;
     }
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 5 [json_name = "state"];</code>
+     * <pre>
+     * 用户的决定。**不是**「此刻能不能用」——那是 effective_granted。
+     *
+     * 对系统软件（随只读系统镜像发布 + Platform 信任 + 平台角色签名）这一条恒为
+     * NOT_REQUESTED：consent 豁免【不伪造一条授予记录】，它绕过的是「要不要问
+     * 用户」这一步本身。所以拿本字段判断开关是否打开，会把一个实际可访问的权限
+     * 显示成「关闭」。
+     * </pre>
+     *
+     * <code>.nervus.interface.permission.v1.GrantState state = 5;</code>
      * @param value The state to set.
      * @return This builder for chaining.
      */
@@ -1130,12 +1244,128 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.nervus.interface.permission.v1.GrantState state = 5 [json_name = "state"];</code>
+     * <pre>
+     * 用户的决定。**不是**「此刻能不能用」——那是 effective_granted。
+     *
+     * 对系统软件（随只读系统镜像发布 + Platform 信任 + 平台角色签名）这一条恒为
+     * NOT_REQUESTED：consent 豁免【不伪造一条授予记录】，它绕过的是「要不要问
+     * 用户」这一步本身。所以拿本字段判断开关是否打开，会把一个实际可访问的权限
+     * 显示成「关闭」。
+     * </pre>
+     *
+     * <code>.nervus.interface.permission.v1.GrantState state = 5;</code>
      * @return This builder for chaining.
      */
     public Builder clearState() {
       bitField0_ = (bitField0_ & ~0x00000010);
       state_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private boolean effectiveGranted_ ;
+    /**
+     * <pre>
+     * 此刻能不能用——nervud `AllowedAt` 的结论。
+     *
+     * # 为什么必须与 state 分成两个字段
+     *
+     * 两者对系统软件【不一致】，而界面需要同时知道这两件事：
+     *
+     * state             用户的决定。系统软件恒为 NOT_REQUESTED
+     * effective_granted 实际能不能访问。系统软件恒为 true（consent 豁免）
+     *
+     * 曾经界面只有 state 可看，于是文件管理器的「用户文件」开关显示为关闭，
+     * 而它实际能读写用户目录——开关与事实相反。把 state 的语义改成「实际能不能
+     * 用」也不行：那会丢掉「用户到底做过什么决定」，而普通应用的界面要靠它区分
+     * 「还没问过」与「问过被拒」（后者不该自动再弹窗）。
+     *
+     * # 界面该怎么用
+     *
+     * 开关的**显示状态**取本字段；`state == NOT_REQUESTED` 且本字段为 true 就是
+     * 豁免，此时开关应当显示为开且**不可拨动**——拨它没有意义，SetGrantState 会
+     * 以 FAILED_PRECONDITION 拒掉（系统软件的运行期状态不由用户决定）。
+     *
+     * 【已授予】与【豁免】在界面上必须可区分：前者是用户点过头，可以撤回；
+     * 后者是装机时就接受的系统组成部分，撤不掉。
+     * </pre>
+     *
+     * <code>bool effective_granted = 6;</code>
+     * @return The effectiveGranted.
+     */
+    @java.lang.Override
+    public boolean getEffectiveGranted() {
+      return effectiveGranted_;
+    }
+    /**
+     * <pre>
+     * 此刻能不能用——nervud `AllowedAt` 的结论。
+     *
+     * # 为什么必须与 state 分成两个字段
+     *
+     * 两者对系统软件【不一致】，而界面需要同时知道这两件事：
+     *
+     * state             用户的决定。系统软件恒为 NOT_REQUESTED
+     * effective_granted 实际能不能访问。系统软件恒为 true（consent 豁免）
+     *
+     * 曾经界面只有 state 可看，于是文件管理器的「用户文件」开关显示为关闭，
+     * 而它实际能读写用户目录——开关与事实相反。把 state 的语义改成「实际能不能
+     * 用」也不行：那会丢掉「用户到底做过什么决定」，而普通应用的界面要靠它区分
+     * 「还没问过」与「问过被拒」（后者不该自动再弹窗）。
+     *
+     * # 界面该怎么用
+     *
+     * 开关的**显示状态**取本字段；`state == NOT_REQUESTED` 且本字段为 true 就是
+     * 豁免，此时开关应当显示为开且**不可拨动**——拨它没有意义，SetGrantState 会
+     * 以 FAILED_PRECONDITION 拒掉（系统软件的运行期状态不由用户决定）。
+     *
+     * 【已授予】与【豁免】在界面上必须可区分：前者是用户点过头，可以撤回；
+     * 后者是装机时就接受的系统组成部分，撤不掉。
+     * </pre>
+     *
+     * <code>bool effective_granted = 6;</code>
+     * @param value The effectiveGranted to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEffectiveGranted(boolean value) {
+
+      effectiveGranted_ = value;
+      bitField0_ |= 0x00000020;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * 此刻能不能用——nervud `AllowedAt` 的结论。
+     *
+     * # 为什么必须与 state 分成两个字段
+     *
+     * 两者对系统软件【不一致】，而界面需要同时知道这两件事：
+     *
+     * state             用户的决定。系统软件恒为 NOT_REQUESTED
+     * effective_granted 实际能不能访问。系统软件恒为 true（consent 豁免）
+     *
+     * 曾经界面只有 state 可看，于是文件管理器的「用户文件」开关显示为关闭，
+     * 而它实际能读写用户目录——开关与事实相反。把 state 的语义改成「实际能不能
+     * 用」也不行：那会丢掉「用户到底做过什么决定」，而普通应用的界面要靠它区分
+     * 「还没问过」与「问过被拒」（后者不该自动再弹窗）。
+     *
+     * # 界面该怎么用
+     *
+     * 开关的**显示状态**取本字段；`state == NOT_REQUESTED` 且本字段为 true 就是
+     * 豁免，此时开关应当显示为开且**不可拨动**——拨它没有意义，SetGrantState 会
+     * 以 FAILED_PRECONDITION 拒掉（系统软件的运行期状态不由用户决定）。
+     *
+     * 【已授予】与【豁免】在界面上必须可区分：前者是用户点过头，可以撤回；
+     * 后者是装机时就接受的系统组成部分，撤不掉。
+     * </pre>
+     *
+     * <code>bool effective_granted = 6;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEffectiveGranted() {
+      bitField0_ = (bitField0_ & ~0x00000020);
+      effectiveGranted_ = false;
       onChanged();
       return this;
     }

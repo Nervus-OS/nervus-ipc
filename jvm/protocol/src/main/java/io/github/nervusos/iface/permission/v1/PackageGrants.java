@@ -53,7 +53,7 @@ private static final long serialVersionUID = 0L;
   @SuppressWarnings("serial")
   private volatile java.lang.Object packageId_ = "";
   /**
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The packageId.
    */
   @java.lang.Override
@@ -70,7 +70,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The bytes for packageId.
    */
   @java.lang.Override
@@ -96,7 +96,7 @@ private static final long serialVersionUID = 0L;
    * 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
    * </pre>
    *
-   * <code>string label = 2 [json_name = "label"];</code>
+   * <code>string label = 2;</code>
    * @return The label.
    */
   @java.lang.Override
@@ -117,7 +117,7 @@ private static final long serialVersionUID = 0L;
    * 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
    * </pre>
    *
-   * <code>string label = 2 [json_name = "label"];</code>
+   * <code>string label = 2;</code>
    * @return The bytes for label.
    */
   @java.lang.Override
@@ -143,7 +143,7 @@ private static final long serialVersionUID = 0L;
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   @java.lang.Override
   public java.util.List<io.github.nervusos.iface.permission.v1.PermissionGrant> getPermissionsList() {
@@ -154,7 +154,7 @@ private static final long serialVersionUID = 0L;
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   @java.lang.Override
   public java.util.List<? extends io.github.nervusos.iface.permission.v1.PermissionGrantOrBuilder> 
@@ -166,7 +166,7 @@ private static final long serialVersionUID = 0L;
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   @java.lang.Override
   public int getPermissionsCount() {
@@ -177,7 +177,7 @@ private static final long serialVersionUID = 0L;
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   @java.lang.Override
   public io.github.nervusos.iface.permission.v1.PermissionGrant getPermissions(int index) {
@@ -188,7 +188,7 @@ private static final long serialVersionUID = 0L;
    * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
    * </pre>
    *
-   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+   * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
    */
   @java.lang.Override
   public io.github.nervusos.iface.permission.v1.PermissionGrantOrBuilder getPermissionsOrBuilder(
@@ -592,7 +592,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object packageId_ = "";
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @return The packageId.
      */
     public java.lang.String getPackageId() {
@@ -608,7 +608,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @return The bytes for packageId.
      */
     public com.google.protobuf.ByteString
@@ -625,7 +625,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @param value The packageId to set.
      * @return This builder for chaining.
      */
@@ -638,7 +638,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearPackageId() {
@@ -648,7 +648,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @param value The bytes for packageId to set.
      * @return This builder for chaining.
      */
@@ -668,7 +668,7 @@ private static final long serialVersionUID = 0L;
      * 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
      * </pre>
      *
-     * <code>string label = 2 [json_name = "label"];</code>
+     * <code>string label = 2;</code>
      * @return The label.
      */
     public java.lang.String getLabel() {
@@ -688,7 +688,7 @@ private static final long serialVersionUID = 0L;
      * 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
      * </pre>
      *
-     * <code>string label = 2 [json_name = "label"];</code>
+     * <code>string label = 2;</code>
      * @return The bytes for label.
      */
     public com.google.protobuf.ByteString
@@ -709,7 +709,7 @@ private static final long serialVersionUID = 0L;
      * 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
      * </pre>
      *
-     * <code>string label = 2 [json_name = "label"];</code>
+     * <code>string label = 2;</code>
      * @param value The label to set.
      * @return This builder for chaining.
      */
@@ -726,7 +726,7 @@ private static final long serialVersionUID = 0L;
      * 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
      * </pre>
      *
-     * <code>string label = 2 [json_name = "label"];</code>
+     * <code>string label = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearLabel() {
@@ -740,7 +740,7 @@ private static final long serialVersionUID = 0L;
      * 包的显示名，来自 manifest 的 label。空则由界面回落到 package_id。
      * </pre>
      *
-     * <code>string label = 2 [json_name = "label"];</code>
+     * <code>string label = 2;</code>
      * @param value The bytes for label to set.
      * @return This builder for chaining.
      */
@@ -771,7 +771,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public java.util.List<io.github.nervusos.iface.permission.v1.PermissionGrant> getPermissionsList() {
       if (permissionsBuilder_ == null) {
@@ -785,7 +785,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public int getPermissionsCount() {
       if (permissionsBuilder_ == null) {
@@ -799,7 +799,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public io.github.nervusos.iface.permission.v1.PermissionGrant getPermissions(int index) {
       if (permissionsBuilder_ == null) {
@@ -813,7 +813,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public Builder setPermissions(
         int index, io.github.nervusos.iface.permission.v1.PermissionGrant value) {
@@ -834,7 +834,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public Builder setPermissions(
         int index, io.github.nervusos.iface.permission.v1.PermissionGrant.Builder builderForValue) {
@@ -852,7 +852,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public Builder addPermissions(io.github.nervusos.iface.permission.v1.PermissionGrant value) {
       if (permissionsBuilder_ == null) {
@@ -872,7 +872,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public Builder addPermissions(
         int index, io.github.nervusos.iface.permission.v1.PermissionGrant value) {
@@ -893,7 +893,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public Builder addPermissions(
         io.github.nervusos.iface.permission.v1.PermissionGrant.Builder builderForValue) {
@@ -911,7 +911,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public Builder addPermissions(
         int index, io.github.nervusos.iface.permission.v1.PermissionGrant.Builder builderForValue) {
@@ -929,7 +929,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public Builder addAllPermissions(
         java.lang.Iterable<? extends io.github.nervusos.iface.permission.v1.PermissionGrant> values) {
@@ -948,7 +948,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public Builder clearPermissions() {
       if (permissionsBuilder_ == null) {
@@ -965,7 +965,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public Builder removePermissions(int index) {
       if (permissionsBuilder_ == null) {
@@ -982,7 +982,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public io.github.nervusos.iface.permission.v1.PermissionGrant.Builder getPermissionsBuilder(
         int index) {
@@ -993,7 +993,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public io.github.nervusos.iface.permission.v1.PermissionGrantOrBuilder getPermissionsOrBuilder(
         int index) {
@@ -1007,7 +1007,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public java.util.List<? extends io.github.nervusos.iface.permission.v1.PermissionGrantOrBuilder> 
          getPermissionsOrBuilderList() {
@@ -1022,7 +1022,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public io.github.nervusos.iface.permission.v1.PermissionGrant.Builder addPermissionsBuilder() {
       return getPermissionsFieldBuilder().addBuilder(
@@ -1033,7 +1033,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public io.github.nervusos.iface.permission.v1.PermissionGrant.Builder addPermissionsBuilder(
         int index) {
@@ -1045,7 +1045,7 @@ private static final long serialVersionUID = 0L;
      * 按 permission_id 字典序排列。顺序确定，否则设置页里的开关每次刷新都在跳。
      * </pre>
      *
-     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3 [json_name = "permissions"];</code>
+     * <code>repeated .nervus.interface.permission.v1.PermissionGrant permissions = 3;</code>
      */
     public java.util.List<io.github.nervusos.iface.permission.v1.PermissionGrant.Builder> 
          getPermissionsBuilderList() {

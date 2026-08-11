@@ -55,7 +55,7 @@ private static final long serialVersionUID = 0L;
    * 只看这一个包。空 = 列出全部已安装包。
    * </pre>
    *
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The packageId.
    */
   @java.lang.Override
@@ -76,7 +76,7 @@ private static final long serialVersionUID = 0L;
    * 只看这一个包。空 = 列出全部已安装包。
    * </pre>
    *
-   * <code>string package_id = 1 [json_name = "packageId"];</code>
+   * <code>string package_id = 1;</code>
    * @return The bytes for packageId.
    */
   @java.lang.Override
@@ -398,7 +398,7 @@ private static final long serialVersionUID = 0L;
      * 只看这一个包。空 = 列出全部已安装包。
      * </pre>
      *
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @return The packageId.
      */
     public java.lang.String getPackageId() {
@@ -418,7 +418,7 @@ private static final long serialVersionUID = 0L;
      * 只看这一个包。空 = 列出全部已安装包。
      * </pre>
      *
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @return The bytes for packageId.
      */
     public com.google.protobuf.ByteString
@@ -439,7 +439,7 @@ private static final long serialVersionUID = 0L;
      * 只看这一个包。空 = 列出全部已安装包。
      * </pre>
      *
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @param value The packageId to set.
      * @return This builder for chaining.
      */
@@ -456,7 +456,7 @@ private static final long serialVersionUID = 0L;
      * 只看这一个包。空 = 列出全部已安装包。
      * </pre>
      *
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearPackageId() {
@@ -470,7 +470,7 @@ private static final long serialVersionUID = 0L;
      * 只看这一个包。空 = 列出全部已安装包。
      * </pre>
      *
-     * <code>string package_id = 1 [json_name = "packageId"];</code>
+     * <code>string package_id = 1;</code>
      * @param value The bytes for packageId to set.
      * @return This builder for chaining.
      */
