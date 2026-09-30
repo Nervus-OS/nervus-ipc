@@ -1,4 +1,4 @@
-module github.com/Nervus-OS/nervus-ipc/go
+module github.com/Nervus-OS/nervus-ipc/go/v2
 
 go 1.23
 
