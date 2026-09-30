@@ -7,12 +7,11 @@
 package nervus_ipc
 
 import (
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
-
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -1255,7 +1254,7 @@ const file_nervus_ipc_proto_rawDesc = "" +
 	"\x15STATUS_CODE_CANCELLED\x10\n" +
 	"\x12\x1b\n" +
 	"\x17STATUS_CODE_UNAVAILABLE\x10\v\x12\x18\n" +
-	"\x14STATUS_CODE_INTERNAL\x10\fB=Z;github.com/Nervus-OS/nervus-ipc/go/v2/nervus_ipc;nervus_ipcb\x06proto3"
+	"\x14STATUS_CODE_INTERNAL\x10\fB2Z0github.com/Nervus-OS/nervus-ipc/go/v2;nervus_ipcb\x06proto3"
 
 var (
 	file_nervus_ipc_proto_rawDescOnce sync.Once

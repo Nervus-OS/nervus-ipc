@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package nervus.ipc.v2;
 
-option go_package = "github.com/Nervus-OS/nervus-ipc/go/v2/nervus_ipc;nervus_ipc";
+option go_package = "github.com/Nervus-OS/nervus-ipc/go/v2;nervus_ipc";
 
 // ============================================================================
 // Top-level Envelope
